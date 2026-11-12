@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-4UuwQgvaE2+D2Z42Zn3SXEy9ALKybVC+uoV8TXqDmMg='; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; font-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-32PyeEIvEzfr+ssVG/qUIQX6wbuxb8rJAD9RpdMLKZY='; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; font-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; form-action 'none'; base-uri 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tarif-Kompass</title>
@@ -1166,6 +1166,10 @@ Antworte nur mit JSON in dieser Form:
     </div>`;
   }
 
+  // Eingebettetes Android-Browserfenster (z. B. in Apps): dort öffnen Datei-/Kamera-Knöpfe oft nichts
+  const ANDROID_APP = /Android/.test(navigator.userAgent) && (/; wv\)/.test(navigator.userAgent) || /Version\/\d+\.\d+ Chrome/.test(navigator.userAgent));
+  const appHint = () => ANDROID_APP ? `<div class="vlink due" style="border-left-color:var(--warn);background:var(--warn-soft)"><div><strong>Kamera in der Claude-App nicht möglich</strong>
+      <div class="hint">Die Claude-App für Android lässt diese Seite keine Kamera und keine Fotos öffnen. So geht es: Öffne <strong>Chrome</strong>, gehe zu <strong>claude.ai</strong>, melde dich an und öffne dort den Tarif-Kompass. Tipp: In Chrome über ⋮ „Zum Startbildschirm hinzufügen“. Oder schick das Foto im Chat an Claude.</div></div></div>` : "";
   function photoBtn(kind, id, label, sub) {
     if (canScan()) {
       const dis = scan.busy ? " disabled" : "";
@@ -1184,6 +1188,7 @@ Antworte nur mit JSON in dieser Form:
     (o.angebote || []).forEach((a) => { const q = a.quelle || "ohne Quelle"; qs[q] = (qs[q] || 0) + 1; });
     return `<div class="card">
       ${stepTitle(o.step || 2, o.title || "Angebote sammeln")}
+      ${appHint()}
       <div class="bigbtns">
         ${photoBtn(kind, "scan-file", o.docLabel, o.docSub)}
         ${o.portalKey ? photoBtn(kind, "scan-list-file", "Ergebnisliste eines Vergleichsportals", "Screenshot von Check24, Verivox &amp; Co. einlesen") : ""}
