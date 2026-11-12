@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-De76heykNHUgYWiQwI9u0QeNEzAsF+q3Eu0bB4K4nyQ='; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; font-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-+w5PEj7C3pUiirnnxjpXP0PGJ4LZZ1d3+GIbZUHIN1I='; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; font-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; form-action 'none'; base-uri 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tarif-Kompass</title>
@@ -554,10 +554,13 @@ footer a { color: var(--accent); }
   let sampler = null, imgLimits = null;
   const canScan = () => !!(sampler && imgLimits);
   const ERR = {
-    not_granted: "Du hast der Seite nicht erlaubt, Claude zu nutzen. Trage die Werte bitte von Hand ein.",
+    not_granted: "Die Seite darf Claude nicht nutzen, weil die Abfrage abgelehnt wurde. Lade die Seite neu und tippe bei der Abfrage auf „Erlauben“.",
     sampling_disabled: "Claude ist für dein Konto hier nicht verfügbar.",
     rate_limited: "Gerade zu viele Anfragen. Versuch es in ein paar Minuten noch einmal.",
-    image_rejected: "Das Bild konnte nicht gelesen werden. Nimm ein JPEG- oder PNG-Foto mit höchstens 20 MB.",
+    image_rejected: "Das Bild konnte nicht verarbeitet werden. Mach einen Screenshot vom Foto und lade den hoch.",
+    decode: "Dieses Bildformat kann der Browser nicht öffnen (z. B. HEIC). Mach einen Screenshot vom Foto und lade den hoch, oder stell in der Kamera „Maximale Kompatibilität“ (JPEG) ein.",
+    images_unavailable: "Diese Ansicht kann keine Bilder an Claude senden. Öffne den Link in Safari oder Chrome auf claude.ai.",
+    upstream_error: "Die Verbindung zu Claude ist abgebrochen. Bitte versuch es noch einmal.",
     refused: "Claude hat diese Anfrage abgelehnt. Versuch es mit einem anderen Bild.",
     invalid_json: "Die Antwort war unvollständig. Bitte noch einmal versuchen.",
     session_expired: "Bitte melde dich neu an und versuche es noch einmal.",
@@ -781,15 +784,23 @@ Form: höchstens 220 Wörter, Deutsch, Du-Form, schlichte Aufzählung mit "• "
 
   // ---------- Foto einlesen ----------
   const scan = { kind: null, mode: "dokument", busy: false, status: "", error: "", result: null, ctl: null };
-  if (window.claude && typeof window.claude.use === "function") {
+  let scanAvail = window.claude && typeof window.claude.use === "function" ? "pending" : "local";
+  if (scanAvail === "pending") {
     window.claude.use("sample").then(async (s) => {
-      if (!s) return;
+      if (!s) { scanAvail = "nosample"; rerenderTab(); return; }
       sampler = s;
       const lim = await s.limits().catch(() => null);
-      if (lim && lim.images) imgLimits = lim.images;
+      if (lim && lim.images) { imgLimits = lim.images; scanAvail = "ok"; } else scanAvail = "noimages";
       rerenderTab();
-    }).catch(() => {});
+    }).catch(() => { scanAvail = "nosample"; rerenderTab(); });
   }
+  const SCAN_WHY = {
+    local: "Die Foto-Erkennung funktioniert nur, wenn du den Tarif-Kompass über claude.ai öffnest, nicht als heruntergeladene Datei.",
+    pending: "Die Foto-Erkennung wird noch geladen. Versuch es in ein paar Sekunden noch einmal.",
+    nosample: "In dieser Ansicht kann die Seite Claude nicht nutzen. Öffne den Link in Safari oder Chrome, melde dich bei claude.ai an und versuch es dort.",
+    noimages: "Diese Ansicht kann keine Bilder an Claude senden. Öffne den Link in Safari oder Chrome, melde dich bei claude.ai an und versuch es dort.",
+  };
+  const CHAT_TIPP = " Alternativ kannst du das Foto im Chat an Claude schicken. Claude liest dann die Werte für dich aus.";
   const fmtOrDash = (v, fn) => (v === null || v === undefined || v === "" ? "–" : fn ? fn(v) : esc(v));
   const n0 = (x) => { const n = typeof x === "string" ? parseFloat(x.replace(",", ".")) : x; return typeof n === "number" && Number.isFinite(n) ? Math.round(n * 100) / 100 : null; };
 
@@ -814,7 +825,6 @@ Form: höchstens 220 Wörter, Deutsch, Du-Form, schlichte Aufzählung mit "• "
       <button class="btn small" id="scan-clear">Verwerfen</button></div>`;
 
   function scanReview(kind) {
-    if (!canScan()) return "";
     const mine = scan.kind === kind;
     const r = mine ? scan.result : null;
     let review = "";
@@ -986,14 +996,41 @@ Antworte nur mit JSON in dieser Form:
   const NUM_KEYS = ["grundpreis_eur_monat", "arbeitspreis_ct_kwh", "bonus_eur", "laufzeit_monate", "preisgarantie_monate", "verbrauch_kwh", "beitrag", "sb_eur", "preis_monat", "aktion_preis_monat", "aktion_monate", "einmalig_eur", "router_eur_monat", "leistung", "upload_mbit", "portal_preis", "mindestlaufzeit_monate", "verlaengerung_monate", "kuendigungsfrist", "kosten_monat", "zahlweise"];
   const cleanNums = (o) => { if (o && typeof o === "object") NUM_KEYS.forEach((k) => { if (k in o) o[k] = n0(o[k]); }); return o; };
 
+  // Handyfotos (bis 200 MP, HEIC) auf max. 2000 px verkleinern und als JPEG senden
+  async function prepImage(file) {
+    let src = null, url = null;
+    try { src = await createImageBitmap(file, { imageOrientation: "from-image" }); }
+    catch (e) {
+      try {
+        url = URL.createObjectURL(file);
+        src = await new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = url; });
+      } catch (x) { if (url) URL.revokeObjectURL(url); throw { code: "decode" }; }
+    }
+    const w = src.width || src.naturalWidth, h = src.height || src.naturalHeight;
+    const scale = Math.min(1, 2000 / Math.max(w, h));
+    const c = document.createElement("canvas");
+    c.width = Math.max(1, Math.round(w * scale)); c.height = Math.max(1, Math.round(h * scale));
+    const ctx = c.getContext("2d");
+    ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+    ctx.drawImage(src, 0, 0, c.width, c.height);
+    if (src.close) src.close();
+    if (url) URL.revokeObjectURL(url);
+    const blob = await new Promise((res) => c.toBlob(res, "image/jpeg", 0.88));
+    if (!blob) throw { code: "decode" };
+    return blob;
+  }
+
   async function runScan(kind, mode, files) {
     if (!files || !files.length) return;
-    const fl = Array.from(files).slice(0, imgLimits.maxCount);
+    const raw = Array.from(files).slice(0, imgLimits.maxCount);
     if (scan.ctl) scan.ctl.abort();
     const ctl = new AbortController();
-    Object.assign(scan, { kind, mode, busy: true, status: `${fl.length} Bild${fl.length > 1 ? "er werden" : " wird"} gelesen. Das dauert meist 10–60 Sekunden …`, error: "", result: null, ctl });
+    Object.assign(scan, { kind, mode, busy: true, status: `${raw.length} Bild${raw.length > 1 ? "er werden" : " wird"} vorbereitet …`, error: "", result: null, ctl });
     rerenderTab();
     try {
+      const fl = await Promise.all(raw.map(prepImage));
+      scan.status = `${fl.length} Bild${fl.length > 1 ? "er werden" : " wird"} gelesen. Das dauert meist 10–60 Sekunden …`;
+      rerenderTab();
       const r = await sampler.json(promptFor(kind, mode), { images: fl, signal: ctl.signal });
       if (!r || typeof r !== "object") throw { code: "invalid_json" };
       cleanNums(r);
@@ -1001,7 +1038,8 @@ Antworte nur mit JSON in dieser Form:
       if (mode === "liste" && (!Array.isArray(r.angebote) || !r.angebote.length)) throw { code: "keine" };
       Object.assign(scan, { busy: false, status: mode === "liste" ? "" : "Bitte prüfe die erkannten Werte:", result: r });
     } catch (e) {
-      const msg = e && e.code === "keine" ? "Auf dem Bild wurden keine Angebote gefunden. Fotografiere die Ergebnisliste möglichst vollständig." : ERR[e && e.code] || "Das Lesen hat nicht geklappt. Bitte versuch es noch einmal.";
+      const code = (e && e.code) || "unbekannt";
+      const msg = (code === "keine" ? "Auf dem Bild wurden keine Angebote gefunden. Fotografiere die Ergebnisliste möglichst vollständig." : ERR[code] || "Das Lesen hat nicht geklappt. Bitte versuch es noch einmal.") + ` (Fehlercode: ${code})` + (code === "keine" ? "" : CHAT_TIPP);
       Object.assign(scan, { busy: false, status: "", error: e && e.code === "cancelled" ? "" : msg });
     }
     rerenderTab();
@@ -1110,16 +1148,19 @@ Antworte nur mit JSON in dieser Form:
     </div>`;
   }
 
+  function photoBtn(kind, id, label, sub) {
+    if (canScan()) return `<label class="bigbtn${scan.busy ? " disabled" : ""}"><span class="bb-t">${label}</span><span class="bb-s">${sub}</span><input class="sr-only" type="file" id="${id}" accept="image/*" multiple ${scan.busy ? "disabled" : ""}></label>`;
+    return `<button type="button" class="bigbtn" data-noscan="${kind}"><span class="bb-t">${label}</span><span class="bb-s">${sub}</span></button>`;
+  }
   function collectCard(kind, o) {
     const busy = scan.busy;
-    const acc = canScan() ? esc(imgLimits.mediaTypes.join(",")) : "";
     const qs = {};
     (o.angebote || []).forEach((a) => { const q = a.quelle || "ohne Quelle"; qs[q] = (qs[q] || 0) + 1; });
     return `<div class="card">
       ${stepTitle(o.step || 2, o.title || "Angebote sammeln")}
       <div class="bigbtns">
-        ${canScan() ? `<label class="bigbtn${busy ? " disabled" : ""}"><span class="bb-t">${o.docLabel}</span><span class="bb-s">${o.docSub}</span><input class="sr-only" type="file" id="scan-file" accept="${acc}" multiple ${busy ? "disabled" : ""}></label>` : ""}
-        ${canScan() && o.portalKey ? `<label class="bigbtn${busy ? " disabled" : ""}"><span class="bb-t">Ergebnisliste eines Vergleichsportals</span><span class="bb-s">Screenshot von Check24, Verivox &amp; Co. einlesen</span><input class="sr-only" type="file" id="scan-list-file" accept="${acc}" multiple ${busy ? "disabled" : ""}></label>` : ""}
+        ${photoBtn(kind, "scan-file", o.docLabel, o.docSub)}
+        ${o.portalKey ? photoBtn(kind, "scan-list-file", "Ergebnisliste eines Vergleichsportals", "Screenshot von Check24, Verivox &amp; Co. einlesen") : ""}
         <button type="button" class="bigbtn" id="form-toggle" aria-expanded="${o.open}"><span class="bb-t">${o.open ? "Eingabe schließen" : o.manualLabel || "Von Hand eingeben"}</span><span class="bb-s">${o.manualSub || "Preise selbst eintragen"}</span></button>
       </div>
       ${scanReview(kind)}
@@ -1131,7 +1172,7 @@ Antworte nur mit JSON in dieser Form:
           <p class="hint">${esc(PORTAL_TIPP[o.tipKey])}</p>
           ${Object.keys(qs).length ? `<div class="chips">${Object.entries(qs).map(([q, n]) => `<span class="pill info">${esc(q)}: ${n}</span>`).join("")}</div>` : ""}
         </div></details>` : ""}
-      ${canScan() ? '<p class="hint small">Fotos gehen zur Auswertung über dein Claude-Konto an Anthropic und werden nicht gespeichert. Decke Name, Adresse, IBAN und Kundennummer vorher ab.</p>' : ""}
+      ${scanAvail !== "local" ? '<p class="hint small">Fotos gehen zur Auswertung über dein Claude-Konto an Anthropic und werden nicht gespeichert. Decke Name, Adresse, IBAN und Kundennummer vorher ab.</p>' : ""}
     </div>`;
   }
   function bindCollect(kind) {
@@ -1839,6 +1880,8 @@ Antworte nur mit JSON in dieser Form:
   document.addEventListener("click", (e) => {
     const g = e.target.closest("[data-go]");
     if (g) { go(g.dataset.go); return; }
+    const n = e.target.closest("[data-noscan]");
+    if (n) { Object.assign(scan, { kind: n.dataset.noscan, busy: false, result: null, status: "", error: SCAN_WHY[scanAvail] + CHAT_TIPP }); rerenderTab(); return; }
     const j = e.target.closest("[data-jump]");
     if (j) { const t = document.getElementById(j.dataset.jump); if (t) t.scrollIntoView({ behavior: "smooth", block: "start" }); }
   });
