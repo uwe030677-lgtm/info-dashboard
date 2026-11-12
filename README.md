@@ -35,3 +35,15 @@ Ein Vergleichsrechner für Strom, Gas, Internet/Telefon und Versicherungen, mit 
 
 Die Daten werden nur lokal im Browser gespeichert (localStorage). Über die Zwischenablage kannst du sie sichern und wiederherstellen.
 Alle Einträge, die mit „Beispiel“ beginnen, sind erfundene Werte.
+
+## Sicherheit & Datenschutz
+
+- **Keine Server, keine Tracker, keine fremden Schriften.** Beim Öffnen und Bedienen stellt die Seite keine einzige Netzwerkverbindung her.
+- **Optionale Verschlüsselung:** Mit Passwort wird nur verschlüsselt gespeichert (AES-256-GCM, Schlüssel per PBKDF2-SHA256 mit 600.000 Iterationen). Der Schlüssel liegt nur im Arbeitsspeicher. Automatische Sperre nach 10 Minuten Inaktivität oder 5 Minuten im Hintergrund; beim Sperren werden alle Daten aus der Seite entfernt. Wartezeit nach wiederholten Fehlversuchen.
+- **Verschlüsselte Sicherungen:** Mit aktivem Passwortschutz ist auch die Sicherung in der Zwischenablage verschlüsselt.
+- **Content-Security-Policy** (lokale `index.html`): Nur das eigene, per SHA-256-Hash freigegebene Skript läuft; Netzwerkzugriffe, Formularziele, Frames und Plugins sind gesperrt.
+- **Schutz vor eingeschleustem Code:** Alle Eingaben, importierten Sicherungen und Foto-Ergebnisse werden vor der Anzeige maskiert. Getestet mit präparierten Sicherungen.
+- **Externe Links** senden keinen Referrer.
+- **Daten verlassen den Browser nur auf deine Aktion:** Fotos und „Mit Claude prüfen“ (über dein Claude-Konto an Anthropic), Kalender-Knöpfe (Termintext an Microsoft bzw. Google).
+
+Grenzen: Gegen Schadsoftware auf dem Gerät, bösartige Browser-Erweiterungen oder ein schwaches Passwort kann keine Webseite schützen. Ohne Passwort sind verschlüsselte Daten nicht wiederherstellbar.

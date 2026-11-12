@@ -2,12 +2,11 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-cPZRa++rA9oWYte49iAsxYHmsN9MMclhIUdtlGedKNY='; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; font-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tarif-Kompass</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
 /* Layout: Kopfzeile mit Reitern und Fristen-Hinweis; je Reiter links Eingaben (Foto, Portale, Formulare), rechts Ergebnis (Kennzahlen, Vergleichbarkeit, Tabelle). */
 :root {
@@ -33,9 +32,10 @@
   --bad-soft: #fbe1de;
   --info: #2f5f8f;
   --info-soft: #e1ecf7;
-  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-data: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  /* Nur Systemschriften: keine Anfragen an fremde Server */
+  --font-display: ui-rounded, "SF Pro Rounded", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-data: ui-monospace, "SFMono-Regular", "Cascadia Mono", Consolas, Menlo, monospace;
   --radius: 10px;
 }
 @media (prefers-color-scheme: dark) {
@@ -170,6 +170,9 @@ tr.best .rank { background: var(--kind); color: var(--surface); }
 details.io summary { cursor: pointer; font-size: 0.85rem; color: var(--muted); }
 footer { margin-top: 28px; font-size: 0.8rem; color: var(--muted); max-width: 70ch; }
 footer a { color: var(--accent); }
+.lockcard { max-width: 420px; margin: 24px auto; }
+.lockcard input[type="password"], #sec-card input[type="password"], #io-pw { font: 0.95rem var(--font-body); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 7px; padding: 7px 9px; width: 100%; }
+.facts { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 0.82rem; color: var(--muted); }
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 8px 16px; border-radius: 999px; font-size: 0.85rem; z-index: 20; max-width: calc(100% - 32px); text-align: center; }
 @media (prefers-reduced-motion: no-preference) { .fill { transition: width .35s ease; } }
 </style>
@@ -179,7 +182,7 @@ footer a { color: var(--accent); }
 <div class="wrap">
   <header class="top">
     <h1>Tarif-Kompass<small>Strom, Gas, Internet und Versicherungen nüchtern nachrechnen</small></h1>
-    <nav class="tabs" role="tablist" aria-label="Bereich">
+    <nav class="tabs" id="tabs-nav" role="tablist" aria-label="Bereich">
       <button class="tab" role="tab" id="tab-strom" data-tab="strom"><span class="dot" style="background:var(--strom)"></span>Strom</button>
       <button class="tab" role="tab" id="tab-gas" data-tab="gas"><span class="dot" style="background:var(--gas)"></span>Gas</button>
       <button class="tab" role="tab" id="tab-internet" data-tab="internet"><span class="dot" style="background:var(--tk)"></span>Internet &amp; Telefon</button>
@@ -188,25 +191,44 @@ footer a { color: var(--accent); }
     </nav>
   </header>
 
-  <p class="notice">Alles, was mit „Beispiel“ beginnt, sind erfundene Werte zum Ausprobieren, keine echten Tarife. Trage deine eigenen Daten ein oder lies sie per Foto ein.</p>
+  <section class="card lockcard" id="lock" hidden>
+    <h2>Tarif-Kompass ist gesperrt</h2>
+    <p class="hint">Deine Daten sind mit deinem Passwort verschlüsselt (AES-256). Ohne Passwort kann sie niemand lesen.</p>
+    <form id="lock-form" class="col" autocomplete="off">
+      <label class="f">Passwort<input type="password" id="lock-pw" autocomplete="current-password" required></label>
+      <button class="btn primary" type="submit" id="lock-btn">Entsperren</button>
+    </form>
+    <p class="err" id="lock-err" hidden></p>
+    <details class="io">
+      <summary>Passwort vergessen?</summary>
+      <p class="hint" style="margin-top:6px">Ohne Passwort lassen sich die Daten nicht wiederherstellen. Es gibt keine Hintertür. Du kannst nur alles löschen und neu beginnen.</p>
+      <div class="row" style="margin-top:8px"><button class="btn small danger" id="lock-wipe">Alle Daten löschen</button></div>
+    </details>
+  </section>
+
+  <p class="notice" id="notice">Alles, was mit „Beispiel“ beginnt, sind erfundene Werte zum Ausprobieren, keine echten Tarife. Trage deine eigenen Daten ein oder lies sie per Foto ein.</p>
   <p class="due" id="due-banner" hidden></p>
 
+  <div id="panels">
   <section class="panel" id="panel-energy"></section>
   <section class="panel" id="panel-tk" hidden></section>
   <section class="panel" id="panel-versicherung" hidden></section>
   <section class="panel" id="panel-fristen" hidden></section>
+  </div>
 
-  <footer>
+  <footer id="app-footer">
+    <div class="card" id="sec-card" style="margin-bottom:16px"></div>
     <p>Alle Eingaben bleiben nur in diesem Browser gespeichert. Energie: Jahreskosten = Grundpreis × 12 + Arbeitspreis × Verbrauch − Bonus; der Bonus gilt meist nur im ersten Jahr. Internet und Mobilfunk: alle Monatspreise, Routermiete und Einmalkosten abzüglich Gutschriften im Vergleichszeitraum, geteilt durch die Monate.</p>
-    <p>Unabhängige Beratung: <a href="https://www.verbraucherzentrale.de" target="_blank" rel="noopener">Verbraucherzentrale</a> · Tests: <a href="https://www.test.de" target="_blank" rel="noopener">Stiftung Warentest</a></p>
+    <p>Unabhängige Beratung: <a href="https://www.verbraucherzentrale.de" target="_blank" rel="noopener noreferrer">Verbraucherzentrale</a> · Tests: <a href="https://www.test.de" target="_blank" rel="noopener noreferrer">Stiftung Warentest</a></p>
     <div class="row" style="margin-top:12px">
-      <button class="btn small" id="btn-export">Daten in Zwischenablage kopieren</button>
+      <button class="btn small" id="btn-export">Sicherung in Zwischenablage kopieren</button>
       <button class="btn small danger" id="btn-reset">Auf Beispieldaten zurücksetzen</button>
     </div>
     <details class="io" style="margin-top:10px">
       <summary>Daten einfügen (Sicherung wiederherstellen)</summary>
       <div class="col" style="margin-top:8px">
-        <textarea id="io-text" placeholder="Gesicherte Daten (JSON) hier einfügen"></textarea>
+        <textarea id="io-text" placeholder="Gesicherte Daten hier einfügen"></textarea>
+        <label class="f">Passwort der Sicherung (nur bei verschlüsselter Sicherung)<input type="password" id="io-pw" autocomplete="off"></label>
         <div class="row"><button class="btn small" id="btn-import">Daten übernehmen</button></div>
       </div>
     </details>
@@ -386,10 +408,47 @@ footer a { color: var(--accent); }
     if (!s.vorlauf) s.vorlauf = 1;
     return s;
   }
+  // ---------- Tresor: optionale Verschlüsselung (PBKDF2-SHA256 + AES-256-GCM, nur im Browser) ----------
+  const te = new TextEncoder(), td = new TextDecoder();
+  const b64 = (u8) => { let s = ""; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); };
+  const unb64 = (s) => Uint8Array.from(atob(String(s)), (c) => c.charCodeAt(0));
+  const KDF_ITER = 600000;
+  async function deriveKey(pw, salt, iter) {
+    const base = await crypto.subtle.importKey("raw", te.encode(pw), "PBKDF2", false, ["deriveKey"]);
+    return crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations: iter, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+  }
+  async function encryptObj(key, salt, obj) {
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, te.encode(JSON.stringify(obj))));
+    return { tkEnc: 1, kdf: "PBKDF2-SHA256", iter: KDF_ITER, salt: b64(salt), iv: b64(iv), ct: b64(ct) };
+  }
+  async function decryptBlob(key, blob) {
+    const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: unb64(blob.iv) }, key, unb64(blob.ct));
+    return JSON.parse(td.decode(pt));
+  }
+  const isBlob = (o) => o && o.tkEnc === 1 && typeof o.salt === "string" && typeof o.iv === "string" && typeof o.ct === "string";
+  const vault = { enabled: false, key: null, salt: null, blob: null, locked: false, fails: 0 };
+  const cryptoOk = !!(window.crypto && crypto.subtle);
+
   let state;
-  try { state = migrate(JSON.parse(localStorage.getItem(STORE_KEY))); } catch (e) { state = defaults(); }
+  {
+    let parsed = null;
+    try { parsed = JSON.parse(localStorage.getItem(STORE_KEY)); } catch (e) { parsed = null; }
+    if (isBlob(parsed)) { vault.enabled = true; vault.blob = parsed; vault.locked = true; state = defaults(); }
+    else state = migrate(parsed);
+  }
   const ui = { tab: "strom", sort: { strom: "y1", gas: "y1" }, nurOeko: { strom: false, gas: false }, maxLaufzeit: { strom: 0, gas: 0 }, tkMin: false, edit: null, draft: null };
-  const save = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} };
+  let saveChain = Promise.resolve();
+  function save() {
+    if (vault.locked) return;
+    if (!vault.enabled) { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} return; }
+    const snap = JSON.parse(JSON.stringify(state)), key = vault.key, salt = vault.salt;
+    saveChain = saveChain.then(async () => {
+      const blob = await encryptObj(key, salt, snap);
+      vault.blob = blob;
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(blob)); } catch (e) {}
+    }).catch(() => toast("Speichern fehlgeschlagen"));
+  }
 
   function toast(msg) {
     const t = document.getElementById("toast");
@@ -514,7 +573,7 @@ Form: höchstens 220 Wörter, Deutsch, Du-Form, schlichte Aufzählung mit "• "
     return `<div class="card">
       <h2>Angebote aus Vergleichsportalen</h2>
       <p class="hint">Rechne dort mit deinen Daten, mach einen Screenshot der Ergebnisliste und lies ihn hier ein. Wiederhole das für jedes Portal. Danach prüft der Kompass, ob die Angebote vergleichbar sind.</p>
-      <div class="chips">${PORTALE[portalKey].map(([n, u]) => `<a class="chip" href="${u}" target="_blank" rel="noopener">${esc(n)}</a>`).join("")}</div>
+      <div class="chips">${PORTALE[portalKey].map(([n, u]) => `<a class="chip" href="${u}" target="_blank" rel="noopener noreferrer">${esc(n)}</a>`).join("")}</div>
       ${canScan() ? `<label class="btn scan-btn" ${scan.busy ? 'aria-disabled="true"' : ""}>${busyHere ? "Wird gelesen …" : "Screenshot der Ergebnisliste einlesen"}
         <input class="sr-only" type="file" id="scan-list-file" accept="${esc(imgLimits.mediaTypes.join(","))}" multiple ${scan.busy ? "disabled" : ""}></label>` : ""}
       <p class="hint">${esc(PORTAL_TIPP[portalKey === "energie" ? kind : portalKey])}</p>
@@ -965,7 +1024,7 @@ Form: höchstens 220 Wörter, Deutsch, Du-Form, schlichte Aufzählung mit "• "
     el.style.setProperty("--kind", "var(--vers)");
     el.innerHTML = `
       <div class="chips" role="group" aria-label="Versicherungsart">
-        ${Object.entries(v.kategorien).map(([k, c]) => `<button class="chip ${k === v.kategorie ? "on" : ""}" data-kat="${k}">${esc(c.name)} <span class="mono">(${c.angebote.length})</span></button>`).join("")}
+        ${Object.entries(v.kategorien).map(([k, c]) => `<button class="chip ${k === v.kategorie ? "on" : ""}" data-kat="${esc(k)}">${esc(c.name)} <span class="mono">(${c.angebote.length})</span></button>`).join("")}
         <button class="chip" id="kat-add">+ Eigene Versicherungsart</button>
       </div>
       <form class="row" id="kat-form" hidden>
@@ -1031,7 +1090,7 @@ Form: höchstens 220 Wörter, Deutsch, Du-Form, schlichte Aufzählung mit "• "
             </div>
             <h3>Enthaltene Leistungen</h3>
             <div class="feat-list">
-              ${kat.features.map((ft) => `<label class="check"><input type="checkbox" name="feat-${ft.id}" id="vers-f-feat-${ft.id}" ${f.features && f.features[ft.id] ? "checked" : ""}>${esc(ft.name)}</label>`).join("") || '<p class="hint">Lege oben Leistungen an, um Tarife zu vergleichen.</p>'}
+              ${kat.features.map((ft) => `<label class="check"><input type="checkbox" name="feat-${esc(ft.id)}" id="vers-f-feat-${esc(ft.id)}" ${f.features && f.features[ft.id] ? "checked" : ""}>${esc(ft.name)}</label>`).join("") || '<p class="hint">Lege oben Leistungen an, um Tarife zu vergleichen.</p>'}
             </div>
             <button class="btn primary" type="submit">${edit ? "Änderungen speichern" : "Angebot hinzufügen"}</button>
           </form>
@@ -1145,7 +1204,7 @@ Form: höchstens 220 Wörter, Deutsch, Du-Form, schlichte Aufzählung mit "• "
     const s = fi.erinnerung, e = addDays(s, 1);
     const g = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${ymd(s)}/${ymd(e)}&details=${encodeURIComponent(body)}`;
     const o = `https://outlook.live.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&rru=addevent&allday=true&startdt=${isoD(s)}&enddt=${isoD(e)}&subject=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
-    return `<div class="cal"><a class="btn small" href="${o}" target="_blank" rel="noopener">Outlook</a><a class="btn small" href="${g}" target="_blank" rel="noopener">Google</a></div>`;
+    return `<div class="cal"><a class="btn small" href="${o}" target="_blank" rel="noopener noreferrer">Outlook</a><a class="btn small" href="${g}" target="_blank" rel="noopener noreferrer">Google</a></div>`;
   }
 
   function buildIcs() {
@@ -1240,7 +1299,7 @@ Form: höchstens 220 Wörter, Deutsch, Du-Form, schlichte Aufzählung mit "• "
               <label class="f inline">Erinnern
                 <select id="vorlauf">${[1, 2, 3].map((m) => `<option value="${m}" ${num(state.vorlauf) === m ? "selected" : ""}>${m} Monat${m > 1 ? "e" : ""} vorher</option>`).join("")}</select></label>
             </div>
-            <p class="hint">Mit „Outlook“ oder „Google“ legst du für jeden Vertrag einen Kalendertermin am Erinnerungstag an. Dein Kalender meldet sich dann auch auf dem Handy.${lokal ? " Oder lade alle Termine auf einmal als Kalenderdatei." : ""}</p>
+            <p class="hint">Mit „Outlook“ oder „Google“ legst du für jeden Vertrag einen Kalendertermin am Erinnerungstag an. Dein Kalender meldet sich dann auch auf dem Handy. Dabei gehen Vertragsname und Datum an Microsoft bzw. Google.${lokal ? " Oder lade alle Termine auf einmal als Kalenderdatei." : ""}</p>
             ${lokal ? '<div class="row"><button class="btn small" id="ics-btn">Alle Termine als Kalenderdatei (.ics)</button></div>' : ""}
           </div>
           <div class="tbl-wrap">
@@ -1390,7 +1449,8 @@ Form: höchstens 220 Wörter, Deutsch, Du-Form, schlichte Aufzählung mit "• "
     const busyHere = mine && scan.busy && scan.mode === "dokument";
     return `<div class="card scan">
       <div class="card-head"><h2>Foto einlesen</h2>${mine && scan.busy ? '<button class="btn small" id="scan-stop">Abbrechen</button>' : ""}</div>
-      ${r ? "" : `<p class="hint">Fotografiere deine ${SCAN_WAS[kind]}. Claude liest die Daten aus, du prüfst sie vor dem Übernehmen. Bis zu ${imgLimits.maxCount} Seiten auf einmal. Namen, Adressen und Kundennummern werden nicht übernommen.</p>
+      ${r ? "" : `<p class="hint">Fotografiere deine ${SCAN_WAS[kind]}. Claude liest die Daten aus, du prüfst sie vor dem Übernehmen. Bis zu ${imgLimits.maxCount} Seiten auf einmal.</p>
+      <p class="hint"><strong>Datenschutz:</strong> Das Foto wird zur Auswertung über dein Claude-Konto an Anthropic gesendet und nicht in der Seite gespeichert. Decke Name, Adresse, IBAN, Kunden- und Zählernummer vorher ab. Für den Vergleich werden sie nicht gebraucht.</p>
       <label class="btn primary scan-btn" ${scan.busy ? 'aria-disabled="true"' : ""}>${busyHere ? "Wird gelesen …" : "Foto aufnehmen oder auswählen"}
         <input class="sr-only" type="file" id="scan-file" accept="${esc(imgLimits.mediaTypes.join(","))}" multiple ${scan.busy ? "disabled" : ""}>
       </label>`}
@@ -1588,6 +1648,108 @@ Antworte nur mit JSON in dieser Form:
     });
   }
 
+  // ---------- Sperre & Sicherheit ----------
+  const APP_IDS = ["tabs-nav", "notice", "due-banner", "panels", "app-footer"];
+  function setLockedView(locked) {
+    APP_IDS.forEach((id) => { const el = document.getElementById(id); if (el && id !== "due-banner") el.hidden = locked; });
+    if (locked) document.getElementById("due-banner").hidden = true;
+    document.getElementById("lock").hidden = !locked;
+  }
+  function lockNow(reason) {
+    if (!vault.enabled || vault.locked) return;
+    vault.locked = true; vault.key = null;
+    if (scan.ctl) scan.ctl.abort();
+    if (ana.ctl) ana.ctl.abort();
+    Object.assign(scan, { kind: null, result: null, status: "", error: "", busy: false });
+    Object.assign(ana, { kind: null, text: "", error: "", busy: false });
+    state = defaults(); ui.edit = null; ui.draft = null;
+    ["panel-energy", "panel-tk", "panel-versicherung", "panel-fristen", "sec-card"].forEach((id) => { document.getElementById(id).innerHTML = ""; });
+    document.getElementById("io-text").value = "";
+    setLockedView(true);
+    const err = document.getElementById("lock-err");
+    err.hidden = !reason; err.textContent = reason || "";
+    document.getElementById("lock-pw").value = "";
+  }
+  document.getElementById("lock-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const pwEl = document.getElementById("lock-pw"), btn = document.getElementById("lock-btn"), err = document.getElementById("lock-err");
+    btn.disabled = true; btn.textContent = "Wird entschlüsselt …"; err.hidden = true;
+    if (vault.fails >= 3) await new Promise((r) => setTimeout(r, Math.min(30000, 2000 * 2 ** (vault.fails - 3))));
+    try {
+      const salt = unb64(vault.blob.salt);
+      const key = await deriveKey(pwEl.value, salt, num(vault.blob.iter, KDF_ITER));
+      const data = await decryptBlob(key, vault.blob);
+      Object.assign(vault, { key, salt, locked: false, fails: 0 });
+      state = migrate(data);
+      pwEl.value = "";
+      setLockedView(false); show(ui.tab); bumpActivity();
+    } catch (x) {
+      vault.fails++;
+      err.hidden = false; err.textContent = "Das Passwort stimmt nicht." + (vault.fails >= 3 ? " Nach mehreren Fehlversuchen wartet die Seite etwas länger." : "");
+    }
+    btn.disabled = false; btn.textContent = "Entsperren";
+  });
+  const wipe = document.getElementById("lock-wipe");
+  wipe.addEventListener("click", () => {
+    if (!wipe.classList.contains("armed")) { wipe.classList.add("armed"); wipe.textContent = "Wirklich alles löschen?"; setTimeout(() => { wipe.classList.remove("armed"); wipe.textContent = "Alle Daten löschen"; }, 3500); return; }
+    try { localStorage.removeItem(STORE_KEY); } catch (e) {}
+    Object.assign(vault, { enabled: false, key: null, salt: null, blob: null, locked: false, fails: 0 });
+    state = defaults(); save(); setLockedView(false); show("strom"); toast("Alle Daten gelöscht");
+  });
+
+  // Automatische Sperre nach 10 Minuten ohne Aktivität oder 5 Minuten im Hintergrund
+  let lastActive = Date.now(), hiddenAt = 0;
+  const bumpActivity = () => { lastActive = Date.now(); };
+  ["pointerdown", "keydown", "scroll", "touchstart"].forEach((ev) => window.addEventListener(ev, bumpActivity, { passive: true }));
+  setInterval(() => { if (vault.enabled && !vault.locked && Date.now() - lastActive > 10 * 60 * 1000) lockNow("Automatisch gesperrt nach 10 Minuten ohne Aktivität."); }, 15000);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) hiddenAt = Date.now();
+    else if (hiddenAt && Date.now() - hiddenAt > 5 * 60 * 1000) lockNow("Automatisch gesperrt, weil die Seite länger im Hintergrund war.");
+  });
+
+  function renderSecurity() {
+    const el = document.getElementById("sec-card");
+    const on = vault.enabled;
+    el.innerHTML = `
+      <div class="card-head"><h2>Datenschutz &amp; Sicherheit</h2><span class="pill ${on ? "good" : "warn"}">${on ? "Verschlüsselt mit Passwort" : "Nicht verschlüsselt"}</span></div>
+      <ul class="facts">
+        <li>Deine Einträge bleiben in diesem Browser. Es gibt keinen Server, keine Werbung, keine Tracker und keine Schriften von fremden Servern.</li>
+        <li>Daten verlassen den Browser nur, wenn du es auslöst: Fotos und „Mit Claude prüfen“ gehen über dein Claude-Konto an Anthropic, Kalender-Knöpfe übergeben Vertragsname und Datum an Microsoft bzw. Google. Portal-Links öffnen nur die Startseite, ohne deine Daten.</li>
+        <li>Die Seite ist privat. Teilst du sie, sehen andere nur die Seite mit Beispieldaten, nie deine Einträge.</li>
+      </ul>
+      ${!cryptoOk ? '<p class="err">Dieser Browser bietet keine Verschlüsselung an.</p>' : on ? `
+        <p class="hint">Gespeichert wird nur verschlüsselt (AES-256-GCM, Schlüssel per PBKDF2 aus deinem Passwort). Die Seite sperrt sich nach 10 Minuten ohne Aktivität.</p>
+        <div class="row"><button class="btn small" id="sec-lock">Jetzt sperren</button><button class="btn small danger" id="sec-off">Verschlüsselung entfernen</button></div>` : `
+        <p class="hint">Schütze deine Daten mit einem Passwort. Dann kann sie niemand lesen, der an deinen Browser oder dein Gerät kommt. Wähle mindestens 12 Zeichen. Ohne Passwort sind die Daten verloren.</p>
+        <form class="fields" id="sec-form" autocomplete="off">
+          <label class="f">Neues Passwort<input type="password" id="sec-pw" autocomplete="new-password" minlength="12" required></label>
+          <label class="f">Wiederholen<input type="password" id="sec-pw2" autocomplete="new-password" minlength="12" required></label>
+          <div class="full row"><button class="btn primary small" type="submit" id="sec-btn">Daten verschlüsseln</button></div>
+        </form>`}
+      <p class="err" id="sec-err" hidden></p>`;
+    const form = document.getElementById("sec-form");
+    if (form) form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const pw = document.getElementById("sec-pw").value, pw2 = document.getElementById("sec-pw2").value, err = document.getElementById("sec-err");
+      if (pw.length < 12) { err.hidden = false; err.textContent = "Das Passwort braucht mindestens 12 Zeichen."; return; }
+      if (pw !== pw2) { err.hidden = false; err.textContent = "Die beiden Passwörter stimmen nicht überein."; return; }
+      const btn = document.getElementById("sec-btn"); btn.disabled = true; btn.textContent = "Wird verschlüsselt …";
+      const salt = crypto.getRandomValues(new Uint8Array(16));
+      const key = await deriveKey(pw, salt, KDF_ITER);
+      Object.assign(vault, { enabled: true, key, salt, locked: false });
+      save(); await saveChain;
+      renderSecurity(); toast("Daten sind jetzt verschlüsselt");
+    });
+    const lk = document.getElementById("sec-lock");
+    if (lk) lk.addEventListener("click", () => lockNow(""));
+    const off = document.getElementById("sec-off");
+    if (off) off.addEventListener("click", () => {
+      if (!off.classList.contains("armed")) { off.classList.add("armed"); off.textContent = "Wirklich unverschlüsselt speichern?"; setTimeout(() => { if (off.isConnected) { off.classList.remove("armed"); off.textContent = "Verschlüsselung entfernen"; } }, 3500); return; }
+      Object.assign(vault, { enabled: false, key: null, salt: null, blob: null });
+      save(); renderSecurity(); toast("Verschlüsselung entfernt");
+    });
+  }
+
   // ---------- Reiter ----------
   const TABS = ["strom", "gas", "internet", "versicherung", "fristen"];
   function show(tab) {
@@ -1604,6 +1766,7 @@ Antworte nur mit JSON in dieser Form:
     else if (tab === "fristen") renderFristen();
     else renderEnergy(tab);
     updateDue();
+    if (!document.getElementById("sec-card").innerHTML) renderSecurity();
   }
   function go(tab) {
     try { history.replaceState(null, "", "#" + tab); } catch (e) {}
@@ -1614,18 +1777,35 @@ Antworte nur mit JSON in dieser Form:
   window.addEventListener("hashchange", () => show(location.hash.slice(1)));
 
   // ---------- Sichern / Laden / Zurücksetzen ----------
-  document.getElementById("btn-export").addEventListener("click", () => {
-    const json = JSON.stringify(state);
+  document.getElementById("btn-export").addEventListener("click", async () => {
+    if (vault.enabled) await saveChain;
+    const json = vault.enabled ? JSON.stringify(vault.blob) : JSON.stringify(state);
+    if (!vault.enabled) toast("Hinweis: Die Sicherung ist unverschlüsselt. Bewahre sie sicher auf.");
     const ta = document.getElementById("io-text");
     const fallback = () => { ta.value = json; ta.closest("details").open = true; ta.select(); toast("Text markiert, bitte selbst kopieren"); };
-    try { navigator.clipboard.writeText(json).then(() => toast("Daten kopiert"), fallback); } catch (e) { fallback(); }
+    try { navigator.clipboard.writeText(json).then(() => toast(vault.enabled ? "Verschlüsselte Sicherung kopiert" : "Unverschlüsselte Sicherung kopiert"), fallback); } catch (e) { fallback(); }
   });
-  document.getElementById("btn-import").addEventListener("click", () => {
-    try {
-      const data = JSON.parse(document.getElementById("io-text").value);
-      if (!data.strom || !data.gas || !data.vers) throw new Error();
-      state = migrate(data); save(); show(ui.tab); toast("Daten übernommen");
-    } catch (e) { toast("Das sind keine gültigen Tarif-Kompass-Daten"); }
+  document.getElementById("btn-import").addEventListener("click", async () => {
+    const raw = document.getElementById("io-text").value;
+    if (raw.length > 5 * 1024 * 1024) { toast("Die Sicherung ist zu groß."); return; }
+    let data;
+    try { data = JSON.parse(raw); } catch (e) { toast("Das sind keine gültigen Tarif-Kompass-Daten"); return; }
+    if (isBlob(data)) {
+      const pwEl = document.getElementById("io-pw");
+      if (!pwEl.value) { toast("Bitte das Passwort der Sicherung eingeben."); pwEl.focus(); return; }
+      try {
+        const salt = unb64(data.salt);
+        const key = await deriveKey(pwEl.value, salt, num(data.iter, KDF_ITER));
+        const plain = await decryptBlob(key, data);
+        if (!vault.enabled) Object.assign(vault, { enabled: true, key, salt });
+        data = plain;
+      } catch (e) { toast("Passwort falsch oder Sicherung beschädigt."); return; }
+      pwEl.value = "";
+    }
+    if (!data || typeof data !== "object" || !data.strom || !data.gas || !data.vers) { toast("Das sind keine gültigen Tarif-Kompass-Daten"); return; }
+    state = migrate(data); save(); renderSecurity(); show(ui.tab);
+    document.getElementById("io-text").value = "";
+    toast("Daten übernommen");
   });
   const reset = document.getElementById("btn-reset");
   reset.addEventListener("click", () => {
@@ -1637,7 +1817,8 @@ Antworte nur mit JSON in dieser Form:
     setTimeout(() => { reset.classList.remove("armed"); reset.textContent = "Auf Beispieldaten zurücksetzen"; }, 3500);
   });
 
-  show(location.hash.slice(1) || "strom");
+  if (vault.locked) setLockedView(true);
+  else show(location.hash.slice(1) || "strom");
 })();
 </script>
 </body>
