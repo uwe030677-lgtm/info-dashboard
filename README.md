@@ -1,3 +1,36 @@
+# Info-Dashboard
+
+Zwei kleine Apps, jeweils eine einzige HTML-Datei, ohne Server und ohne Build:
+
+- **[Morgen-Briefing](morgen.html)** – jeden Morgen alles Wichtige auf einen Blick
+- **[Tarif-Kompass](index.html)** – Tarife vergleichen und Kündigungsfristen im Blick behalten
+
+---
+
+# Morgen-Briefing
+
+Öffne `morgen.html` – am besten über https (z. B. GitHub Pages), dann lässt es sich als App auf dem Startbildschirm installieren.
+
+**Auf einen Blick:** Begrüßung, Datum, Kalenderwoche und eine Zusammenfassung in wenigen Zeilen: Wetter (abends für morgen), Termine, offene Aufgaben, Geburtstage, nahe Feiertage und fällige Kündigungsfristen.
+
+**Wetter** (Open-Meteo, ohne Konto): aktuelle Temperatur, Tageswerte, stündliche Vorhersage mit Regenwahrscheinlichkeit, Sonnenauf- und -untergang sowie Hinweise wie „Schirm einpacken ab 15 Uhr“, Glätte/Frost, passende Jacke, UV-Schutz und Sturmböen.
+
+**Termine & Aufgaben:** eigene Termine mit Wiederholung (täglich, werktags, wöchentlich, alle 2 Wochen – z. B. Müllabfuhr –, monatlich, jährlich), Import des eigenen Kalenders als `.ics`-Datei (inkl. Serienterminen und Ausnahmen), Aufgabenliste mit Fälligkeit; erledigte Aufgaben verschwinden am nächsten Tag.
+
+**Nachrichten:** aktuelle Meldungen von tagesschau.de, wahlweise Topmeldungen oder eine Rubrik (Inland, Ausland, Wirtschaft, Wissen, Sport, Investigativ).
+
+**Geburtstage & Feiertage:** Geburtstage der nächsten 30 Tage mit Alter, gesetzliche Feiertage je Bundesland.
+
+**Kündigungsfristen:** liest die Verträge aus dem Tarif-Kompass (gleiche Adresse/gleicher Browser) und zeigt fällige Fristen. Ist der Tarif-Kompass mit Passwort geschützt, erscheint nur ein Hinweis.
+
+**Jeden Morgen erinnern:** In den Einstellungen eine Uhrzeit wählen und einen täglichen Kalendertermin (.ics oder Google Kalender) anlegen, der das Briefing verlinkt.
+
+**Datenschutz:** Einstellungen und Einträge bleiben im Browser (localStorage); Sicherung als JSON-Datei. Verbindungen gehen nur an `api.open-meteo.com` / `geocoding-api.open-meteo.com` (Koordinaten deines Orts) und `www.tagesschau.de` – per Content-Security-Policy erzwungen, ohne Cookies und ohne Referrer. Alle Texte aus Kalender, Nachrichten und Eingaben werden maskiert angezeigt.
+
+Nach Änderungen am Skript den CSP-Hash neu eintragen: `python3 tools/csp-hash.py morgen.html`
+
+---
+
 # Tarif-Kompass
 
 Ein Vergleichsrechner für Strom, Gas, Internet/Telefon und Versicherungen, mit Kündigungsfristen, in einer einzigen HTML-Datei. Er braucht weder Server noch Build: Öffne einfach `index.html` im Browser.

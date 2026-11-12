@@ -1,0 +1,15 @@
+{
+  "name": "Morgen-Briefing",
+  "short_name": "Morgen",
+  "description": "Wetter, Termine, Aufgaben, Geburtstage, Nachrichten und Fristen – jeden Morgen auf einen Blick.",
+  "lang": "de",
+  "start_url": "morgen.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f1e8",
+  "theme_color": "#f7f1e8",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
