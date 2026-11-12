@@ -1,0 +1,751 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tarif-Kompass</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: Kopfzeile mit Reitern; je Reiter links Eingaben (Verbrauch, Angebot erfassen), rechts Ergebnis (Bestes Angebot, Balken, Tabelle). */
+:root {
+  --bg: #f5f6f3;
+  --surface: #ffffff;
+  --sunken: #eceee9;
+  --fg: #1c211d;
+  --muted: #5d665f;
+  --line: #d9ddd6;
+  --accent: #1f6b52;
+  --accent-fg: #ffffff;
+  --accent-soft: #dcefe6;
+  --strom: #c98a06;
+  --gas: #2f6fb3;
+  --vers: #1f6b52;
+  --good: #1d7a45;
+  --good-soft: #def3e6;
+  --warn: #9a5b00;
+  --warn-soft: #fbecd2;
+  --bad: #b3261e;
+  --bad-soft: #fbe1de;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-data: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121613; --surface: #1a1f1b; --sunken: #232924; --fg: #e6ebe6; --muted: #9aa59c; --line: #2f3731;
+    --accent: #5cc49b; --accent-fg: #0d1a14; --accent-soft: #1d3a2e;
+    --strom: #f0b429; --gas: #6aa8ea; --vers: #5cc49b;
+    --good: #6fd39a; --good-soft: #1b3826; --warn: #f2b45a; --warn-soft: #3a2c14; --bad: #ff8a80; --bad-soft: #3d1f1d;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121613; --surface: #1a1f1b; --sunken: #232924; --fg: #e6ebe6; --muted: #9aa59c; --line: #2f3731;
+  --accent: #5cc49b; --accent-fg: #0d1a14; --accent-soft: #1d3a2e;
+  --strom: #f0b429; --gas: #6aa8ea; --vers: #5cc49b;
+  --good: #6fd39a; --good-soft: #1b3826; --warn: #f2b45a; --warn-soft: #3a2c14; --bad: #ff8a80; --bad-soft: #3d1f1d;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 24px 48px; }
+header.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 24px; margin-bottom: 20px; }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.7rem, 4vw, 2.3rem); margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+h1 small { display: block; font-family: var(--font-body); font-weight: 400; font-size: 0.9rem; color: var(--muted); letter-spacing: 0; margin-top: 2px; }
+h2 { font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; margin: 0; text-wrap: balance; }
+h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0; font-weight: 600; }
+.tabs { display: flex; gap: 4px; background: var(--sunken); padding: 4px; border-radius: 999px; flex-wrap: wrap; }
+.tab { border: 0; background: transparent; color: var(--fg); font: 600 0.92rem var(--font-body); padding: 8px 16px; border-radius: 999px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+.tab .dot { width: 9px; height: 9px; border-radius: 50%; }
+.tab[aria-selected="true"] { background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.tab:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.notice { font-size: 0.85rem; color: var(--warn); background: var(--warn-soft); border-radius: var(--radius); padding: 8px 12px; margin-bottom: 20px; }
+.grid { display: grid; grid-template-columns: minmax(0, 360px) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 920px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.card-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.fields .full { grid-column: 1 / -1; }
+label.f { display: flex; flex-direction: column; gap: 4px; font-size: 0.8rem; color: var(--muted); font-weight: 500; min-width: 0; }
+input[type="number"], input[type="text"], select, textarea { font: 0.95rem var(--font-body); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 7px; padding: 7px 9px; width: 100%; min-width: 0; }
+input[type="number"] { font-family: var(--font-data); font-size: 0.9rem; }
+textarea { font-family: var(--font-data); font-size: 0.8rem; min-height: 90px; resize: vertical; }
+.check { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: var(--fg); cursor: pointer; }
+.check input { width: 16px; height: 16px; accent-color: var(--accent); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 999px; padding: 4px 10px; font: 500 0.8rem var(--font-body); cursor: pointer; }
+.chip:hover { border-color: var(--accent); }
+.chip.on { background: var(--accent-soft); border-color: var(--accent); }
+.btn { border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 7px; padding: 8px 14px; font: 600 0.88rem var(--font-body); cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+.btn.small { padding: 4px 9px; font-size: 0.78rem; }
+.btn.danger { color: var(--bad); }
+.btn.danger.armed { background: var(--bad); color: var(--surface); border-color: var(--bad); }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.hint { font-size: 0.8rem; color: var(--muted); margin: 0; }
+.mono { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+
+/* Summary */
+.summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 640px) { .summary { grid-template-columns: minmax(0, 1fr); } }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.stat.hero { border-color: var(--kind); box-shadow: inset 4px 0 0 var(--kind); }
+.stat .v { font-family: var(--font-data); font-size: 1.45rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.stat .s { font-size: 0.82rem; color: var(--muted); overflow-wrap: anywhere; }
+.pos { color: var(--good); } .neg { color: var(--bad); }
+
+/* Bars */
+.bars { display: flex; flex-direction: column; gap: 8px; }
+.bar-row { display: grid; grid-template-columns: minmax(0, 170px) minmax(0, 1fr) auto; gap: 10px; align-items: center; font-size: 0.85rem; }
+@media (max-width: 560px) { .bar-row { grid-template-columns: minmax(0, 1fr) auto; } .bar-row .track { grid-column: 1 / -1; order: 3; } }
+.bar-row .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.track { position: relative; height: 14px; background: var(--sunken); border-radius: 4px; }
+.fill { position: absolute; inset: 0 auto 0 0; border-radius: 4px; background: var(--kind); }
+.fill.ghost { background: transparent; border: 1.5px dashed var(--kind); opacity: .55; }
+.fill.current { background: var(--muted); opacity: .55; }
+.bar-row .val { font-family: var(--font-data); font-variant-numeric: tabular-nums; text-align: right; min-width: 82px; }
+
+/* Table */
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
+th, td { padding: 9px 10px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; background: var(--sunken); position: sticky; top: 0; }
+th.l, td.l { text-align: left; }
+td { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+td.l { font-family: var(--font-body); white-space: normal; min-width: 180px; }
+tr.best td { background: var(--accent-soft); }
+tr:last-child td { border-bottom: 0; }
+.rank { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--sunken); font-weight: 600; font-size: 0.78rem; }
+tr.best .rank { background: var(--kind); color: var(--surface); }
+.tname { font-weight: 600; }
+.tsub { color: var(--muted); font-size: 0.8rem; }
+.pills { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.pill { font: 600 0.68rem var(--font-body); padding: 2px 7px; border-radius: 999px; letter-spacing: 0.02em; white-space: nowrap; }
+.pill.good { background: var(--good-soft); color: var(--good); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+.actions { display: flex; gap: 4px; justify-content: flex-end; }
+.score { display: inline-flex; align-items: center; gap: 6px; }
+.score .mini { width: 52px; height: 6px; background: var(--sunken); border-radius: 3px; position: relative; overflow: hidden; }
+.score .mini i { position: absolute; inset: 0 auto 0 0; background: var(--kind); }
+.feat-list { display: flex; flex-direction: column; gap: 6px; }
+.feat { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; align-items: center; font-size: 0.86rem; }
+.feat select { width: auto; padding: 3px 6px; font-size: 0.8rem; }
+.yes { color: var(--good); font-weight: 600; } .no { color: var(--bad); }
+.empty { padding: 24px; text-align: center; color: var(--muted); font-size: 0.9rem; }
+.panel { display: flex; flex-direction: column; gap: 16px; }
+details.io summary { cursor: pointer; font-size: 0.85rem; color: var(--muted); }
+footer { margin-top: 28px; font-size: 0.8rem; color: var(--muted); max-width: 70ch; }
+footer a { color: var(--accent); }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 8px 16px; border-radius: 999px; font-size: 0.85rem; z-index: 20; }
+@media (prefers-reduced-motion: no-preference) { .fill { transition: width .35s ease; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <h1>Tarif-Kompass<small>Strom, Gas und Versicherungen nüchtern nachrechnen</small></h1>
+    <nav class="tabs" role="tablist" aria-label="Bereich">
+      <button class="tab" role="tab" id="tab-strom" data-tab="strom"><span class="dot" style="background:var(--strom)"></span>Strom</button>
+      <button class="tab" role="tab" id="tab-gas" data-tab="gas"><span class="dot" style="background:var(--gas)"></span>Gas</button>
+      <button class="tab" role="tab" id="tab-versicherung" data-tab="versicherung"><span class="dot" style="background:var(--vers)"></span>Versicherungen</button>
+    </nav>
+  </header>
+
+  <p class="notice" id="example-notice">Die vorausgefüllten Angebote „Beispiel A, B, C …“ sind erfundene Beispielwerte, keine echten Tarife. Trage die Angebote ein, die du z. B. auf Vergleichsportalen oder bei deinem Stadtwerk findest.</p>
+
+  <section class="panel" id="panel-energy"></section>
+  <section class="panel" id="panel-versicherung" hidden></section>
+
+  <footer>
+    <p>Alle Eingaben bleiben nur in diesem Browser gespeichert. Rechnung Energie: Jahreskosten = Grundpreis × 12 + Arbeitspreis × Verbrauch − Bonus. Der Bonus gilt meist nur im ersten Vertragsjahr, deshalb zeigt der Vergleich auch die Kosten ab dem zweiten Jahr. Gasumrechnung: m³ × Brennwert × Zustandszahl = kWh (Werte stehen auf deiner Jahresabrechnung).</p>
+    <p>Unabhängige Beratung: <a href="https://www.verbraucherzentrale.de" target="_blank" rel="noopener">Verbraucherzentrale</a> · Versicherungstests: <a href="https://www.test.de" target="_blank" rel="noopener">Stiftung Warentest</a></p>
+    <div class="row" style="margin-top:12px">
+      <button class="btn small" id="btn-export">Daten in Zwischenablage kopieren</button>
+      <button class="btn small danger" id="btn-reset">Auf Beispieldaten zurücksetzen</button>
+    </div>
+    <details class="io" style="margin-top:10px">
+      <summary>Daten einfügen (Sicherung wiederherstellen)</summary>
+      <div class="col" style="margin-top:8px">
+        <textarea id="io-text" placeholder="Gesicherte Daten (JSON) hier einfügen"></textarea>
+        <div class="row"><button class="btn small" id="btn-import">Daten übernehmen</button></div>
+      </div>
+    </details>
+  </footer>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function () {
+  "use strict";
+  const STORE_KEY = "tarif-kompass.v1";
+  const EUR0 = new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+  const EUR2 = new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const NUM = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 2 });
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const num = (v, d = 0) => { const n = parseFloat(String(v).replace(",", ".")); return Number.isFinite(n) ? n : d; };
+
+  // ---------- Beispieldaten ----------
+  function defaults() {
+    return {
+      strom: {
+        verbrauch: 2500,
+        aktuell: { name: "Mein aktueller Tarif", gp: 13.5, ap: 39.8 },
+        angebote: [
+          { anbieter: "Beispiel A", tarif: "Strom Fix 24", gp: 12.9, ap: 29.4, bonus: 120, laufzeit: 24, garantie: 24, oeko: true },
+          { anbieter: "Beispiel B", tarif: "Öko Flex", gp: 14.5, ap: 30.9, bonus: 0, laufzeit: 1, garantie: 12, oeko: true },
+          { anbieter: "Beispiel C", tarif: "Bonus Plus", gp: 9.9, ap: 33.8, bonus: 250, laufzeit: 12, garantie: 12, oeko: false },
+          { anbieter: "Beispiel D", tarif: "Regional Basis", gp: 11.2, ap: 31.5, bonus: 50, laufzeit: 12, garantie: 12, oeko: false },
+        ],
+      },
+      gas: {
+        verbrauch: 15000,
+        aktuell: { name: "Mein aktueller Tarif", gp: 16.0, ap: 12.9 },
+        angebote: [
+          { anbieter: "Beispiel A", tarif: "Gas Fix 12", gp: 14.9, ap: 10.2, bonus: 100, laufzeit: 12, garantie: 12, oeko: false },
+          { anbieter: "Beispiel B", tarif: "Klima Gas", gp: 17.5, ap: 9.8, bonus: 0, laufzeit: 1, garantie: 6, oeko: true },
+          { anbieter: "Beispiel C", tarif: "Gas Bonus", gp: 9.0, ap: 11.4, bonus: 300, laufzeit: 12, garantie: 12, oeko: false },
+        ],
+      },
+      vers: {
+        kategorie: "haftpflicht",
+        gewichtPreis: 50,
+        schadenquote: 0,
+        kategorien: {
+          haftpflicht: {
+            name: "Privathaftpflicht",
+            features: [
+              { id: "f1", name: "Deckungssumme ≥ 50 Mio. €", w: 2 },
+              { id: "f2", name: "Schlüsselverlust", w: 1 },
+              { id: "f3", name: "Gefälligkeitsschäden", w: 1 },
+              { id: "f4", name: "Forderungsausfalldeckung", w: 2 },
+              { id: "f5", name: "Deliktunfähige Kinder", w: 1 },
+              { id: "f6", name: "Mietsachschäden", w: 1 },
+            ],
+            angebote: [
+              { anbieter: "Beispiel A", tarif: "Basis", beitrag: 4.5, zahlweise: 12, sb: 150, features: { f2: true, f6: true } },
+              { anbieter: "Beispiel B", tarif: "Komfort", beitrag: 72, zahlweise: 1, sb: 0, features: { f1: true, f2: true, f3: true, f4: true, f6: true } },
+              { anbieter: "Beispiel C", tarif: "Premium", beitrag: 109, zahlweise: 1, sb: 0, features: { f1: true, f2: true, f3: true, f4: true, f5: true, f6: true } },
+            ],
+          },
+          hausrat: {
+            name: "Hausrat",
+            features: [
+              { id: "f1", name: "Unterversicherungsverzicht", w: 2 },
+              { id: "f2", name: "Grobe Fahrlässigkeit 100 %", w: 2 },
+              { id: "f3", name: "Elementarschäden", w: 1 },
+              { id: "f4", name: "Fahrraddiebstahl", w: 1 },
+              { id: "f5", name: "Überspannung (Blitz)", w: 1 },
+            ],
+            angebote: [
+              { anbieter: "Beispiel A", tarif: "Basis", beitrag: 58, zahlweise: 1, sb: 150, features: { f1: true, f5: true } },
+              { anbieter: "Beispiel B", tarif: "Komfort", beitrag: 8.9, zahlweise: 12, sb: 0, features: { f1: true, f2: true, f4: true, f5: true } },
+              { anbieter: "Beispiel C", tarif: "Top", beitrag: 129, zahlweise: 1, sb: 0, features: { f1: true, f2: true, f3: true, f4: true, f5: true } },
+            ],
+          },
+          kfz: {
+            name: "Kfz",
+            features: [
+              { id: "f1", name: "Vollkasko", w: 1 },
+              { id: "f2", name: "Rabattschutz", w: 1 },
+              { id: "f3", name: "Freie Werkstattwahl", w: 1 },
+              { id: "f4", name: "Verzicht auf Einrede grober Fahrlässigkeit", w: 2 },
+              { id: "f5", name: "Schutzbrief", w: 0 },
+            ],
+            angebote: [
+              { anbieter: "Beispiel A", tarif: "Teilkasko", beitrag: 389, zahlweise: 1, sb: 150, features: { f3: true } },
+              { anbieter: "Beispiel B", tarif: "Vollkasko Werkstatt", beitrag: 52, zahlweise: 12, sb: 300, features: { f1: true, f4: true, f5: true } },
+              { anbieter: "Beispiel C", tarif: "Vollkasko Plus", beitrag: 702, zahlweise: 1, sb: 300, features: { f1: true, f2: true, f3: true, f4: true } },
+            ],
+          },
+          rechtsschutz: {
+            name: "Rechtsschutz",
+            features: [
+              { id: "f1", name: "Privat", w: 2 },
+              { id: "f2", name: "Beruf", w: 2 },
+              { id: "f3", name: "Verkehr", w: 1 },
+              { id: "f4", name: "Wohnen / Miete", w: 1 },
+              { id: "f5", name: "Freie Anwaltswahl", w: 1 },
+            ],
+            angebote: [
+              { anbieter: "Beispiel A", tarif: "Privat + Beruf", beitrag: 21, zahlweise: 12, sb: 250, features: { f1: true, f2: true, f5: true } },
+              { anbieter: "Beispiel B", tarif: "Komplett", beitrag: 398, zahlweise: 1, sb: 150, features: { f1: true, f2: true, f3: true, f4: true, f5: true } },
+            ],
+          },
+          zahn: {
+            name: "Zahnzusatz",
+            features: [
+              { id: "f1", name: "Zahnersatz ≥ 90 %", w: 2 },
+              { id: "f2", name: "Implantate", w: 1 },
+              { id: "f3", name: "Professionelle Zahnreinigung", w: 1 },
+              { id: "f4", name: "Keine Wartezeit", w: 1 },
+            ],
+            angebote: [
+              { anbieter: "Beispiel A", tarif: "ZE 70", beitrag: 11.9, zahlweise: 12, sb: 0, features: { f2: true, f4: true } },
+              { anbieter: "Beispiel B", tarif: "ZE 90 Plus", beitrag: 24.5, zahlweise: 12, sb: 0, features: { f1: true, f2: true, f3: true } },
+              { anbieter: "Beispiel C", tarif: "ZE 100", beitrag: 33.9, zahlweise: 12, sb: 0, features: { f1: true, f2: true, f3: true, f4: true } },
+            ],
+          },
+        },
+      },
+    };
+  }
+
+  // ---------- Zustand ----------
+  let state;
+  try { state = JSON.parse(localStorage.getItem(STORE_KEY)) || defaults(); } catch (e) { state = defaults(); }
+  if (!state.strom || !state.gas || !state.vers) state = defaults();
+  const ui = { tab: "strom", sort: { strom: "y1", gas: "y1" }, nurOeko: { strom: false, gas: false }, maxLaufzeit: { strom: 0, gas: 0 }, edit: null };
+  const save = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} };
+
+  function toast(msg) {
+    const t = document.getElementById("toast");
+    t.textContent = msg; t.hidden = false;
+    clearTimeout(toast._t); toast._t = setTimeout(() => (t.hidden = true), 2200);
+  }
+
+  // ---------- Rechnen: Energie ----------
+  function kostenEnergie(t, kwh) {
+    const fix = num(t.gp) * 12;
+    const var_ = (num(t.ap) / 100) * kwh;
+    const folge = fix + var_;
+    const y1 = folge - num(t.bonus);
+    return { fix, var_, y1, folge, avg2: (y1 + folge) / 2, abschlag: y1 / 12 };
+  }
+  const SORTS = { y1: "1. Jahr inkl. Bonus", folge: "Ab 2. Jahr (ohne Bonus)", avg2: "Ø über 2 Jahre" };
+
+  function renderEnergy(kind) {
+    const d = state[kind];
+    const isStrom = kind === "strom";
+    const kwh = num(d.verbrauch);
+    const sortKey = ui.sort[kind];
+    const oekoLabel = isStrom ? "Ökostrom" : "Klimaneutral / Biogas";
+    const akt = kostenEnergie(d.aktuell, kwh);
+
+    let rows = d.angebote.map((t, i) => ({ t, i, k: kostenEnergie(t, kwh) }));
+    if (ui.nurOeko[kind]) rows = rows.filter((r) => r.t.oeko);
+    if (ui.maxLaufzeit[kind]) rows = rows.filter((r) => num(r.t.laufzeit) <= ui.maxLaufzeit[kind]);
+    rows.sort((a, b) => a.k[sortKey] - b.k[sortKey]);
+    const best = rows[0];
+    const maxVal = Math.max(akt.folge, ...rows.map((r) => Math.max(r.k.folge, r.k[sortKey])), 1);
+
+    const edit = ui.edit && ui.edit.kind === kind ? d.angebote[ui.edit.i] : null;
+    const f = edit || { anbieter: "", tarif: "", gp: "", ap: "", bonus: "", laufzeit: 12, garantie: 12, oeko: false };
+
+    const presets = isStrom
+      ? [["1 Person", 1500], ["2 Personen", 2500], ["3 Personen", 3500], ["4 Personen", 4250], ["5+ Personen", 5000]]
+      : [];
+
+    const pillsFor = (t, k) => {
+      const p = [];
+      if (num(t.laufzeit) <= 1) p.push('<span class="pill good">monatlich kündbar</span>');
+      else if (num(t.laufzeit) > 12) p.push(`<span class="pill warn">${esc(t.laufzeit)} Mon. Bindung</span>`);
+      if (num(t.garantie) >= 12) p.push(`<span class="pill good">${esc(t.garantie)} Mon. Preisgarantie</span>`);
+      else p.push(`<span class="pill warn">${num(t.garantie) ? esc(t.garantie) + " Mon." : "keine"} Preisgarantie</span>`);
+      if (num(t.bonus) > 0 && num(t.bonus) / k.folge > 0.15) p.push('<span class="pill warn">Bonus-lastig</span>');
+      if (t.oeko) p.push(`<span class="pill good">${oekoLabel}</span>`);
+      return p.join("");
+    };
+
+    const el = document.getElementById("panel-energy");
+    el.style.setProperty("--kind", `var(--${kind})`);
+    el.innerHTML = `
+      <div class="summary">
+        <div class="stat hero">
+          <h3>Günstigstes Angebot · ${esc(SORTS[sortKey])}</h3>
+          <div class="v">${best ? EUR0.format(best.k[sortKey]) : "–"}</div>
+          <div class="s">${best ? esc(best.t.anbieter) + " · " + esc(best.t.tarif) + " · Abschlag ca. " + EUR0.format(best.k.y1 / 12) + "/Monat" : "Noch kein passendes Angebot"}</div>
+        </div>
+        <div class="stat">
+          <h3>Dein aktueller Tarif</h3>
+          <div class="v">${EUR0.format(akt.folge)}</div>
+          <div class="s">pro Jahr · ${EUR0.format(akt.folge / 12)} im Monat</div>
+        </div>
+        <div class="stat">
+          <h3>Mögliche Ersparnis</h3>
+          <div class="v ${best && akt.folge - best.k[sortKey] >= 0 ? "pos" : "neg"}">${best ? EUR0.format(akt.folge - best.k[sortKey]) : "–"}</div>
+          <div class="s">${best ? "ab 2. Jahr: " + EUR0.format(akt.folge - best.k.folge) + " pro Jahr" : ""}</div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="col">
+          <div class="card">
+            <h2>Verbrauch</h2>
+            <label class="f">Jahresverbrauch in kWh
+              <input type="number" id="${kind}-verbrauch" min="0" step="100" value="${esc(d.verbrauch)}">
+            </label>
+            ${isStrom ? `<div class="chips">${presets.map(([l, v]) => `<button class="chip ${kwh === v ? "on" : ""}" data-preset="${v}">${l} · ${NUM.format(v)}</button>`).join("")}</div>
+              <p class="hint">Richtwerte ohne elektrische Warmwasserbereitung. Mit Durchlauferhitzer ca. 25 % mehr.</p>`
+            : `<div class="fields">
+                <label class="f">Wohnfläche m²<input type="number" id="gas-flaeche" min="0" step="5" placeholder="z. B. 100"></label>
+                <label class="f">Gebäude
+                  <select id="gas-standard">
+                    <option value="80">Neubau / saniert (80 kWh/m²)</option>
+                    <option value="140" selected>Durchschnitt (140 kWh/m²)</option>
+                    <option value="200">Altbau unsaniert (200 kWh/m²)</option>
+                  </select></label>
+                <label class="f">oder Zählerstand-Differenz m³<input type="number" id="gas-m3" min="0" step="10" placeholder="z. B. 1400"></label>
+                <label class="f">Brennwert × Zustandszahl<input type="number" id="gas-faktor" min="5" max="15" step="0.01" value="10.45"></label>
+                <div class="full row"><button class="btn small" id="gas-calc">Verbrauch schätzen</button><span class="hint">Faktor steht auf der Gasrechnung (oft 10–11).</span></div>
+              </div>`}
+          </div>
+
+          <div class="card">
+            <h2>Aktueller Tarif</h2>
+            <div class="fields">
+              <label class="f">Grundpreis €/Monat<input type="number" id="${kind}-akt-gp" step="0.01" min="0" value="${esc(d.aktuell.gp)}"></label>
+              <label class="f">Arbeitspreis ct/kWh<input type="number" id="${kind}-akt-ap" step="0.01" min="0" value="${esc(d.aktuell.ap)}"></label>
+            </div>
+            <p class="hint">Brutto-Preise inkl. MwSt. von deiner letzten Abrechnung oder Preisanpassung.</p>
+          </div>
+
+          <form class="card" id="${kind}-form" autocomplete="off">
+            <div class="card-head"><h2>${edit ? "Angebot bearbeiten" : "Angebot hinzufügen"}</h2>${edit ? '<button type="button" class="btn small" id="cancel-edit">Abbrechen</button>' : ""}</div>
+            <div class="fields">
+              <label class="f">Anbieter<input type="text" name="anbieter" id="${kind}-f-anbieter" required value="${esc(f.anbieter)}"></label>
+              <label class="f">Tarif<input type="text" name="tarif" id="${kind}-f-tarif" value="${esc(f.tarif)}"></label>
+              <label class="f">Grundpreis €/Monat<input type="number" name="gp" id="${kind}-f-gp" step="0.01" min="0" required value="${esc(f.gp)}"></label>
+              <label class="f">Arbeitspreis ct/kWh<input type="number" name="ap" id="${kind}-f-ap" step="0.01" min="0" required value="${esc(f.ap)}"></label>
+              <label class="f">Bonus € (einmalig)<input type="number" name="bonus" id="${kind}-f-bonus" step="1" min="0" value="${esc(f.bonus)}"></label>
+              <label class="f">Laufzeit Monate<input type="number" name="laufzeit" id="${kind}-f-laufzeit" step="1" min="0" value="${esc(f.laufzeit)}"></label>
+              <label class="f">Preisgarantie Monate<input type="number" name="garantie" id="${kind}-f-garantie" step="1" min="0" value="${esc(f.garantie)}"></label>
+              <label class="check" style="align-self:end"><input type="checkbox" name="oeko" id="${kind}-f-oeko" ${f.oeko ? "checked" : ""}>${oekoLabel}</label>
+            </div>
+            <button class="btn primary" type="submit">${edit ? "Änderungen speichern" : "Angebot hinzufügen"}</button>
+          </form>
+        </div>
+
+        <div class="col">
+          <div class="card">
+            <div class="card-head">
+              <h2>Jahreskosten im Vergleich</h2>
+              <div class="chips" role="group" aria-label="Sortierung">
+                ${Object.entries(SORTS).map(([k, l]) => `<button class="chip ${sortKey === k ? "on" : ""}" data-sort="${k}">${l}</button>`).join("")}
+              </div>
+            </div>
+            <div class="row">
+              <label class="check"><input type="checkbox" id="${kind}-nuroeko" ${ui.nurOeko[kind] ? "checked" : ""}>nur ${oekoLabel}</label>
+              <label class="check"><input type="checkbox" id="${kind}-max12" ${ui.maxLaufzeit[kind] ? "checked" : ""}>max. 12 Monate Laufzeit</label>
+            </div>
+            <div class="bars">
+              <div class="bar-row"><span class="name">Aktueller Tarif</span><div class="track"><div class="fill current" style="width:${(akt.folge / maxVal) * 100}%"></div></div><span class="val">${EUR0.format(akt.folge)}</span></div>
+              ${rows.map((r) => `
+                <div class="bar-row" title="Gestrichelt: Kosten ab dem 2. Jahr">
+                  <span class="name">${esc(r.t.anbieter)} · ${esc(r.t.tarif)}</span>
+                  <div class="track">
+                    ${sortKey === "y1" && num(r.t.bonus) > 0 ? `<div class="fill ghost" style="width:${(r.k.folge / maxVal) * 100}%"></div>` : ""}
+                    <div class="fill" style="width:${(r.k[sortKey] / maxVal) * 100}%"></div>
+                  </div>
+                  <span class="val">${EUR0.format(r.k[sortKey])}</span>
+                </div>`).join("")}
+            </div>
+            ${sortKey === "y1" ? '<p class="hint">Gestrichelter Rahmen: was der Tarif ab dem zweiten Jahr kostet, wenn der Bonus wegfällt.</p>' : ""}
+          </div>
+
+          <div class="tbl-wrap">
+            ${rows.length ? `<table>
+              <thead><tr>
+                <th class="l">#</th><th class="l">Angebot</th><th>Grundpreis</th><th>Arbeitspreis</th><th>Bonus</th>
+                <th>1. Jahr</th><th>ab 2. Jahr</th><th>Ersparnis/Jahr*</th><th></th>
+              </tr></thead>
+              <tbody>
+                ${rows.map((r, n) => `
+                  <tr class="${n === 0 ? "best" : ""}">
+                    <td class="l"><span class="rank">${n + 1}</span></td>
+                    <td class="l"><div class="tname">${esc(r.t.anbieter)}</div><div class="tsub">${esc(r.t.tarif)}</div><div class="pills">${pillsFor(r.t, r.k)}</div></td>
+                    <td>${EUR2.format(num(r.t.gp))}/M</td>
+                    <td>${NUM.format(num(r.t.ap))} ct</td>
+                    <td>${num(r.t.bonus) ? EUR0.format(num(r.t.bonus)) : "–"}</td>
+                    <td>${EUR0.format(r.k.y1)}</td>
+                    <td>${EUR0.format(r.k.folge)}</td>
+                    <td class="${akt.folge - r.k[sortKey] >= 0 ? "pos" : "neg"}">${EUR0.format(akt.folge - r.k[sortKey])}</td>
+                    <td><div class="actions"><button class="btn small" data-edit="${r.i}">Bearbeiten</button><button class="btn small danger" data-del="${r.i}">Löschen</button></div></td>
+                  </tr>`).join("")}
+              </tbody></table>` : `<div class="empty">Keine Angebote${d.angebote.length ? " für diese Filter" : ""}. Trage links ein Angebot ein.</div>`}
+          </div>
+          <p class="hint">* Ersparnis gegenüber deinem aktuellen Tarif nach der gewählten Sortierung (${esc(SORTS[sortKey])}). Grenzpreis: ab ${best ? NUM.format(((akt.folge - num(best.t.gp) * 12) / kwh) * 100) : "–"} ct/kWh Arbeitspreis wäre das beste Angebot nicht mehr günstiger als dein aktueller Tarif.</p>
+        </div>
+      </div>`;
+
+    // Events
+    const rerender = () => { save(); renderEnergy(kind); };
+    const bindNum = (id, setter) => {
+      const inp = document.getElementById(id);
+      inp.addEventListener("change", () => { setter(num(inp.value)); rerender(); });
+    };
+    bindNum(`${kind}-verbrauch`, (v) => (d.verbrauch = v));
+    bindNum(`${kind}-akt-gp`, (v) => (d.aktuell.gp = v));
+    bindNum(`${kind}-akt-ap`, (v) => (d.aktuell.ap = v));
+    el.querySelectorAll("[data-preset]").forEach((b) => b.addEventListener("click", () => { d.verbrauch = num(b.dataset.preset); rerender(); }));
+    el.querySelectorAll("[data-sort]").forEach((b) => b.addEventListener("click", () => { ui.sort[kind] = b.dataset.sort; renderEnergy(kind); }));
+    document.getElementById(`${kind}-nuroeko`).addEventListener("change", (e) => { ui.nurOeko[kind] = e.target.checked; renderEnergy(kind); });
+    document.getElementById(`${kind}-max12`).addEventListener("change", (e) => { ui.maxLaufzeit[kind] = e.target.checked ? 12 : 0; renderEnergy(kind); });
+    if (!isStrom) {
+      document.getElementById("gas-calc").addEventListener("click", () => {
+        const m3 = num(document.getElementById("gas-m3").value);
+        const fl = num(document.getElementById("gas-flaeche").value);
+        if (m3 > 0) d.verbrauch = Math.round(m3 * num(document.getElementById("gas-faktor").value, 10.45));
+        else if (fl > 0) d.verbrauch = Math.round(fl * num(document.getElementById("gas-standard").value, 140));
+        else { toast("Bitte Wohnfläche oder m³ eingeben"); return; }
+        rerender(); toast(`Verbrauch auf ${NUM.format(d.verbrauch)} kWh gesetzt`);
+      });
+    }
+    const form = document.getElementById(`${kind}-form`);
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const t = {
+        anbieter: String(fd.get("anbieter")).trim(), tarif: String(fd.get("tarif")).trim(),
+        gp: num(fd.get("gp")), ap: num(fd.get("ap")), bonus: num(fd.get("bonus")),
+        laufzeit: num(fd.get("laufzeit")), garantie: num(fd.get("garantie")), oeko: fd.get("oeko") === "on",
+      };
+      if (edit) { d.angebote[ui.edit.i] = t; ui.edit = null; toast("Angebot gespeichert"); }
+      else { d.angebote.push(t); toast("Angebot hinzugefügt"); }
+      rerender();
+    });
+    const cancel = document.getElementById("cancel-edit");
+    if (cancel) cancel.addEventListener("click", () => { ui.edit = null; renderEnergy(kind); });
+    el.querySelectorAll("[data-edit]").forEach((b) => b.addEventListener("click", () => {
+      ui.edit = { kind, i: +b.dataset.edit }; renderEnergy(kind);
+      document.getElementById(`${kind}-form`).scrollIntoView({ behavior: "smooth", block: "center" });
+    }));
+    bindDelete(el, (i) => { d.angebote.splice(i, 1); ui.edit = null; rerender(); });
+  }
+
+  // Löschen mit zweitem Klick bestätigen
+  function bindDelete(root, onDelete) {
+    root.querySelectorAll("[data-del]").forEach((b) => b.addEventListener("click", () => {
+      if (b.classList.contains("armed")) { onDelete(+b.dataset.del); return; }
+      b.classList.add("armed"); b.textContent = "Sicher?";
+      setTimeout(() => { if (b.isConnected) { b.classList.remove("armed"); b.textContent = "Löschen"; } }, 3000);
+    }));
+  }
+
+  // ---------- Rechnen: Versicherungen ----------
+  const ZAHLWEISE = { 1: "jährlich", 2: "halbjährlich", 4: "vierteljährlich", 12: "monatlich" };
+  const GEWICHT = { 2: "wichtig", 1: "nett", 0: "egal" };
+
+  function renderVers() {
+    const v = state.vers;
+    const kat = v.kategorien[v.kategorie] || Object.values(v.kategorien)[0];
+    const wP = num(v.gewichtPreis, 50) / 100;
+    const quote = num(v.schadenquote) / 100;
+    const sumW = kat.features.reduce((s, f) => s + num(f.w), 0);
+
+    const rows = kat.angebote.map((a, i) => {
+      const jahr = num(a.beitrag) * num(a.zahlweise, 1);
+      const eff = jahr + num(a.sb) * quote;
+      const fs = sumW ? kat.features.reduce((s, f) => s + (a.features[f.id] ? num(f.w) : 0), 0) / sumW : 1;
+      return { a, i, jahr, eff, fs };
+    });
+    const minEff = Math.min(...rows.map((r) => r.eff).filter((x) => x > 0), Infinity);
+    rows.forEach((r) => { r.ps = r.eff > 0 ? minEff / r.eff : 1; r.score = Math.round((wP * r.ps + (1 - wP) * r.fs) * 100); });
+    rows.sort((a, b) => b.score - a.score || a.eff - b.eff);
+    const best = rows[0];
+    const cheapest = rows.slice().sort((a, b) => a.eff - b.eff)[0];
+
+    const edit = ui.edit && ui.edit.kind === "vers" ? kat.angebote[ui.edit.i] : null;
+    const f = edit || { anbieter: "", tarif: "", beitrag: "", zahlweise: 1, sb: 0, features: {} };
+
+    const el = document.getElementById("panel-versicherung");
+    el.style.setProperty("--kind", "var(--vers)");
+    el.innerHTML = `
+      <div class="chips" role="group" aria-label="Versicherungsart">
+        ${Object.entries(v.kategorien).map(([k, c]) => `<button class="chip ${k === v.kategorie ? "on" : ""}" data-kat="${k}">${esc(c.name)} <span class="mono">(${c.angebote.length})</span></button>`).join("")}
+        <button class="chip" id="kat-add">+ Eigene Versicherungsart</button>
+      </div>
+      <form class="row" id="kat-form" hidden>
+        <input type="text" id="kat-name" placeholder="z. B. Berufsunfähigkeit" style="max-width:260px">
+        <button class="btn small primary" type="submit">Anlegen</button>
+      </form>
+
+      <div class="summary">
+        <div class="stat hero">
+          <h3>Bestes Preis-Leistungs-Verhältnis</h3>
+          <div class="v">${best ? best.score + " / 100" : "–"}</div>
+          <div class="s">${best ? esc(best.a.anbieter) + " · " + esc(best.a.tarif) + " · " + EUR0.format(best.jahr) + " pro Jahr" : "Noch keine Angebote"}</div>
+        </div>
+        <div class="stat">
+          <h3>Günstigster Beitrag</h3>
+          <div class="v">${cheapest ? EUR0.format(cheapest.jahr) : "–"}</div>
+          <div class="s">${cheapest ? esc(cheapest.a.anbieter) + " · " + esc(cheapest.a.tarif) + " · Leistung " + Math.round(cheapest.fs * 100) + " %" : ""}</div>
+        </div>
+        <div class="stat">
+          <h3>Gewichtung</h3>
+          <div class="v">${Math.round(wP * 100)} % Preis</div>
+          <div class="s">${100 - Math.round(wP * 100)} % Leistung · Schadenquote ${NUM.format(quote * 100)} %</div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="col">
+          <div class="card">
+            <h2>Was ist dir wichtig?</h2>
+            <label class="f">Preis ↔ Leistung: <span class="mono">${Math.round(wP * 100)} % Preis</span>
+              <input type="range" id="vers-gewicht" min="0" max="100" step="5" value="${Math.round(wP * 100)}" style="accent-color:var(--accent)">
+            </label>
+            <label class="f">Erwartete Schadenfälle pro Jahr in %, um die Selbstbeteiligung einzurechnen
+              <input type="number" id="vers-quote" min="0" max="100" step="5" value="${esc(v.schadenquote)}">
+            </label>
+            <h3>Leistungen in ${esc(kat.name)}</h3>
+            <div class="feat-list">
+              ${kat.features.map((ft, n) => `
+                <div class="feat">
+                  <span>${esc(ft.name)}</span>
+                  <select data-fw="${n}" aria-label="Gewicht ${esc(ft.name)}">${Object.entries(GEWICHT).map(([w, l]) => `<option value="${w}" ${num(ft.w) === +w ? "selected" : ""}>${l}</option>`).join("")}</select>
+                  <button class="btn small danger" data-fdel="${n}" aria-label="Leistung entfernen" title="Leistung entfernen">✕</button>
+                </div>`).join("")}
+            </div>
+            <form class="row" id="feat-form">
+              <input type="text" id="feat-name" placeholder="Weitere Leistung, z. B. Ehrenamt" style="flex:1;min-width:140px">
+              <button class="btn small" type="submit">Hinzufügen</button>
+            </form>
+          </div>
+
+          <form class="card" id="vers-form" autocomplete="off">
+            <div class="card-head"><h2>${edit ? "Angebot bearbeiten" : "Angebot hinzufügen"}</h2>${edit ? '<button type="button" class="btn small" id="cancel-edit">Abbrechen</button>' : ""}</div>
+            <div class="fields">
+              <label class="f">Versicherer<input type="text" name="anbieter" id="vers-f-anbieter" required value="${esc(f.anbieter)}"></label>
+              <label class="f">Tarif<input type="text" name="tarif" id="vers-f-tarif" value="${esc(f.tarif)}"></label>
+              <label class="f">Beitrag €<input type="number" name="beitrag" id="vers-f-beitrag" step="0.01" min="0" required value="${esc(f.beitrag)}"></label>
+              <label class="f">Zahlweise
+                <select name="zahlweise" id="vers-f-zahlweise">${Object.entries(ZAHLWEISE).map(([k, l]) => `<option value="${k}" ${num(f.zahlweise) === +k ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+              <label class="f full">Selbstbeteiligung € pro Schadenfall<input type="number" name="sb" id="vers-f-sb" step="1" min="0" value="${esc(f.sb)}"></label>
+            </div>
+            <h3>Enthaltene Leistungen</h3>
+            <div class="feat-list">
+              ${kat.features.map((ft) => `<label class="check"><input type="checkbox" name="feat-${ft.id}" id="vers-f-feat-${ft.id}" ${f.features[ft.id] ? "checked" : ""}>${esc(ft.name)}</label>`).join("") || '<p class="hint">Lege oben Leistungen an, um Tarife zu vergleichen.</p>'}
+            </div>
+            <button class="btn primary" type="submit">${edit ? "Änderungen speichern" : "Angebot hinzufügen"}</button>
+          </form>
+        </div>
+
+        <div class="col">
+          <div class="tbl-wrap">
+            ${rows.length ? `<table>
+              <thead><tr>
+                <th class="l">#</th><th class="l">Angebot</th><th>Gesamt</th><th>Beitrag/Jahr</th><th>SB</th><th>Leistung</th>
+                ${kat.features.map((ft) => `<th title="${esc(ft.name)}">${esc(ft.name.length > 14 ? ft.name.slice(0, 13) + "…" : ft.name)}</th>`).join("")}
+                <th></th>
+              </tr></thead>
+              <tbody>
+                ${rows.map((r, n) => `
+                  <tr class="${n === 0 ? "best" : ""}">
+                    <td class="l"><span class="rank">${n + 1}</span></td>
+                    <td class="l"><div class="tname">${esc(r.a.anbieter)}</div><div class="tsub">${esc(r.a.tarif)} · ${EUR2.format(num(r.a.beitrag))} ${ZAHLWEISE[r.a.zahlweise] || ""}</div>
+                      <div class="pills">${r === cheapest ? '<span class="pill good">günstigster</span>' : ""}${num(r.a.sb) > 0 ? `<span class="pill warn">SB ${EUR0.format(num(r.a.sb))}</span>` : '<span class="pill good">ohne SB</span>'}${kat.features.some((ft) => num(ft.w) === 2 && !r.a.features[ft.id]) ? '<span class="pill bad">Wichtiges fehlt</span>' : ""}</div></td>
+                    <td><span class="score"><span class="mini"><i style="width:${r.score}%"></i></span>${r.score}</span></td>
+                    <td>${EUR0.format(r.jahr)}</td>
+                    <td>${num(r.a.sb) ? EUR0.format(num(r.a.sb)) : "–"}</td>
+                    <td>${Math.round(r.fs * 100)} %</td>
+                    ${kat.features.map((ft) => `<td>${r.a.features[ft.id] ? '<span class="yes" aria-label="ja">✓</span>' : '<span class="no" aria-label="nein">–</span>'}</td>`).join("")}
+                    <td><div class="actions"><button class="btn small" data-edit="${r.i}">Bearbeiten</button><button class="btn small danger" data-del="${r.i}">Löschen</button></div></td>
+                  </tr>`).join("")}
+              </tbody></table>` : '<div class="empty">Noch keine Angebote für diese Versicherungsart. Trage links das erste Angebot ein.</div>'}
+          </div>
+          <p class="hint">Gesamtwert = Preisanteil × (günstigster Beitrag ÷ Beitrag) + Leistungsanteil × erfüllte Leistungen (wichtig zählt doppelt, egal gar nicht). „Wichtiges fehlt“ markiert Tarife ohne eine als wichtig markierte Leistung. Monatliche Zahlweise kostet bei vielen Versicherern einen Aufschlag von 3–5 %.</p>
+          ${v.kategorie.startsWith("eigen-") ? '<div class="row"><button class="btn small danger" id="kat-del" data-del="0">Löschen</button><span class="hint">Diese eigene Versicherungsart entfernen</span></div>' : ""}
+        </div>
+      </div>`;
+
+    const rerender = () => { save(); renderVers(); };
+    el.querySelectorAll("[data-kat]").forEach((b) => b.addEventListener("click", () => { v.kategorie = b.dataset.kat; ui.edit = null; rerender(); }));
+    document.getElementById("kat-add").addEventListener("click", () => { const fm = document.getElementById("kat-form"); fm.hidden = false; document.getElementById("kat-name").focus(); });
+    document.getElementById("kat-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = document.getElementById("kat-name").value.trim();
+      if (!name) return;
+      const id = "eigen-" + Date.now();
+      v.kategorien[id] = { name, features: [], angebote: [] };
+      v.kategorie = id; rerender(); toast(`${name} angelegt`);
+    });
+    const rng = document.getElementById("vers-gewicht");
+    rng.addEventListener("input", () => { rng.parentElement.querySelector(".mono").textContent = rng.value + " % Preis"; });
+    rng.addEventListener("change", () => { v.gewichtPreis = num(rng.value); rerender(); document.getElementById("vers-gewicht").focus(); });
+    document.getElementById("vers-quote").addEventListener("change", (e) => { v.schadenquote = Math.min(100, Math.max(0, num(e.target.value))); rerender(); });
+    el.querySelectorAll("[data-fw]").forEach((s) => s.addEventListener("change", () => { kat.features[+s.dataset.fw].w = num(s.value); rerender(); }));
+    el.querySelectorAll("[data-fdel]").forEach((b) => b.addEventListener("click", () => { kat.features.splice(+b.dataset.fdel, 1); rerender(); }));
+    document.getElementById("feat-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = document.getElementById("feat-name").value.trim();
+      if (!name) return;
+      kat.features.push({ id: "f" + Date.now().toString(36), name, w: 1 }); rerender();
+    });
+    const form = document.getElementById("vers-form");
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const a = {
+        anbieter: String(fd.get("anbieter")).trim(), tarif: String(fd.get("tarif")).trim(),
+        beitrag: num(fd.get("beitrag")), zahlweise: num(fd.get("zahlweise"), 1), sb: num(fd.get("sb")), features: {},
+      };
+      kat.features.forEach((ft) => { if (fd.get("feat-" + ft.id) === "on") a.features[ft.id] = true; });
+      if (edit) { kat.angebote[ui.edit.i] = a; ui.edit = null; toast("Angebot gespeichert"); }
+      else { kat.angebote.push(a); toast("Angebot hinzugefügt"); }
+      rerender();
+    });
+    const cancel = document.getElementById("cancel-edit");
+    if (cancel) cancel.addEventListener("click", () => { ui.edit = null; renderVers(); });
+    el.querySelectorAll("[data-edit]").forEach((b) => b.addEventListener("click", () => {
+      ui.edit = { kind: "vers", i: +b.dataset.edit }; renderVers();
+      document.getElementById("vers-form").scrollIntoView({ behavior: "smooth", block: "center" });
+    }));
+    const katDel = document.getElementById("kat-del");
+    bindDelete(el.querySelector(".tbl-wrap"), (i) => { kat.angebote.splice(i, 1); ui.edit = null; rerender(); });
+    if (katDel) bindDelete(katDel.parentElement, () => { delete v.kategorien[v.kategorie]; v.kategorie = Object.keys(v.kategorien)[0]; rerender(); });
+  }
+
+  // ---------- Reiter ----------
+  function show(tab) {
+    if (!["strom", "gas", "versicherung"].includes(tab)) tab = "strom";
+    if (ui.tab !== tab) ui.edit = null;
+    ui.tab = tab;
+    document.querySelectorAll(".tab").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === tab)));
+    document.getElementById("panel-energy").hidden = tab === "versicherung";
+    document.getElementById("panel-versicherung").hidden = tab !== "versicherung";
+    if (tab === "versicherung") renderVers(); else renderEnergy(tab);
+  }
+  document.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => {
+    try { history.replaceState(null, "", "#" + b.dataset.tab); } catch (e) {}
+    show(b.dataset.tab);
+  }));
+  window.addEventListener("hashchange", () => show(location.hash.slice(1)));
+
+  // ---------- Sichern / Laden / Zurücksetzen ----------
+  document.getElementById("btn-export").addEventListener("click", () => {
+    const json = JSON.stringify(state);
+    const ta = document.getElementById("io-text");
+    const fallback = () => { ta.value = json; ta.closest("details").open = true; ta.select(); toast("Text markiert, bitte selbst kopieren"); };
+    try { navigator.clipboard.writeText(json).then(() => toast("Daten kopiert"), fallback); } catch (e) { fallback(); }
+  });
+  document.getElementById("btn-import").addEventListener("click", () => {
+    try {
+      const data = JSON.parse(document.getElementById("io-text").value);
+      if (!data.strom || !data.gas || !data.vers) throw new Error();
+      state = data; save(); show(ui.tab); toast("Daten übernommen");
+    } catch (e) { toast("Das sind keine gültigen Tarif-Kompass-Daten"); }
+  });
+  const reset = document.getElementById("btn-reset");
+  reset.addEventListener("click", () => {
+    if (reset.classList.contains("armed")) {
+      state = defaults(); save(); ui.edit = null; show(ui.tab);
+      reset.classList.remove("armed"); reset.textContent = "Auf Beispieldaten zurücksetzen"; toast("Beispieldaten geladen"); return;
+    }
+    reset.classList.add("armed"); reset.textContent = "Alle eigenen Daten löschen?";
+    setTimeout(() => { reset.classList.remove("armed"); reset.textContent = "Auf Beispieldaten zurücksetzen"; }, 3500);
+  });
+
+  show(location.hash.slice(1) || "strom");
+})();
+</script>
+</body>
+</html>
