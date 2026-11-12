@@ -17,5 +17,9 @@ Ein Vergleichsrechner für Strom, Gas und Versicherungen in einer einzigen HTML-
 - Leistungen als „wichtig / nett / egal“ gewichten, Schieberegler für Preis ↔ Leistung
 - Gesamtwert (0–100) und der Hinweis „Wichtiges fehlt“
 
+**Foto einlesen**
+- Fotografiere eine Jahresabrechnung, ein Preisblatt, eine Police oder ein Angebot. Claude liest die Tarifdaten aus, und du prüfst sie, bevor sie übernommen werden.
+- Die Funktion gibt es nur, wenn die Seite als Claude-Artifact geöffnet ist. Als lokale Datei ist sie ausgeblendet.
+
 Die Daten werden nur lokal im Browser gespeichert (localStorage). Über die Zwischenablage kannst du sie sichern und wiederherstellen.
 Die vorausgefüllten Angebote („Beispiel A, B, C“) sind erfundene Beispielwerte.

@@ -144,6 +144,14 @@ tr.best .rank { background: var(--kind); color: var(--surface); }
 details.io summary { cursor: pointer; font-size: 0.85rem; color: var(--muted); }
 footer { margin-top: 28px; font-size: 0.8rem; color: var(--muted); max-width: 70ch; }
 footer a { color: var(--accent); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.scan { border-style: dashed; border-color: var(--kind); }
+.scan-btn { display: inline-flex; justify-content: center; align-items: center; gap: 8px; text-align: center; }
+.scan-btn:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.scan dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; margin: 0; font-size: 0.86rem; }
+.scan dt { color: var(--muted); }
+.scan dd { margin: 0; font-family: var(--font-data); overflow-wrap: anywhere; }
+.scan .err { color: var(--bad); font-size: 0.85rem; margin: 0; }
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 8px 16px; border-radius: 999px; font-size: 0.85rem; z-index: 20; }
 @media (prefers-reduced-motion: no-preference) { .fill { transition: width .35s ease; } }
 </style>
@@ -160,7 +168,7 @@ footer a { color: var(--accent); }
     </nav>
   </header>
 
-  <p class="notice" id="example-notice">Die vorausgefüllten Angebote „Beispiel A, B, C …“ sind erfundene Beispielwerte, keine echten Tarife. Trage die Angebote ein, die du z. B. auf Vergleichsportalen oder bei deinem Stadtwerk findest.</p>
+  <p class="notice" id="example-notice">Die vorausgefüllten Angebote „Beispiel A, B, C …“ sind erfundene Beispielwerte, keine echten Tarife. Trage deine eigenen Daten ein oder lies sie per Foto ein.</p>
 
   <section class="panel" id="panel-energy"></section>
   <section class="panel" id="panel-versicherung" hidden></section>
@@ -303,7 +311,7 @@ footer a { color: var(--accent); }
   let state;
   try { state = JSON.parse(localStorage.getItem(STORE_KEY)) || defaults(); } catch (e) { state = defaults(); }
   if (!state.strom || !state.gas || !state.vers) state = defaults();
-  const ui = { tab: "strom", sort: { strom: "y1", gas: "y1" }, nurOeko: { strom: false, gas: false }, maxLaufzeit: { strom: 0, gas: 0 }, edit: null };
+  const ui = { tab: "strom", sort: { strom: "y1", gas: "y1" }, nurOeko: { strom: false, gas: false }, maxLaufzeit: { strom: 0, gas: 0 }, edit: null, draft: null };
   const save = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} };
 
   function toast(msg) {
@@ -338,7 +346,8 @@ footer a { color: var(--accent); }
     const maxVal = Math.max(akt.folge, ...rows.map((r) => Math.max(r.k.folge, r.k[sortKey])), 1);
 
     const edit = ui.edit && ui.edit.kind === kind ? d.angebote[ui.edit.i] : null;
-    const f = edit || { anbieter: "", tarif: "", gp: "", ap: "", bonus: "", laufzeit: 12, garantie: 12, oeko: false };
+    const draft = !edit && ui.draft && ui.draft.kind === kind ? ui.draft.data : null;
+    const f = edit || draft || { anbieter: "", tarif: "", gp: "", ap: "", bonus: "", laufzeit: 12, garantie: 12, oeko: false };
 
     const presets = isStrom
       ? [["1 Person", 1500], ["2 Personen", 2500], ["3 Personen", 3500], ["4 Personen", 4250], ["5+ Personen", 5000]]
@@ -378,6 +387,7 @@ footer a { color: var(--accent); }
 
       <div class="grid">
         <div class="col">
+          ${scanCard(kind)}
           <div class="card">
             <h2>Verbrauch</h2>
             <label class="f">Jahresverbrauch in kWh
@@ -409,7 +419,7 @@ footer a { color: var(--accent); }
           </div>
 
           <form class="card" id="${kind}-form" autocomplete="off">
-            <div class="card-head"><h2>${edit ? "Angebot bearbeiten" : "Angebot hinzufügen"}</h2>${edit ? '<button type="button" class="btn small" id="cancel-edit">Abbrechen</button>' : ""}</div>
+            <div class="card-head"><h2>${edit ? "Angebot bearbeiten" : draft ? "Erkanntes Angebot prüfen" : "Angebot hinzufügen"}</h2>${edit || draft ? '<button type="button" class="btn small" id="cancel-edit">Abbrechen</button>' : ""}</div>
             <div class="fields">
               <label class="f">Anbieter<input type="text" name="anbieter" id="${kind}-f-anbieter" required value="${esc(f.anbieter)}"></label>
               <label class="f">Tarif<input type="text" name="tarif" id="${kind}-f-tarif" value="${esc(f.tarif)}"></label>
@@ -510,15 +520,16 @@ footer a { color: var(--accent); }
       };
       if (edit) { d.angebote[ui.edit.i] = t; ui.edit = null; toast("Angebot gespeichert"); }
       else { d.angebote.push(t); toast("Angebot hinzugefügt"); }
-      rerender();
+      ui.draft = null; rerender();
     });
     const cancel = document.getElementById("cancel-edit");
-    if (cancel) cancel.addEventListener("click", () => { ui.edit = null; renderEnergy(kind); });
+    if (cancel) cancel.addEventListener("click", () => { ui.edit = null; ui.draft = null; renderEnergy(kind); });
     el.querySelectorAll("[data-edit]").forEach((b) => b.addEventListener("click", () => {
       ui.edit = { kind, i: +b.dataset.edit }; renderEnergy(kind);
       document.getElementById(`${kind}-form`).scrollIntoView({ behavior: "smooth", block: "center" });
     }));
     bindDelete(el, (i) => { d.angebote.splice(i, 1); ui.edit = null; rerender(); });
+    bindScan(kind);
   }
 
   // Löschen mit zweitem Klick bestätigen
@@ -554,7 +565,8 @@ footer a { color: var(--accent); }
     const cheapest = rows.slice().sort((a, b) => a.eff - b.eff)[0];
 
     const edit = ui.edit && ui.edit.kind === "vers" ? kat.angebote[ui.edit.i] : null;
-    const f = edit || { anbieter: "", tarif: "", beitrag: "", zahlweise: 1, sb: 0, features: {} };
+    const draft = !edit && ui.draft && ui.draft.kind === "vers" ? ui.draft.data : null;
+    const f = edit || draft || { anbieter: "", tarif: "", beitrag: "", zahlweise: 1, sb: 0, features: {} };
 
     const el = document.getElementById("panel-versicherung");
     el.style.setProperty("--kind", "var(--vers)");
@@ -588,6 +600,7 @@ footer a { color: var(--accent); }
 
       <div class="grid">
         <div class="col">
+          ${scanCard("vers")}
           <div class="card">
             <h2>Was ist dir wichtig?</h2>
             <label class="f">Preis ↔ Leistung: <span class="mono">${Math.round(wP * 100)} % Preis</span>
@@ -612,7 +625,7 @@ footer a { color: var(--accent); }
           </div>
 
           <form class="card" id="vers-form" autocomplete="off">
-            <div class="card-head"><h2>${edit ? "Angebot bearbeiten" : "Angebot hinzufügen"}</h2>${edit ? '<button type="button" class="btn small" id="cancel-edit">Abbrechen</button>' : ""}</div>
+            <div class="card-head"><h2>${edit ? "Angebot bearbeiten" : draft ? "Erkanntes Angebot prüfen" : "Angebot hinzufügen"}</h2>${edit || draft ? '<button type="button" class="btn small" id="cancel-edit">Abbrechen</button>' : ""}</div>
             <div class="fields">
               <label class="f">Versicherer<input type="text" name="anbieter" id="vers-f-anbieter" required value="${esc(f.anbieter)}"></label>
               <label class="f">Tarif<input type="text" name="tarif" id="vers-f-tarif" value="${esc(f.tarif)}"></label>
@@ -691,10 +704,10 @@ footer a { color: var(--accent); }
       kat.features.forEach((ft) => { if (fd.get("feat-" + ft.id) === "on") a.features[ft.id] = true; });
       if (edit) { kat.angebote[ui.edit.i] = a; ui.edit = null; toast("Angebot gespeichert"); }
       else { kat.angebote.push(a); toast("Angebot hinzugefügt"); }
-      rerender();
+      ui.draft = null; rerender();
     });
     const cancel = document.getElementById("cancel-edit");
-    if (cancel) cancel.addEventListener("click", () => { ui.edit = null; renderVers(); });
+    if (cancel) cancel.addEventListener("click", () => { ui.edit = null; ui.draft = null; renderVers(); });
     el.querySelectorAll("[data-edit]").forEach((b) => b.addEventListener("click", () => {
       ui.edit = { kind: "vers", i: +b.dataset.edit }; renderVers();
       document.getElementById("vers-form").scrollIntoView({ behavior: "smooth", block: "center" });
@@ -702,12 +715,187 @@ footer a { color: var(--accent); }
     const katDel = document.getElementById("kat-del");
     bindDelete(el.querySelector(".tbl-wrap"), (i) => { kat.angebote.splice(i, 1); ui.edit = null; rerender(); });
     if (katDel) bindDelete(katDel.parentElement, () => { delete v.kategorien[v.kategorie]; v.kategorie = Object.keys(v.kategorien)[0]; rerender(); });
+    bindScan("vers");
+  }
+
+  // ---------- Foto einlesen (Claude liest Dokumente aus) ----------
+  let sampler = null, imgLimits = null;
+  const scan = { kind: null, busy: false, status: "", error: "", result: null, ctl: null };
+  const ERR = {
+    not_granted: "Du hast der Seite nicht erlaubt, Claude zu nutzen. Trage die Werte bitte von Hand ein.",
+    sampling_disabled: "Claude ist für dein Konto hier nicht verfügbar.",
+    rate_limited: "Gerade zu viele Anfragen. Versuch es in ein paar Minuten noch einmal.",
+    image_rejected: "Das Bild konnte nicht gelesen werden. Nimm ein JPEG- oder PNG-Foto, höchstens " + "20 MB.",
+    refused: "Claude hat dieses Bild abgelehnt. Versuch ein anderes Foto.",
+    invalid_json: "Die Antwort war unvollständig. Bitte noch einmal versuchen.",
+    session_expired: "Bitte melde dich neu an und versuche es noch einmal.",
+  };
+  const rerenderTab = () => show(ui.tab);
+
+  if (window.claude && typeof window.claude.use === "function") {
+    window.claude.use("sample").then(async (s) => {
+      if (!s) return;
+      const lim = await s.limits().catch(() => null);
+      if (!lim || !lim.images) return;
+      sampler = s; imgLimits = lim.images; rerenderTab();
+    }).catch(() => {});
+  }
+
+  const fmtOrDash = (v, fn) => (v === null || v === undefined || v === "" ? "–" : fn ? fn(v) : esc(v));
+
+  function scanCard(kind) {
+    if (!sampler) return "";
+    const mine = scan.kind === kind;
+    const r = mine ? scan.result : null;
+    const was = kind === "vers" ? "Police, Beitragsrechnung oder ein Angebot" : "Jahresabrechnung, Preisblatt oder ein Angebot";
+    let review = "";
+    if (r && kind !== "vers") {
+      review = `<dl>
+        <dt>Dokument</dt><dd>${r.dokument === "angebot" ? "Angebot" : "Rechnung / Vertrag"}</dd>
+        <dt>Anbieter</dt><dd>${fmtOrDash(r.anbieter)}</dd>
+        <dt>Tarif</dt><dd>${fmtOrDash(r.tarif)}</dd>
+        <dt>Grundpreis</dt><dd>${fmtOrDash(r.grundpreis_eur_monat, (x) => EUR2.format(x) + " / Monat")}</dd>
+        <dt>Arbeitspreis</dt><dd>${fmtOrDash(r.arbeitspreis_ct_kwh, (x) => NUM.format(x) + " ct/kWh")}</dd>
+        <dt>Verbrauch</dt><dd>${fmtOrDash(r.verbrauch_kwh, (x) => NUM.format(x) + " kWh")}</dd>
+        <dt>Bonus</dt><dd>${fmtOrDash(r.bonus_eur, (x) => EUR0.format(x))}</dd>
+        <dt>Laufzeit / Garantie</dt><dd>${fmtOrDash(r.laufzeit_monate)} / ${fmtOrDash(r.preisgarantie_monate)} Mon.</dd>
+      </dl>
+      ${r.hinweis ? `<p class="hint">${esc(r.hinweis)}</p>` : ""}
+      <div class="row">
+        <button class="btn ${r.dokument !== "angebot" ? "primary" : ""}" id="scan-aktuell">Als aktuellen Tarif übernehmen</button>
+        <button class="btn ${r.dokument === "angebot" ? "primary" : ""}" id="scan-angebot">Als Angebot prüfen</button>
+        <button class="btn small" id="scan-clear">Verwerfen</button>
+      </div>`;
+    } else if (r) {
+      const kat = state.vers.kategorien[r.kategorie];
+      const feats = kat ? kat.features.filter((ft) => (r.leistungen || []).includes(ft.id)).map((ft) => ft.name) : [];
+      review = `<dl>
+        <dt>Art</dt><dd>${kat ? esc(kat.name) : "nicht erkannt (aktuelle Art wird genutzt)"}</dd>
+        <dt>Versicherer</dt><dd>${fmtOrDash(r.anbieter)}</dd>
+        <dt>Tarif</dt><dd>${fmtOrDash(r.tarif)}</dd>
+        <dt>Beitrag</dt><dd>${fmtOrDash(r.beitrag, (x) => EUR2.format(x) + " " + (ZAHLWEISE[r.zahlweise] || ""))}</dd>
+        <dt>Selbstbeteiligung</dt><dd>${fmtOrDash(r.sb_eur, (x) => EUR0.format(x))}</dd>
+        <dt>Leistungen</dt><dd>${feats.length ? feats.map(esc).join(", ") : "keine der Liste erkannt"}</dd>
+      </dl>
+      ${r.hinweis ? `<p class="hint">${esc(r.hinweis)}</p>` : ""}
+      <div class="row">
+        <button class="btn primary" id="scan-angebot">Ins Formular übernehmen</button>
+        <button class="btn small" id="scan-clear">Verwerfen</button>
+      </div>`;
+    }
+    return `<div class="card scan">
+      <div class="card-head"><h2>Foto einlesen</h2>${mine && scan.busy ? '<button class="btn small" id="scan-stop">Abbrechen</button>' : ""}</div>
+      ${r ? "" : `<p class="hint">Fotografiere deine ${was}. Claude liest die Tarifdaten aus, du prüfst sie vor dem Übernehmen. Bis zu ${imgLimits.maxCount} Seiten auf einmal. Namen, Adressen und Kundennummern werden nicht übernommen.</p>
+      <label class="btn primary scan-btn" ${mine && scan.busy ? 'aria-disabled="true"' : ""}>${mine && scan.busy ? "Wird gelesen …" : "Foto aufnehmen oder auswählen"}
+        <input class="sr-only" type="file" id="scan-file" accept="${esc(imgLimits.mediaTypes.join(","))}" multiple ${mine && scan.busy ? "disabled" : ""}>
+      </label>`}
+      ${mine && scan.status ? `<p class="hint">${esc(scan.status)}</p>` : ""}
+      ${mine && scan.error ? `<p class="err">${esc(scan.error)}</p>` : ""}
+      ${review}
+    </div>`;
+  }
+
+  function promptFor(kind) {
+    if (kind === "vers") {
+      const cats = {};
+      Object.entries(state.vers.kategorien).forEach(([k, c]) => { cats[k] = { name: c.name, leistungen: c.features.map((f) => ({ id: f.id, name: f.name })) }; });
+      return `Die Bilder zeigen Seiten eines deutschen Versicherungsdokuments (Police, Versicherungsschein, Beitragsrechnung oder Angebot). Lies die Tarifdaten aus.
+
+Bekannte Versicherungsarten mit ihren Leistungen (JSON):
+${JSON.stringify(cats)}
+
+Regeln:
+- "kategorie": der passende Schlüssel aus der Liste oben, sonst null.
+- "beitrag": Betrag je Zahlungsperiode in Euro, brutto inkl. Versicherungsteuer. "zahlweise": 1 = jährlich, 2 = halbjährlich, 4 = vierteljährlich, 12 = monatlich.
+- "sb_eur": Selbstbeteiligung pro Schadenfall in Euro (0 wenn ausdrücklich keine), sonst null.
+- "leistungen": nur IDs aus der gewählten Kategorie, deren Leistung im Dokument klar als enthalten erkennbar ist.
+- Unbekanntes = null. Gib keine Namen, Adressen, Kennzeichen oder Vertragsnummern aus.
+- "hinweis": ein kurzer deutscher Satz zu Unsicherheiten, sonst null.
+
+Antworte nur mit JSON in dieser Form:
+{"kategorie":"haftpflicht","anbieter":"…","tarif":"…","beitrag":6.5,"zahlweise":12,"sb_eur":0,"leistungen":["f1"],"hinweis":null}`;
+    }
+    const art = kind === "strom" ? "Strom" : "Gas";
+    return `Die Bilder zeigen Seiten eines deutschen ${art}-Dokuments (Jahresabrechnung, Preisblatt, Vertragsbestätigung, Preisanpassung oder Angebot). Lies die Tarifdaten aus.
+
+Regeln:
+- Alle Preise brutto inkl. MwSt.
+- "grundpreis_eur_monat": Grundpreis in Euro pro MONAT. Steht er pro Jahr, durch 12 teilen; pro Tag, mal 365 und durch 12.
+- "arbeitspreis_ct_kwh": Arbeitspreis in Cent pro kWh (bei €/kWh mal 100).
+- Gibt es mehrere Preisstände (z. B. vor/nach Preisänderung), nimm den neuesten.
+- "verbrauch_kwh": Jahresverbrauch in kWh${kind === "gas" ? " (bei Gas die kWh-Angabe, nicht m³)" : ""}, sonst null.
+- "dokument": "angebot" bei einem Angebot für einen neuen Vertrag, sonst "rechnung".
+- "oeko": true bei Ökostrom / Biogas / klimaneutral, sonst false; unklar null.
+- Unbekanntes = null. Gib keine Namen, Adressen, Zähler- oder Kundennummern aus.
+- "hinweis": ein kurzer deutscher Satz zu Unsicherheiten, sonst null.
+
+Antworte nur mit JSON in dieser Form:
+{"dokument":"rechnung","anbieter":"…","tarif":"…","grundpreis_eur_monat":12.5,"arbeitspreis_ct_kwh":32.1,"bonus_eur":null,"laufzeit_monate":null,"preisgarantie_monate":null,"oeko":false,"verbrauch_kwh":2500,"hinweis":null}`;
+  }
+
+  const n0 = (x) => (typeof x === "number" && Number.isFinite(x) ? Math.round(x * 100) / 100 : null);
+
+  async function runScan(kind, files) {
+    if (!files || !files.length) return;
+    const list = Array.from(files).slice(0, imgLimits.maxCount);
+    scan.ctl && scan.ctl.abort();
+    const ctl = new AbortController();
+    Object.assign(scan, { kind, busy: true, status: `${list.length} Foto${list.length > 1 ? "s" : ""} wird gelesen. Das dauert meist 10–40 Sekunden …`, error: "", result: null, ctl });
+    rerenderTab();
+    try {
+      const r = await sampler.json(promptFor(kind), { images: list, signal: ctl.signal });
+      if (!r || typeof r !== "object") throw { code: "invalid_json" };
+      ["grundpreis_eur_monat", "arbeitspreis_ct_kwh", "bonus_eur", "laufzeit_monate", "preisgarantie_monate", "verbrauch_kwh", "beitrag", "sb_eur"].forEach((k) => { if (k in r) r[k] = n0(r[k]); });
+      if (kind === "vers" && ![1, 2, 4, 12].includes(r.zahlweise)) r.zahlweise = 1;
+      Object.assign(scan, { busy: false, status: "Bitte prüfe die erkannten Werte:", result: r });
+    } catch (e) {
+      Object.assign(scan, { busy: false, status: "", error: e && e.code === "cancelled" ? "" : (ERR[e && e.code] || "Das Lesen hat nicht geklappt. Bitte versuch es noch einmal.") });
+    }
+    rerenderTab();
+  }
+
+  function bindScan(kind) {
+    if (!sampler) return;
+    const file = document.getElementById("scan-file");
+    if (file) file.addEventListener("change", () => runScan(kind, file.files));
+    const stop = document.getElementById("scan-stop");
+    if (stop) stop.addEventListener("click", () => scan.ctl && scan.ctl.abort());
+    const clear = document.getElementById("scan-clear");
+    if (clear) clear.addEventListener("click", () => { Object.assign(scan, { result: null, status: "", error: "" }); rerenderTab(); });
+    const r = scan.kind === kind ? scan.result : null;
+    if (!r) return;
+    const done = () => Object.assign(scan, { result: null, status: "", error: "" });
+    const akt = document.getElementById("scan-aktuell");
+    if (akt) akt.addEventListener("click", () => {
+      const d = state[kind];
+      if (r.grundpreis_eur_monat !== null) d.aktuell.gp = r.grundpreis_eur_monat;
+      if (r.arbeitspreis_ct_kwh !== null) d.aktuell.ap = r.arbeitspreis_ct_kwh;
+      if (r.verbrauch_kwh) d.verbrauch = Math.round(r.verbrauch_kwh);
+      done(); save(); rerenderTab(); toast("Aktueller Tarif übernommen");
+    });
+    const ang = document.getElementById("scan-angebot");
+    if (ang) ang.addEventListener("click", () => {
+      ui.edit = null;
+      if (kind === "vers") {
+        if (r.kategorie && state.vers.kategorien[r.kategorie]) state.vers.kategorie = r.kategorie;
+        const feats = {};
+        (r.leistungen || []).forEach((id) => { feats[id] = true; });
+        ui.draft = { kind, data: { anbieter: r.anbieter || "", tarif: r.tarif || "", beitrag: r.beitrag ?? "", zahlweise: r.zahlweise || 1, sb: r.sb_eur ?? 0, features: feats } };
+      } else {
+        ui.draft = { kind, data: { anbieter: r.anbieter || "", tarif: r.tarif || "", gp: r.grundpreis_eur_monat ?? "", ap: r.arbeitspreis_ct_kwh ?? "", bonus: r.bonus_eur ?? "", laufzeit: r.laufzeit_monate ?? 12, garantie: r.preisgarantie_monate ?? 12, oeko: !!r.oeko } };
+        if (r.verbrauch_kwh && r.dokument !== "angebot") state[kind].verbrauch = Math.round(r.verbrauch_kwh);
+      }
+      done(); save(); rerenderTab();
+      const form = document.getElementById(kind === "vers" ? "vers-form" : kind + "-form");
+      if (form) form.scrollIntoView({ behavior: "smooth", block: "center" });
+      toast("Werte ins Formular übernommen. Bitte prüfen und speichern.");
+    });
   }
 
   // ---------- Reiter ----------
   function show(tab) {
     if (!["strom", "gas", "versicherung"].includes(tab)) tab = "strom";
-    if (ui.tab !== tab) ui.edit = null;
+    if (ui.tab !== tab) { ui.edit = null; ui.draft = null; }
     ui.tab = tab;
     document.querySelectorAll(".tab").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === tab)));
     document.getElementById("panel-energy").hidden = tab === "versicherung";
