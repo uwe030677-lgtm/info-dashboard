@@ -2,20 +2,20 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-cPZRa++rA9oWYte49iAsxYHmsN9MMclhIUdtlGedKNY='; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; font-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-De76heykNHUgYWiQwI9u0QeNEzAsF+q3Eu0bB4K4nyQ='; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; font-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; form-action 'none'; base-uri 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tarif-Kompass</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
-/* Layout: Kopfzeile mit Reitern und Fristen-Hinweis; je Reiter links Eingaben (Foto, Portale, Formulare), rechts Ergebnis (Kennzahlen, Vergleichbarkeit, Tabelle). */
+/* Layout: Kopfzeile mit Reitern; Startseite „Übersicht“; je Bereich eine Empfehlung oben, links Schritt 1 (aktueller Tarif) und 2 (Angebote sammeln), rechts Schritt 3 (Vergleich als Karten) und Hinweise. */
 :root {
-  --bg: #f5f6f3;
+  --bg: #f4f5f2;
   --surface: #ffffff;
   --sunken: #eceee9;
   --fg: #1c211d;
   --muted: #5d665f;
-  --line: #d9ddd6;
+  --line: #dadfd7;
   --accent: #1f6b52;
   --accent-fg: #ffffff;
   --accent-soft: #dcefe6;
@@ -36,7 +36,7 @@
   --font-display: ui-rounded, "SF Pro Rounded", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
   --font-body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-data: ui-monospace, "SFMono-Regular", "Cascadia Mono", Consolas, Menlo, monospace;
-  --radius: 10px;
+  --radius: 12px;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -57,96 +57,146 @@
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
-.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 24px 48px; }
-header.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 24px; margin-bottom: 16px; }
-h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.7rem, 4vw, 2.3rem); margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 48px; }
+header.top { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.6rem, 4vw, 2.1rem); margin: 0; letter-spacing: -0.01em; }
 h1 small { display: block; font-family: var(--font-body); font-weight: 400; font-size: 0.9rem; color: var(--muted); letter-spacing: 0; margin-top: 2px; }
-h2 { font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; margin: 0; text-wrap: balance; }
+h2 { font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; margin: 0; text-wrap: balance; }
 h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0; font-weight: 600; }
-.tabs { display: flex; gap: 4px; background: var(--sunken); padding: 4px; border-radius: 18px; flex-wrap: wrap; }
-.tab { border: 0; background: transparent; color: var(--fg); font: 600 0.9rem var(--font-body); padding: 8px 14px; border-radius: 999px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-.tab .dot { width: 9px; height: 9px; border-radius: 50%; }
+
+/* Reiter: eine Zeile, auf dem Handy seitlich wischbar */
+.tabs { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--line); margin: 0 calc(-1 * max(16px, env(safe-area-inset-left, 0px))); padding: 0 max(16px, env(safe-area-inset-left, 0px)); }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { flex: none; border: 0; border-bottom: 3px solid transparent; background: transparent; color: var(--muted); font: 600 0.92rem var(--font-body); padding: 10px 12px 9px; cursor: pointer; display: flex; align-items: center; gap: 7px; white-space: nowrap; }
+.tab:hover { color: var(--fg); }
+.tab .dot { width: 8px; height: 8px; border-radius: 50%; }
 .tab .count { font: 600 0.7rem var(--font-data); background: var(--bad); color: var(--surface); border-radius: 999px; padding: 0 6px; }
-.tab[aria-selected="true"] { background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
-.tab:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.notice { font-size: 0.85rem; color: var(--warn); background: var(--warn-soft); border-radius: var(--radius); padding: 8px 12px; margin: 0 0 12px; }
-.due { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; font-size: 0.9rem; color: var(--bad); background: var(--bad-soft); border-radius: var(--radius); padding: 10px 12px; margin: 0 0 16px; font-weight: 500; }
-.grid { display: grid; grid-template-columns: minmax(0, 360px) minmax(0, 1fr); gap: 20px; align-items: start; }
-@media (max-width: 920px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.tab[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); }
+.tab.end { margin-left: auto; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.banner { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; font-size: 0.88rem; border-radius: var(--radius); padding: 10px 14px; margin: 0 0 14px; }
+.banner.note { color: var(--warn); background: var(--warn-soft); }
+.banner.due { color: var(--bad); background: var(--bad-soft); font-weight: 500; }
+
+.grid { display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr); } }
 .col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.panel { display: flex; flex-direction: column; gap: 16px; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .card-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.step { display: flex; align-items: center; gap: 10px; }
+.step-num { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--kind, var(--accent)); color: var(--surface); font: 700 0.85rem var(--font-body); flex: none; }
+
+/* Empfehlung */
+.reco { background: var(--surface); border: 1px solid var(--line); border-left: 5px solid var(--kind, var(--accent)); border-radius: var(--radius); padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+.reco-text { font-size: 1.05rem; line-height: 1.45; max-width: 70ch; }
+.reco-text strong { font-family: var(--font-display); }
+.reco-stats { display: flex; flex-wrap: wrap; gap: 10px 28px; }
+.reco-stats > div { display: flex; flex-direction: column; min-width: 0; }
+.reco-stats .lbl { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); font-weight: 600; }
+.reco-stats .val { font-family: var(--font-data); font-size: 1.25rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.jump { border: 0; background: none; padding: 0; color: var(--warn); font: inherit; font-size: 0.95rem; text-decoration: underline; cursor: pointer; }
+
+/* Formulare */
 .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .fields .full { grid-column: 1 / -1; }
 label.f { display: flex; flex-direction: column; gap: 4px; font-size: 0.8rem; color: var(--muted); font-weight: 500; min-width: 0; }
 label.f.inline { flex-direction: row; align-items: center; gap: 8px; }
 label.f.inline select { width: auto; }
-input[type="number"], input[type="text"], input[type="date"], select, textarea { font: 0.95rem var(--font-body); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 7px; padding: 7px 9px; width: 100%; min-width: 0; }
+input[type="number"], input[type="text"], input[type="date"], input[type="password"], select, textarea { font: 0.95rem var(--font-body); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%; min-width: 0; }
 input[type="number"], input[type="date"] { font-family: var(--font-data); font-size: 0.9rem; }
 textarea { font-family: var(--font-data); font-size: 0.8rem; min-height: 90px; resize: vertical; }
 .check { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: var(--fg); cursor: pointer; }
 .check input { width: 16px; height: 16px; accent-color: var(--accent); flex: none; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip { border: 1px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 999px; padding: 4px 10px; font: 500 0.8rem var(--font-body); cursor: pointer; text-decoration: none; }
+.chip { border: 1px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 999px; padding: 5px 11px; font: 500 0.82rem var(--font-body); cursor: pointer; text-decoration: none; }
 .chip:hover { border-color: var(--accent); }
 .chip.on { background: var(--accent-soft); border-color: var(--accent); }
 a.chip::after { content: " ↗"; color: var(--muted); }
-.btn { border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 7px; padding: 8px 14px; font: 600 0.88rem var(--font-body); cursor: pointer; text-decoration: none; }
+.btn { border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 8px; padding: 9px 14px; font: 600 0.88rem var(--font-body); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
 .btn:hover { border-color: var(--accent); }
 .btn:disabled { opacity: .5; cursor: default; }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
-.btn.small { padding: 4px 9px; font-size: 0.78rem; }
+.btn.small { padding: 5px 10px; font-size: 0.8rem; }
 .btn.danger { color: var(--bad); }
 .btn.danger.armed { background: var(--bad); color: var(--surface); border-color: var(--bad); }
 .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-.hint { font-size: 0.8rem; color: var(--muted); margin: 0; }
-.mono { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
-.summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-@media (max-width: 640px) { .summary { grid-template-columns: minmax(0, 1fr); } }
-.stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.stat.hero { border-color: var(--kind); box-shadow: inset 4px 0 0 var(--kind); }
-.stat .v { font-family: var(--font-data); font-size: 1.45rem; font-weight: 600; font-variant-numeric: tabular-nums; }
-.stat .s { font-size: 0.82rem; color: var(--muted); overflow-wrap: anywhere; }
+.hint { font-size: 0.82rem; color: var(--muted); margin: 0; }
+.hint.small { font-size: 0.76rem; }
+.err { color: var(--bad); font-size: 0.85rem; margin: 0; }
 .pos { color: var(--good); } .neg { color: var(--bad); }
-.bars { display: flex; flex-direction: column; gap: 8px; }
-.bar-row { display: grid; grid-template-columns: minmax(0, 190px) minmax(0, 1fr) auto; gap: 10px; align-items: center; font-size: 0.85rem; }
-@media (max-width: 560px) { .bar-row { grid-template-columns: minmax(0, 1fr) auto; } .bar-row .track { grid-column: 1 / -1; order: 3; } }
-.bar-row .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.track { position: relative; height: 14px; background: var(--sunken); border-radius: 4px; }
-.fill { position: absolute; inset: 0 auto 0 0; border-radius: 4px; background: var(--kind); }
-.fill.ghost { background: transparent; border: 1.5px dashed var(--kind); opacity: .55; }
-.fill.current { background: var(--muted); opacity: .55; }
-.bar-row .val { font-family: var(--font-data); font-variant-numeric: tabular-nums; text-align: right; min-width: 82px; }
-.tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
-table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
-th, td { padding: 9px 10px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
-th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; background: var(--sunken); }
-th.l, td.l { text-align: left; }
-td { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
-td.l { font-family: var(--font-body); white-space: normal; min-width: 180px; }
-tr.best td { background: var(--accent-soft); }
-tr.due-row td { background: var(--bad-soft); }
-tr:last-child td { border-bottom: 0; }
-.rank { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--sunken); font-weight: 600; font-size: 0.78rem; }
-tr.best .rank { background: var(--kind); color: var(--surface); }
-.tname { font-weight: 600; }
-.tsub { color: var(--muted); font-size: 0.8rem; }
-.pills { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
-.pill { font: 600 0.68rem var(--font-body); padding: 2px 7px; border-radius: 999px; letter-spacing: 0.02em; white-space: nowrap; }
+.mono { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+details.more > summary { cursor: pointer; font-size: 0.86rem; color: var(--accent); font-weight: 600; list-style: none; }
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::before { content: "▸ "; }
+details.more[open] > summary::before { content: "▾ "; }
+
+/* Große Auswahlknöpfe in Schritt 2 */
+.bigbtns { display: grid; gap: 8px; }
+.bigbtn { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; text-align: left; padding: 11px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--fg); cursor: pointer; font: inherit; width: 100%; }
+.bigbtn:hover, .bigbtn:focus-within { border-color: var(--kind, var(--accent)); }
+.bigbtn[aria-expanded="true"] { border-color: var(--kind, var(--accent)); background: var(--surface); }
+.bigbtn.disabled { opacity: .5; pointer-events: none; }
+.bb-t { font-weight: 600; font-size: 0.92rem; }
+.bb-s { font-size: 0.8rem; color: var(--muted); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.scan-status { padding: 10px 12px; background: var(--sunken); border-radius: 8px; }
+.spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--line); border-top-color: var(--kind, var(--accent)); flex: none; }
+@media (prefers-reduced-motion: no-preference) { .spinner { animation: spin 0.9s linear infinite; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+.scan-review { border: 1px dashed var(--kind, var(--accent)); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.scan-review dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; margin: 0; font-size: 0.86rem; }
+.scan-review dt { color: var(--muted); }
+.scan-review dd { margin: 0; font-family: var(--font-data); overflow-wrap: anywhere; }
+.picklist { display: flex; flex-direction: column; gap: 6px; max-height: 360px; overflow-y: auto; }
+.picklist label { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; align-items: center; font-size: 0.84rem; padding: 7px 9px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
+.picklist .p { font-family: var(--font-data); font-size: 0.8rem; text-align: right; }
+
+/* Angebotskarten */
+.ref { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; padding: 10px 14px; border-radius: 10px; background: var(--sunken); font-size: 0.88rem; }
+.ref .track { grid-column: 1 / -1; }
+.offers { display: flex; flex-direction: column; gap: 10px; }
+.offer { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 6px 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); align-items: start; }
+.offer.best { border-color: var(--kind); box-shadow: inset 4px 0 0 var(--kind); }
+.offer.due { border-color: var(--bad); box-shadow: inset 4px 0 0 var(--bad); }
+.offer.nr { grid-template-columns: minmax(0, 1fr) auto; }
+.rank { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--sunken); font-weight: 700; font-size: 0.8rem; }
+.offer.best .rank { background: var(--kind); color: var(--surface); }
+.o-main { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.o-title { font-weight: 650; font-size: 0.98rem; overflow-wrap: anywhere; }
+.o-tarif { font-weight: 400; color: var(--muted); }
+.o-price { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+.o-big { font-family: var(--font-data); font-size: 1.15rem; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.delta { font-size: 0.8rem; font-weight: 600; color: var(--muted); }
+.delta.pos { color: var(--good); } .delta.neg { color: var(--bad); }
+.offer > details { grid-column: 1 / -1; }
+.offer.nr > details { grid-column: 1 / -1; }
+.facts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px 16px; margin: 10px 0; font-size: 0.84rem; }
+.facts-grid dt { color: var(--muted); font-size: 0.75rem; }
+.facts-grid dd { margin: 0; font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+.actions { display: flex; gap: 6px; flex-wrap: wrap; }
+@media (max-width: 520px) {
+  .offer { grid-template-columns: 28px minmax(0, 1fr); }
+  .offer .o-price { grid-column: 2; align-items: flex-start; text-align: left; }
+  .offer.nr { grid-template-columns: minmax(0, 1fr); }
+  .offer.nr .o-price { grid-column: 1; }
+}
+.pills { display: flex; flex-wrap: wrap; gap: 4px; }
+.pill { font: 600 0.7rem var(--font-body); padding: 2px 8px; border-radius: 999px; letter-spacing: 0.02em; white-space: nowrap; }
 .pill.good { background: var(--good-soft); color: var(--good); }
 .pill.warn { background: var(--warn-soft); color: var(--warn); }
 .pill.bad { background: var(--bad-soft); color: var(--bad); }
 .pill.info { background: var(--info-soft); color: var(--info); }
-.actions { display: flex; gap: 4px; justify-content: flex-end; flex-wrap: wrap; }
-.score { display: inline-flex; align-items: center; gap: 6px; }
-.score .mini { width: 52px; height: 6px; background: var(--sunken); border-radius: 3px; position: relative; overflow: hidden; }
-.score .mini i { position: absolute; inset: 0 auto 0 0; background: var(--kind); }
-.feat-list { display: flex; flex-direction: column; gap: 6px; }
-.feat { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; align-items: center; font-size: 0.86rem; }
-.feat select { width: auto; padding: 3px 6px; font-size: 0.8rem; }
-.yes { color: var(--good); font-weight: 600; } .no { color: var(--bad); }
-.empty { padding: 24px; text-align: center; color: var(--muted); font-size: 0.9rem; }
-.panel { display: flex; flex-direction: column; gap: 16px; }
+.pill.muted { background: var(--sunken); color: var(--muted); }
+.track { position: relative; height: 8px; background: var(--sunken); border-radius: 4px; margin-top: 4px; }
+.fill { position: absolute; inset: 0 auto 0 0; border-radius: 4px; background: var(--kind); }
+.fill.ghost { background: transparent; border: 1.5px dashed var(--kind); opacity: .6; }
+.fill.current { background: var(--muted); opacity: .6; }
+@media (prefers-reduced-motion: no-preference) { .fill { transition: width .35s ease; } }
+.empty { padding: 22px; text-align: center; color: var(--muted); font-size: 0.9rem; border: 1px dashed var(--line); border-radius: 10px; }
+
+/* Hinweise */
 .findings { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .findings li { display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 10px; font-size: 0.88rem; align-items: start; }
 .tag { font: 600 0.66rem var(--font-body); padding: 2px 7px; border-radius: 999px; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.04em; text-align: center; }
@@ -154,40 +204,41 @@ tr.best .rank { background: var(--kind); color: var(--surface); }
 .tag.warn { background: var(--warn-soft); color: var(--warn); }
 .tag.info { background: var(--info-soft); color: var(--info); }
 .analysis { white-space: pre-wrap; font-size: 0.88rem; background: var(--sunken); border-radius: 8px; padding: 12px; margin: 0; }
-.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.scan { border-style: dashed; border-color: var(--kind); }
-.scan-btn { display: inline-flex; justify-content: center; align-items: center; gap: 8px; text-align: center; }
-.scan-btn:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
-.scan dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; margin: 0; font-size: 0.86rem; }
-.scan dt { color: var(--muted); }
-.scan dd { margin: 0; font-family: var(--font-data); overflow-wrap: anywhere; }
-.err { color: var(--bad); font-size: 0.85rem; margin: 0; }
-.picklist { display: flex; flex-direction: column; gap: 6px; max-height: 360px; overflow-y: auto; }
-.picklist label { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; align-items: center; font-size: 0.84rem; padding: 6px 8px; border: 1px solid var(--line); border-radius: 7px; cursor: pointer; }
-.picklist .p { font-family: var(--font-data); font-size: 0.8rem; text-align: right; }
-.cal { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
-.legal { font-size: 0.82rem; color: var(--muted); margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
-details.io summary { cursor: pointer; font-size: 0.85rem; color: var(--muted); }
-footer { margin-top: 28px; font-size: 0.8rem; color: var(--muted); max-width: 70ch; }
-footer a { color: var(--accent); }
+.feat-list { display: flex; flex-direction: column; gap: 6px; }
+.feat { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; align-items: center; font-size: 0.86rem; }
+.feat select { width: auto; padding: 4px 6px; font-size: 0.8rem; }
+
+/* Übersicht */
+.ov-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+.ov { border-top: 4px solid var(--c); }
+.ov .ov-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ov dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; margin: 0; font-size: 0.86rem; }
+.ov dt { color: var(--muted); }
+.ov dd { margin: 0; text-align: right; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.deadlines { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.deadlines li { display: flex; justify-content: space-between; gap: 10px; font-size: 0.88rem; align-items: center; }
+.howto { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 0.9rem; }
+.facts { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 0.84rem; color: var(--muted); }
+.cal { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 .lockcard { max-width: 420px; margin: 24px auto; }
-.lockcard input[type="password"], #sec-card input[type="password"], #io-pw { font: 0.95rem var(--font-body); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 7px; padding: 7px 9px; width: 100%; }
-.facts { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 0.82rem; color: var(--muted); }
-.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 8px 16px; border-radius: 999px; font-size: 0.85rem; z-index: 20; max-width: calc(100% - 32px); text-align: center; }
-@media (prefers-reduced-motion: no-preference) { .fill { transition: width .35s ease; } }
+footer { margin-top: 28px; font-size: 0.8rem; color: var(--muted); max-width: 75ch; }
+footer a { color: var(--accent); }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 999px; font-size: 0.86rem; z-index: 20; max-width: calc(100% - 32px); text-align: center; }
 </style>
 </head>
 <body>
 
 <div class="wrap">
   <header class="top">
-    <h1>Tarif-Kompass<small>Strom, Gas, Internet und Versicherungen nüchtern nachrechnen</small></h1>
+    <h1>Tarif-Kompass<small>Strom, Gas, Internet und Versicherungen vergleichen, Fristen im Blick behalten</small></h1>
     <nav class="tabs" id="tabs-nav" role="tablist" aria-label="Bereich">
+      <button class="tab" role="tab" id="tab-uebersicht" data-tab="uebersicht">Übersicht</button>
       <button class="tab" role="tab" id="tab-strom" data-tab="strom"><span class="dot" style="background:var(--strom)"></span>Strom</button>
       <button class="tab" role="tab" id="tab-gas" data-tab="gas"><span class="dot" style="background:var(--gas)"></span>Gas</button>
-      <button class="tab" role="tab" id="tab-internet" data-tab="internet"><span class="dot" style="background:var(--tk)"></span>Internet &amp; Telefon</button>
+      <button class="tab" role="tab" id="tab-internet" data-tab="internet"><span class="dot" style="background:var(--tk)"></span>Internet &amp; Handy</button>
       <button class="tab" role="tab" id="tab-versicherung" data-tab="versicherung"><span class="dot" style="background:var(--vers)"></span>Versicherungen</button>
       <button class="tab" role="tab" id="tab-fristen" data-tab="fristen"><span class="dot" style="background:var(--frist)"></span>Fristen<span class="count" id="due-count" hidden></span></button>
+      <button class="tab end" role="tab" id="tab-sicherheit" data-tab="sicherheit">Sicherheit &amp; Daten</button>
     </nav>
   </header>
 
@@ -199,39 +250,54 @@ footer a { color: var(--accent); }
       <button class="btn primary" type="submit" id="lock-btn">Entsperren</button>
     </form>
     <p class="err" id="lock-err" hidden></p>
-    <details class="io">
+    <details class="more">
       <summary>Passwort vergessen?</summary>
       <p class="hint" style="margin-top:6px">Ohne Passwort lassen sich die Daten nicht wiederherstellen. Es gibt keine Hintertür. Du kannst nur alles löschen und neu beginnen.</p>
       <div class="row" style="margin-top:8px"><button class="btn small danger" id="lock-wipe">Alle Daten löschen</button></div>
     </details>
   </section>
 
-  <p class="notice" id="notice">Alles, was mit „Beispiel“ beginnt, sind erfundene Werte zum Ausprobieren, keine echten Tarife. Trage deine eigenen Daten ein oder lies sie per Foto ein.</p>
-  <p class="due" id="due-banner" hidden></p>
+  <div class="banner note" id="notice" hidden><span>Du siehst Beispieldaten. Alles mit „Beispiel“ ist erfunden.</span><button class="btn small" id="btn-examples-top">Beispiele entfernen</button></div>
+  <div class="banner due" id="due-banner" hidden></div>
 
   <div id="panels">
-  <section class="panel" id="panel-energy"></section>
-  <section class="panel" id="panel-tk" hidden></section>
-  <section class="panel" id="panel-versicherung" hidden></section>
-  <section class="panel" id="panel-fristen" hidden></section>
+    <section class="panel" id="panel-uebersicht"></section>
+    <section class="panel" id="panel-energy" hidden></section>
+    <section class="panel" id="panel-tk" hidden></section>
+    <section class="panel" id="panel-versicherung" hidden></section>
+    <section class="panel" id="panel-fristen" hidden></section>
+    <section class="panel" id="panel-sicherheit" hidden>
+      <div class="grid">
+        <div class="col">
+          <div class="card" id="sec-card"></div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <h2>Datensicherung</h2>
+            <p class="hint">Deine Daten liegen nur in diesem Browser. Kopiere ab und zu eine Sicherung, zum Beispiel in einen Passwort-Manager. Mit Passwortschutz ist auch die Sicherung verschlüsselt.</p>
+            <div class="row"><button class="btn small" id="btn-export">Sicherung in Zwischenablage kopieren</button></div>
+            <details class="more">
+              <summary>Sicherung wiederherstellen</summary>
+              <div class="col" style="margin-top:8px;gap:8px">
+                <textarea id="io-text" placeholder="Gesicherte Daten hier einfügen"></textarea>
+                <label class="f">Passwort der Sicherung (nur bei verschlüsselter Sicherung)<input type="password" id="io-pw" autocomplete="off"></label>
+                <div class="row"><button class="btn small" id="btn-import">Daten übernehmen</button></div>
+              </div>
+            </details>
+          </div>
+          <div class="card">
+            <h2>Beispieldaten</h2>
+            <p class="hint">Entferne die Beispiele, um nur mit deinen eigenen Daten zu arbeiten. Oder setze alles auf die Beispiele zurück. Dabei gehen deine Einträge verloren.</p>
+            <div class="row"><button class="btn small" id="btn-examples">Beispiele entfernen</button><button class="btn small danger" id="btn-reset">Auf Beispieldaten zurücksetzen</button></div>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 
   <footer id="app-footer">
-    <div class="card" id="sec-card" style="margin-bottom:16px"></div>
-    <p>Alle Eingaben bleiben nur in diesem Browser gespeichert. Energie: Jahreskosten = Grundpreis × 12 + Arbeitspreis × Verbrauch − Bonus; der Bonus gilt meist nur im ersten Jahr. Internet und Mobilfunk: alle Monatspreise, Routermiete und Einmalkosten abzüglich Gutschriften im Vergleichszeitraum, geteilt durch die Monate.</p>
+    <p>Rechenweg Energie: Grundpreis × 12 + Arbeitspreis × Verbrauch − Bonus; der Bonus gilt meist nur im ersten Jahr. Internet und Handy: alle Monatspreise, Routermiete und Einmalkosten abzüglich Gutschriften, geteilt durch die Monate des Vergleichszeitraums.</p>
     <p>Unabhängige Beratung: <a href="https://www.verbraucherzentrale.de" target="_blank" rel="noopener noreferrer">Verbraucherzentrale</a> · Tests: <a href="https://www.test.de" target="_blank" rel="noopener noreferrer">Stiftung Warentest</a></p>
-    <div class="row" style="margin-top:12px">
-      <button class="btn small" id="btn-export">Sicherung in Zwischenablage kopieren</button>
-      <button class="btn small danger" id="btn-reset">Auf Beispieldaten zurücksetzen</button>
-    </div>
-    <details class="io" style="margin-top:10px">
-      <summary>Daten einfügen (Sicherung wiederherstellen)</summary>
-      <div class="col" style="margin-top:8px">
-        <textarea id="io-text" placeholder="Gesicherte Daten hier einfügen"></textarea>
-        <label class="f">Passwort der Sicherung (nur bei verschlüsselter Sicherung)<input type="password" id="io-pw" autocomplete="off"></label>
-        <div class="row"><button class="btn small" id="btn-import">Daten übernehmen</button></div>
-      </div>
-    </details>
   </footer>
 </div>
 <div class="toast" id="toast" hidden></div>
@@ -437,7 +503,7 @@ footer a { color: var(--accent); }
     if (isBlob(parsed)) { vault.enabled = true; vault.blob = parsed; vault.locked = true; state = defaults(); }
     else state = migrate(parsed);
   }
-  const ui = { tab: "strom", sort: { strom: "y1", gas: "y1" }, nurOeko: { strom: false, gas: false }, maxLaufzeit: { strom: 0, gas: 0 }, tkMin: false, edit: null, draft: null };
+  const ui = { tab: "uebersicht", form: {}, sort: { strom: "y1", gas: "y1" }, nurOeko: { strom: false, gas: false }, maxLaufzeit: { strom: 0, gas: 0 }, tkMin: false, edit: null, draft: null };
   let saveChain = Promise.resolve();
   function save() {
     if (vault.locked) return;
@@ -528,16 +594,6 @@ footer a { color: var(--accent); }
   const TAG = { warn: "Achtung", info: "Hinweis", good: "Passt" };
 
   const ana = { kind: null, busy: false, text: "", error: "", ctl: null };
-  function vergleichCard(kind, findings) {
-    const mine = ana.kind === kind;
-    return `<div class="card">
-      <div class="card-head"><h2>Vergleichbarkeit</h2>${sampler ? `<button class="btn small" id="ana-btn" ${mine && ana.busy ? "disabled" : ""}>${mine && ana.busy ? "Claude prüft …" : "Mit Claude genauer prüfen"}</button>` : ""}</div>
-      <ul class="findings">${findings.map((x) => `<li><span class="tag ${x.lvl}">${TAG[x.lvl]}</span><span>${esc(x.t)}</span></li>`).join("")}</ul>
-      ${mine && ana.busy && !ana.text ? '<p class="hint">Claude prüft die Angebote, das dauert meist 10–30 Sekunden …</p>' : ""}
-      ${mine && ana.text ? `<p class="analysis" id="ana-out">${esc(ana.text)}</p>` : ""}
-      ${mine && ana.error ? `<p class="err">${esc(ana.error)}</p>` : ""}
-    </div>`;
-  }
   function bindVergleich(kind, label, payload, findings) {
     const b = document.getElementById("ana-btn");
     if (!b) return;
@@ -566,21 +622,6 @@ Form: höchstens 220 Wörter, Deutsch, Du-Form, schlichte Aufzählung mit "• "
     });
   }
 
-  function portalCard(kind, portalKey, angebote) {
-    const qs = {};
-    angebote.forEach((a) => { const q = a.quelle || "ohne Quelle"; qs[q] = (qs[q] || 0) + 1; });
-    const busyHere = scan.busy && scan.kind === kind && scan.mode === "liste";
-    return `<div class="card">
-      <h2>Angebote aus Vergleichsportalen</h2>
-      <p class="hint">Rechne dort mit deinen Daten, mach einen Screenshot der Ergebnisliste und lies ihn hier ein. Wiederhole das für jedes Portal. Danach prüft der Kompass, ob die Angebote vergleichbar sind.</p>
-      <div class="chips">${PORTALE[portalKey].map(([n, u]) => `<a class="chip" href="${u}" target="_blank" rel="noopener noreferrer">${esc(n)}</a>`).join("")}</div>
-      ${canScan() ? `<label class="btn scan-btn" ${scan.busy ? 'aria-disabled="true"' : ""}>${busyHere ? "Wird gelesen …" : "Screenshot der Ergebnisliste einlesen"}
-        <input class="sr-only" type="file" id="scan-list-file" accept="${esc(imgLimits.mediaTypes.join(","))}" multiple ${scan.busy ? "disabled" : ""}></label>` : ""}
-      <p class="hint">${esc(PORTAL_TIPP[portalKey === "energie" ? kind : portalKey])}</p>
-      ${Object.keys(qs).length ? `<div class="chips">${Object.entries(qs).map(([q, n]) => `<span class="pill info">${esc(q)}: ${n}</span>`).join("")}</div>` : ""}
-    </div>`;
-  }
-
   // ---------- Energie ----------
   function kostenEnergie(t, kwh) {
     const folge = num(t.gp) * 12 + (num(t.ap) / 100) * kwh;
@@ -605,204 +646,6 @@ Form: höchstens 220 Wörter, Deutsch, Du-Form, schlichte Aufzählung mit "• "
     }
     f.push(...commonFindings(rows.map((r) => ({ t: r.t, preis: r.k.y1, portalVergleich: r.k.y1 })), { fmt: EUR0.format, portalNote: `bei ${NUM.format(kwh)} kWh` }));
     return finalize(f, rows.length);
-  }
-
-  function renderEnergy(kind) {
-    const d = state[kind];
-    const isStrom = kind === "strom";
-    const kwh = num(d.verbrauch);
-    const sortKey = ui.sort[kind];
-    const oekoLabel = isStrom ? "Ökostrom" : "Klimaneutral / Biogas";
-    const akt = kostenEnergie(d.aktuell, kwh);
-    const all = d.angebote.map((t, i) => ({ t, i, k: kostenEnergie(t, kwh) }));
-    let rows = all.slice();
-    if (ui.nurOeko[kind]) rows = rows.filter((r) => r.t.oeko);
-    if (ui.maxLaufzeit[kind]) rows = rows.filter((r) => num(r.t.laufzeit) <= ui.maxLaufzeit[kind]);
-    rows.sort((a, b) => a.k[sortKey] - b.k[sortKey]);
-    const best = rows[0];
-    const maxVal = Math.max(akt.folge, ...rows.map((r) => Math.max(r.k.folge, r.k[sortKey])), 1);
-    const findings = checkEnergy(kind, all, kwh);
-
-    const edit = ui.edit && ui.edit.kind === kind ? d.angebote[ui.edit.i] : null;
-    const draft = !edit && ui.draft && ui.draft.kind === kind ? ui.draft.data : null;
-    const f = edit || draft || { anbieter: "", tarif: "", gp: "", ap: "", bonus: "", laufzeit: 12, garantie: 12, oeko: false, quelle: "" };
-    const presets = [["1 Person", 1500], ["2 Personen", 2500], ["3 Personen", 3500], ["4 Personen", 4250], ["5+ Personen", 5000]];
-
-    const pillsFor = (t, k) => {
-      const p = [];
-      if (num(t.laufzeit) <= 1) p.push('<span class="pill good">monatlich kündbar</span>');
-      else if (num(t.laufzeit) > 12) p.push(`<span class="pill warn">${esc(t.laufzeit)} Mon. Bindung</span>`);
-      if (num(t.garantie) >= 12) p.push(`<span class="pill good">${esc(t.garantie)} Mon. Preisgarantie</span>`);
-      else p.push(`<span class="pill warn">${num(t.garantie) ? esc(t.garantie) + " Mon." : "keine"} Preisgarantie</span>`);
-      if (num(t.bonus) > 0 && num(t.bonus) / k.folge > 0.15) p.push('<span class="pill warn">Bonus-lastig</span>');
-      if (t.oeko) p.push(`<span class="pill good">${oekoLabel}</span>`);
-      if (t.anzeige) p.push('<span class="pill info">Anzeige</span>');
-      return p.join("");
-    };
-
-    const el = document.getElementById("panel-energy");
-    el.style.setProperty("--kind", `var(--${kind})`);
-    el.innerHTML = `
-      <div class="summary">
-        <div class="stat hero">
-          <h3>Günstigstes Angebot · ${esc(SORTS[sortKey])}</h3>
-          <div class="v">${best ? EUR0.format(best.k[sortKey]) : "–"}</div>
-          <div class="s">${best ? esc(nameOf(best.t)) + (best.t.quelle ? " · " + esc(best.t.quelle) : "") + " · Abschlag ca. " + EUR0.format(best.k.y1 / 12) + "/Monat" : "Noch kein passendes Angebot"}</div>
-        </div>
-        <div class="stat">
-          <h3>Dein aktueller Tarif</h3>
-          <div class="v">${EUR0.format(akt.folge)}</div>
-          <div class="s">pro Jahr · ${EUR0.format(akt.folge / 12)} im Monat</div>
-        </div>
-        <div class="stat">
-          <h3>Mögliche Ersparnis</h3>
-          <div class="v ${best && akt.folge - best.k[sortKey] >= 0 ? "pos" : "neg"}">${best ? EUR0.format(akt.folge - best.k[sortKey]) : "–"}</div>
-          <div class="s">${best ? "ab 2. Jahr: " + EUR0.format(akt.folge - best.k.folge) + " pro Jahr" : ""}</div>
-        </div>
-      </div>
-
-      <div class="grid">
-        <div class="col">
-          ${scanCard(kind)}
-          ${portalCard(kind, "energie", d.angebote)}
-          <div class="card">
-            <h2>Verbrauch</h2>
-            <label class="f">Jahresverbrauch in kWh
-              <input type="number" id="${kind}-verbrauch" min="0" step="100" value="${esc(d.verbrauch)}">
-            </label>
-            ${isStrom ? `<div class="chips">${presets.map(([l, v]) => `<button class="chip ${kwh === v ? "on" : ""}" data-preset="${v}">${l} · ${NUM.format(v)}</button>`).join("")}</div>
-              <p class="hint">Richtwerte ohne elektrische Warmwasserbereitung. Mit Durchlauferhitzer ca. 25 % mehr.</p>`
-            : `<div class="fields">
-                <label class="f">Wohnfläche m²<input type="number" id="gas-flaeche" min="0" step="5" placeholder="z. B. 100"></label>
-                <label class="f">Gebäude
-                  <select id="gas-standard">
-                    <option value="80">Neubau / saniert (80 kWh/m²)</option>
-                    <option value="140" selected>Durchschnitt (140 kWh/m²)</option>
-                    <option value="200">Altbau unsaniert (200 kWh/m²)</option>
-                  </select></label>
-                <label class="f">oder Zählerstand-Differenz m³<input type="number" id="gas-m3" min="0" step="10" placeholder="z. B. 1400"></label>
-                <label class="f">Brennwert × Zustandszahl<input type="number" id="gas-faktor" min="5" max="15" step="0.01" value="10.45"></label>
-                <div class="full row"><button class="btn small" id="gas-calc">Verbrauch schätzen</button><span class="hint">Faktor steht auf der Gasrechnung (oft 10–11).</span></div>
-              </div>`}
-          </div>
-
-          <div class="card">
-            <h2>Aktueller Tarif</h2>
-            <div class="fields">
-              <label class="f">Grundpreis €/Monat<input type="number" id="${kind}-akt-gp" step="0.01" min="0" value="${esc(d.aktuell.gp)}"></label>
-              <label class="f">Arbeitspreis ct/kWh<input type="number" id="${kind}-akt-ap" step="0.01" min="0" value="${esc(d.aktuell.ap)}"></label>
-            </div>
-            <p class="hint">Brutto-Preise inkl. MwSt. von deiner letzten Abrechnung oder Preisanpassung.</p>
-          </div>
-
-          <form class="card" id="${kind}-form" autocomplete="off">
-            ${formHead(edit, draft)}
-            <div class="fields">
-              ${inp("Anbieter", `${kind}-f-anbieter`, "anbieter", f.anbieter, { type: "text", req: true })}
-              ${inp("Tarif", `${kind}-f-tarif`, "tarif", f.tarif, { type: "text" })}
-              ${inp("Grundpreis €/Monat", `${kind}-f-gp`, "gp", f.gp, { req: true })}
-              ${inp("Arbeitspreis ct/kWh", `${kind}-f-ap`, "ap", f.ap, { req: true })}
-              ${inp("Bonus € (einmalig)", `${kind}-f-bonus`, "bonus", f.bonus, { step: "1" })}
-              ${inp("Laufzeit Monate", `${kind}-f-laufzeit`, "laufzeit", f.laufzeit, { step: "1" })}
-              ${inp("Preisgarantie Monate", `${kind}-f-garantie`, "garantie", f.garantie, { step: "1" })}
-              ${inp("Quelle (Portal)", `${kind}-f-quelle`, "quelle", f.quelle, { type: "text", ph: "z. B. Verivox" })}
-              <label class="check full"><input type="checkbox" name="oeko" id="${kind}-f-oeko" ${f.oeko ? "checked" : ""}>${oekoLabel}</label>
-            </div>
-            <button class="btn primary" type="submit">${edit ? "Änderungen speichern" : "Angebot hinzufügen"}</button>
-          </form>
-        </div>
-
-        <div class="col">
-          ${vergleichCard(kind, findings)}
-          <div class="card">
-            <div class="card-head">
-              <h2>Jahreskosten im Vergleich</h2>
-              <div class="chips" role="group" aria-label="Sortierung">
-                ${Object.entries(SORTS).map(([k, l]) => `<button class="chip ${sortKey === k ? "on" : ""}" data-sort="${k}">${l}</button>`).join("")}
-              </div>
-            </div>
-            <div class="row">
-              <label class="check"><input type="checkbox" id="${kind}-nuroeko" ${ui.nurOeko[kind] ? "checked" : ""}>nur ${oekoLabel}</label>
-              <label class="check"><input type="checkbox" id="${kind}-max12" ${ui.maxLaufzeit[kind] ? "checked" : ""}>max. 12 Monate Laufzeit</label>
-            </div>
-            <div class="bars">
-              <div class="bar-row"><span class="name">Aktueller Tarif</span><div class="track"><div class="fill current" style="width:${(akt.folge / maxVal) * 100}%"></div></div><span class="val">${EUR0.format(akt.folge)}</span></div>
-              ${rows.map((r) => `
-                <div class="bar-row" title="Gestrichelt: Kosten ab dem 2. Jahr">
-                  <span class="name">${esc(nameOf(r.t))}${r.t.quelle ? " · " + esc(r.t.quelle) : ""}</span>
-                  <div class="track">
-                    ${sortKey === "y1" && num(r.t.bonus) > 0 ? `<div class="fill ghost" style="width:${(r.k.folge / maxVal) * 100}%"></div>` : ""}
-                    <div class="fill" style="width:${(r.k[sortKey] / maxVal) * 100}%"></div>
-                  </div>
-                  <span class="val">${EUR0.format(r.k[sortKey])}</span>
-                </div>`).join("")}
-            </div>
-            ${sortKey === "y1" ? '<p class="hint">Gestrichelter Rahmen: was der Tarif ab dem zweiten Jahr kostet, wenn der Bonus wegfällt.</p>' : ""}
-          </div>
-
-          <div class="tbl-wrap">
-            ${rows.length ? `<table>
-              <thead><tr>
-                <th class="l">#</th><th class="l">Angebot</th><th>Grundpreis</th><th>Arbeitspreis</th><th>Bonus</th>
-                <th>1. Jahr</th><th>ab 2. Jahr</th><th>Ersparnis/Jahr*</th><th></th>
-              </tr></thead>
-              <tbody>
-                ${rows.map((r, n) => `
-                  <tr class="${n === 0 ? "best" : ""}">
-                    <td class="l"><span class="rank">${n + 1}</span></td>
-                    <td class="l"><div class="tname">${esc(r.t.anbieter)}</div><div class="tsub">${esc(r.t.tarif)}${r.t.quelle ? " · über " + esc(r.t.quelle) : ""}</div><div class="pills">${pillsFor(r.t, r.k)}</div></td>
-                    <td>${EUR2.format(num(r.t.gp))}/M</td>
-                    <td>${NUM.format(num(r.t.ap))} ct</td>
-                    <td>${num(r.t.bonus) ? EUR0.format(num(r.t.bonus)) : "–"}</td>
-                    <td>${EUR0.format(r.k.y1)}</td>
-                    <td>${EUR0.format(r.k.folge)}</td>
-                    <td class="${akt.folge - r.k[sortKey] >= 0 ? "pos" : "neg"}">${EUR0.format(akt.folge - r.k[sortKey])}</td>
-                    <td><div class="actions"><button class="btn small" data-edit="${r.i}">Bearbeiten</button><button class="btn small danger" data-del="${r.i}">Löschen</button></div></td>
-                  </tr>`).join("")}
-              </tbody></table>` : `<div class="empty">Keine Angebote${d.angebote.length ? " für diese Filter" : ""}. Trage links ein Angebot ein.</div>`}
-          </div>
-          <p class="hint">* Ersparnis gegenüber deinem aktuellen Tarif nach der gewählten Sortierung (${esc(SORTS[sortKey])}). ${best && kwh ? `Grenzpreis: Ab ${NUM.format(((akt.folge - num(best.t.gp) * 12) / kwh) * 100)} ct/kWh Arbeitspreis wäre das beste Angebot nicht mehr günstiger als dein aktueller Tarif.` : ""}</p>
-        </div>
-      </div>`;
-
-    const rerender = () => { save(); renderEnergy(kind); updateDue(); };
-    const bindNum = (id, setter) => { const i = document.getElementById(id); i.addEventListener("change", () => { setter(num(i.value)); rerender(); }); };
-    bindNum(`${kind}-verbrauch`, (v) => (d.verbrauch = v));
-    bindNum(`${kind}-akt-gp`, (v) => (d.aktuell.gp = v));
-    bindNum(`${kind}-akt-ap`, (v) => (d.aktuell.ap = v));
-    el.querySelectorAll("[data-preset]").forEach((b) => b.addEventListener("click", () => { d.verbrauch = num(b.dataset.preset); rerender(); }));
-    el.querySelectorAll("[data-sort]").forEach((b) => b.addEventListener("click", () => { ui.sort[kind] = b.dataset.sort; renderEnergy(kind); }));
-    document.getElementById(`${kind}-nuroeko`).addEventListener("change", (e) => { ui.nurOeko[kind] = e.target.checked; renderEnergy(kind); });
-    document.getElementById(`${kind}-max12`).addEventListener("change", (e) => { ui.maxLaufzeit[kind] = e.target.checked ? 12 : 0; renderEnergy(kind); });
-    if (!isStrom) {
-      document.getElementById("gas-calc").addEventListener("click", () => {
-        const m3 = num(document.getElementById("gas-m3").value);
-        const fl = num(document.getElementById("gas-flaeche").value);
-        if (m3 > 0) d.verbrauch = Math.round(m3 * num(document.getElementById("gas-faktor").value, 10.45));
-        else if (fl > 0) d.verbrauch = Math.round(fl * num(document.getElementById("gas-standard").value, 140));
-        else { toast("Bitte Wohnfläche oder m³ eingeben"); return; }
-        rerender(); toast(`Verbrauch auf ${NUM.format(d.verbrauch)} kWh gesetzt`);
-      });
-    }
-    const form = document.getElementById(`${kind}-form`);
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const fd = new FormData(form);
-      const t = keepMeta({
-        anbieter: String(fd.get("anbieter")).trim(), tarif: String(fd.get("tarif")).trim(),
-        gp: num(fd.get("gp")), ap: num(fd.get("ap")), bonus: num(fd.get("bonus")),
-        laufzeit: num(fd.get("laufzeit")), garantie: num(fd.get("garantie")), oeko: fd.get("oeko") === "on",
-        quelle: String(fd.get("quelle")).trim(),
-      }, edit || draft);
-      if (edit) { d.angebote[ui.edit.i] = t; ui.edit = null; toast("Angebot gespeichert"); }
-      else { d.angebote.push(t); toast("Angebot hinzugefügt"); }
-      ui.draft = null; rerender();
-    });
-    bindEditCancel();
-    bindEditButtons(el, kind);
-    bindDelete(el.querySelector(".tbl-wrap"), (i) => { d.angebote.splice(i, 1); ui.edit = null; rerender(); });
-    bindScan(kind);
-    bindVergleich(kind, isStrom ? "Strom" : "Gas", { verbrauch_kwh: kwh, aktueller_tarif: d.aktuell, angebote: all.map((r) => ({ ...r.t, kosten_1_jahr: Math.round(r.k.y1), kosten_ab_2_jahr: Math.round(r.k.folge) })) }, findings);
   }
 
   // ---------- Internet & Telefon ----------
@@ -843,134 +686,6 @@ Form: höchstens 220 Wörter, Deutsch, Du-Form, schlichte Aufzählung mit "• "
     return finalize(f, rows.length);
   }
 
-  function renderTk() {
-    const tk = state.tk, art = tk.art, A = TK_ART[art], d = tk[art], H = num(tk.horizont, 24);
-    const aktTotal = num(d.aktuell.preis) * H;
-    const all = d.angebote.map((t, i) => ({ t, i, k: kostenTk(t, H) }));
-    let rows = all.slice();
-    if (ui.tkMin && num(d.aktuell.leistung) > 0) rows = rows.filter((r) => num(r.t.leistung) >= num(d.aktuell.leistung));
-    rows.sort((a, b) => a.k.monat - b.k.monat);
-    const best = rows[0];
-    const maxVal = Math.max(num(d.aktuell.preis), ...rows.map((r) => r.k.monat), 1);
-    const findings = checkTk(art, all, d, H);
-    const edit = ui.edit && ui.edit.kind === "tk" ? d.angebote[ui.edit.i] : null;
-    const draft = !edit && ui.draft && ui.draft.kind === "tk" ? ui.draft.data : null;
-    const f = edit || draft || { anbieter: "", tarif: "", preis: "", aktionPreis: "", aktionMonate: "", einmalig: "", router: "", bonus: "", leistung: "", upload: "", laufzeit: 24, technik: "", quelle: "" };
-
-    const el = document.getElementById("panel-tk");
-    el.style.setProperty("--kind", "var(--tk)");
-    el.innerHTML = `
-      <div class="row" style="justify-content:space-between">
-        <div class="chips" role="group" aria-label="Art">${Object.entries(TK_ART).map(([k, a]) => `<button class="chip ${k === art ? "on" : ""}" data-art="${k}">${a.name} <span class="mono">(${tk[k].angebote.length})</span></button>`).join("")}</div>
-        <label class="f inline">Vergleichszeitraum
-          <select id="tk-horizont">${[12, 24, 36].map((h) => `<option value="${h}" ${H === h ? "selected" : ""}>${h} Monate</option>`).join("")}</select></label>
-      </div>
-      <div class="summary">
-        <div class="stat hero">
-          <h3>Günstigstes Angebot · Ø pro Monat</h3>
-          <div class="v">${best ? EUR2.format(best.k.monat) : "–"}</div>
-          <div class="s">${best ? esc(nameOf(best.t)) + " · " + fmtLeistung(art, best.t.leistung) + (best.t.quelle ? " · " + esc(best.t.quelle) : "") : "Noch kein passendes Angebot"}</div>
-        </div>
-        <div class="stat">
-          <h3>Dein aktueller Tarif</h3>
-          <div class="v">${EUR2.format(num(d.aktuell.preis))}</div>
-          <div class="s">pro Monat · ${fmtLeistung(art, d.aktuell.leistung)}</div>
-        </div>
-        <div class="stat">
-          <h3>Ersparnis in ${H} Monaten</h3>
-          <div class="v ${best && aktTotal - best.k.total >= 0 ? "pos" : "neg"}">${best ? EUR0.format(aktTotal - best.k.total) : "–"}</div>
-          <div class="s">gegenüber deinem aktuellen Tarif</div>
-        </div>
-      </div>
-
-      <div class="grid">
-        <div class="col">
-          ${scanCard("tk")}
-          ${portalCard("tk", art, d.angebote)}
-          <div class="card">
-            <h2>Aktueller Tarif</h2>
-            <div class="fields">
-              <label class="f">Monatspreis €<input type="number" id="tk-akt-preis" step="0.01" min="0" value="${esc(d.aktuell.preis)}"></label>
-              <label class="f">${A.leistung}<input type="number" id="tk-akt-leistung" step="1" min="0" value="${esc(d.aktuell.leistung)}"></label>
-            </div>
-            <p class="hint">Was du heute monatlich zahlst, inklusive Routermiete und Zusatzoptionen.</p>
-          </div>
-          <form class="card" id="tk-form" autocomplete="off">
-            ${formHead(edit, draft)}
-            <div class="fields">
-              ${inp("Anbieter", "tk-f-anbieter", "anbieter", f.anbieter, { type: "text", req: true })}
-              ${inp("Tarif", "tk-f-tarif", "tarif", f.tarif, { type: "text" })}
-              ${inp("Regulärer Preis €/Monat", "tk-f-preis", "preis", f.preis, { req: true })}
-              ${inp(A.leistung, "tk-f-leistung", "leistung", f.leistung, { step: "1", ph: art === "mobil" ? "unbegrenzt = 1000" : "" })}
-              ${inp("Aktionspreis €/Monat", "tk-f-aktionPreis", "aktionPreis", f.aktionPreis)}
-              ${inp("Aktion für Monate", "tk-f-aktionMonate", "aktionMonate", f.aktionMonate, { step: "1" })}
-              ${inp("Einmalkosten €", "tk-f-einmalig", "einmalig", f.einmalig)}
-              ${inp("Gutschrift / Bonus €", "tk-f-bonus", "bonus", f.bonus)}
-              ${art === "mobil" ? "" : inp("Routermiete €/Monat", "tk-f-router", "router", f.router)}
-              ${art === "mobil" ? "" : inp("Upload Mbit/s", "tk-f-upload", "upload", f.upload, { step: "1" })}
-              ${inp("Laufzeit Monate", "tk-f-laufzeit", "laufzeit", f.laufzeit, { step: "1" })}
-              <label class="f">Technik<select name="technik" id="tk-f-technik"><option value="">–</option>${A.technik.map((x) => `<option ${f.technik === x ? "selected" : ""}>${x}</option>`).join("")}</select></label>
-              ${inp("Quelle (Portal)", "tk-f-quelle", "quelle", f.quelle, { type: "text", ph: "z. B. Check24", full: true })}
-            </div>
-            <button class="btn primary" type="submit">${edit ? "Änderungen speichern" : "Angebot hinzufügen"}</button>
-          </form>
-        </div>
-
-        <div class="col">
-          ${vergleichCard("tk", findings)}
-          <div class="card">
-            <div class="card-head"><h2>Ø Kosten pro Monat über ${H} Monate</h2>
-              <label class="check"><input type="checkbox" id="tk-min" ${ui.tkMin ? "checked" : ""}>mindestens so viel ${art === "mobil" ? "Datenvolumen" : "Tempo"} wie bisher</label></div>
-            <div class="bars">
-              <div class="bar-row"><span class="name">Aktueller Tarif</span><div class="track"><div class="fill current" style="width:${(num(d.aktuell.preis) / maxVal) * 100}%"></div></div><span class="val">${EUR2.format(num(d.aktuell.preis))}</span></div>
-              ${rows.map((r) => `<div class="bar-row"><span class="name">${esc(nameOf(r.t))}${r.t.quelle ? " · " + esc(r.t.quelle) : ""}</span><div class="track"><div class="fill" style="width:${(Math.max(r.k.monat, 0) / maxVal) * 100}%"></div></div><span class="val">${EUR2.format(r.k.monat)}</span></div>`).join("")}
-            </div>
-          </div>
-          <div class="tbl-wrap">
-            ${rows.length ? `<table>
-              <thead><tr><th class="l">#</th><th class="l">Angebot</th><th>${A.einheit}</th><th>Preis/Monat</th><th>Einmalig</th><th>Ø/Monat</th><th>€ pro ${A.einheit}</th><th>Ersparnis ${H} M.</th><th></th></tr></thead>
-              <tbody>${rows.map((r, n) => `
-                <tr class="${n === 0 ? "best" : ""}">
-                  <td class="l"><span class="rank">${n + 1}</span></td>
-                  <td class="l"><div class="tname">${esc(r.t.anbieter)}</div><div class="tsub">${esc(r.t.tarif)}${r.t.quelle ? " · über " + esc(r.t.quelle) : ""}</div>
-                    <div class="pills">${num(r.t.laufzeit) <= 1 ? '<span class="pill good">monatlich kündbar</span>' : `<span class="pill ${num(r.t.laufzeit) > 12 ? "warn" : "info"}">${esc(r.t.laufzeit)} Mon. Laufzeit</span>`}${r.t.technik ? `<span class="pill info">${esc(r.t.technik)}</span>` : ""}${num(r.t.aktionMonate) > 0 && num(r.t.aktionPreis) > 0 ? `<span class="pill warn">Aktion ${esc(r.t.aktionMonate)} Mon.</span>` : ""}${num(r.t.router) > 0 ? `<span class="pill warn">Router ${EUR2.format(num(r.t.router))}/M</span>` : ""}${r.t.anzeige ? '<span class="pill info">Anzeige</span>' : ""}</div></td>
-                  <td>${unbegrenzt(art, r.t.leistung) ? "∞" : NUM.format(num(r.t.leistung))}${num(r.t.upload) ? ` / ${NUM.format(num(r.t.upload))}` : ""}</td>
-                  <td>${num(r.t.aktionMonate) > 0 && num(r.t.aktionPreis) > 0 ? `${EUR2.format(num(r.t.aktionPreis))} → ${EUR2.format(num(r.t.preis))}` : EUR2.format(num(r.t.preis))}</td>
-                  <td>${num(r.t.einmalig) ? EUR0.format(num(r.t.einmalig)) : "–"}</td>
-                  <td>${EUR2.format(r.k.monat)}</td>
-                  <td>${num(r.t.leistung) > 0 && !unbegrenzt(art, r.t.leistung) ? EUR2.format(r.k.monat / num(r.t.leistung)) : "–"}</td>
-                  <td class="${aktTotal - r.k.total >= 0 ? "pos" : "neg"}">${EUR0.format(aktTotal - r.k.total)}</td>
-                  <td><div class="actions"><button class="btn small" data-edit="${r.i}">Bearbeiten</button><button class="btn small danger" data-del="${r.i}">Löschen</button></div></td>
-                </tr>`).join("")}</tbody></table>` : '<div class="empty">Keine Angebote. Trage links ein Angebot ein oder lies einen Screenshot ein.</div>'}
-          </div>
-          <p class="hint">Ø/Monat = (Aktions- und Regulärpreise + Routermiete + Einmalkosten − Gutschriften) ÷ ${H} Monate.</p>
-        </div>
-      </div>`;
-
-    const rerender = () => { save(); renderTk(); updateDue(); };
-    el.querySelectorAll("[data-art]").forEach((b) => b.addEventListener("click", () => { tk.art = b.dataset.art; ui.edit = null; ui.draft = null; rerender(); }));
-    document.getElementById("tk-horizont").addEventListener("change", (e) => { tk.horizont = num(e.target.value, 24); rerender(); });
-    document.getElementById("tk-min").addEventListener("change", (e) => { ui.tkMin = e.target.checked; renderTk(); });
-    document.getElementById("tk-akt-preis").addEventListener("change", (e) => { d.aktuell.preis = num(e.target.value); rerender(); });
-    document.getElementById("tk-akt-leistung").addEventListener("change", (e) => { d.aktuell.leistung = num(e.target.value); rerender(); });
-    const form = document.getElementById("tk-form");
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const fd = new FormData(form);
-      const t = { anbieter: String(fd.get("anbieter")).trim(), tarif: String(fd.get("tarif")).trim(), technik: String(fd.get("technik") || ""), quelle: String(fd.get("quelle")).trim() };
-      ["preis", "aktionPreis", "aktionMonate", "einmalig", "router", "bonus", "leistung", "upload", "laufzeit"].forEach((k) => { t[k] = num(fd.get(k)); });
-      keepMeta(t, edit || draft);
-      if (edit) { d.angebote[ui.edit.i] = t; ui.edit = null; toast("Angebot gespeichert"); }
-      else { d.angebote.push(t); toast("Angebot hinzugefügt"); }
-      ui.draft = null; rerender();
-    });
-    bindEditCancel();
-    bindEditButtons(el, "tk");
-    bindDelete(el.querySelector(".tbl-wrap"), (i) => { d.angebote.splice(i, 1); ui.edit = null; rerender(); });
-    bindScan("tk");
-    bindVergleich("tk", A.name, { art: A.name, vergleichszeitraum_monate: H, aktueller_tarif: d.aktuell, angebote: all.map((r) => ({ ...r.t, durchschnitt_monat: Math.round(r.k.monat * 100) / 100 })) }, findings);
-  }
-
   // ---------- Versicherungen ----------
   const ZAHLWEISE = { 1: "jährlich", 2: "halbjährlich", 4: "vierteljährlich", 12: "monatlich" };
   const GEWICHT = { 2: "wichtig", 1: "nett", 0: "egal" };
@@ -994,176 +709,6 @@ Form: höchstens 220 Wörter, Deutsch, Du-Form, schlichte Aufzählung mit "• "
     }
     f.push(...commonFindings(rows.map((r) => ({ t: r.a, preis: r.jahr, portalVergleich: r.jahr })), { fmt: EUR0.format, portalNote: "im Jahr" }));
     return finalize(f, rows.length);
-  }
-
-  function renderVers() {
-    const v = state.vers;
-    const kat = currentKat();
-    const wP = num(v.gewichtPreis, 50) / 100;
-    const quote = num(v.schadenquote) / 100;
-    const sumW = kat.features.reduce((s, f) => s + num(f.w), 0);
-    const rows = kat.angebote.map((a, i) => {
-      a.features = a.features || {};
-      const jahr = num(a.beitrag) * num(a.zahlweise, 1);
-      const eff = jahr + num(a.sb) * quote;
-      const fs = sumW ? kat.features.reduce((s, f) => s + (a.features[f.id] ? num(f.w) : 0), 0) / sumW : 1;
-      return { a, i, jahr, eff, fs };
-    });
-    const minEff = Math.min(...rows.map((r) => r.eff).filter((x) => x > 0), Infinity);
-    rows.forEach((r) => { r.ps = r.eff > 0 ? minEff / r.eff : 1; r.score = Math.round((wP * r.ps + (1 - wP) * r.fs) * 100); });
-    rows.sort((a, b) => b.score - a.score || a.eff - b.eff);
-    const best = rows[0];
-    const cheapest = rows.slice().sort((a, b) => a.eff - b.eff)[0];
-    const findings = checkVers(kat, rows);
-
-    const edit = ui.edit && ui.edit.kind === "vers" ? kat.angebote[ui.edit.i] : null;
-    const draft = !edit && ui.draft && ui.draft.kind === "vers" ? ui.draft.data : null;
-    const f = edit || draft || { anbieter: "", tarif: "", beitrag: "", zahlweise: 1, sb: 0, features: {}, quelle: "" };
-
-    const el = document.getElementById("panel-versicherung");
-    el.style.setProperty("--kind", "var(--vers)");
-    el.innerHTML = `
-      <div class="chips" role="group" aria-label="Versicherungsart">
-        ${Object.entries(v.kategorien).map(([k, c]) => `<button class="chip ${k === v.kategorie ? "on" : ""}" data-kat="${esc(k)}">${esc(c.name)} <span class="mono">(${c.angebote.length})</span></button>`).join("")}
-        <button class="chip" id="kat-add">+ Eigene Versicherungsart</button>
-      </div>
-      <form class="row" id="kat-form" hidden>
-        <input type="text" id="kat-name" placeholder="z. B. Berufsunfähigkeit" style="max-width:260px">
-        <button class="btn small primary" type="submit">Anlegen</button>
-      </form>
-
-      <div class="summary">
-        <div class="stat hero">
-          <h3>Bestes Preis-Leistungs-Verhältnis</h3>
-          <div class="v">${best ? best.score + " / 100" : "–"}</div>
-          <div class="s">${best ? esc(nameOf(best.a)) + " · " + EUR0.format(best.jahr) + " pro Jahr" : "Noch keine Angebote"}</div>
-        </div>
-        <div class="stat">
-          <h3>Günstigster Beitrag</h3>
-          <div class="v">${cheapest ? EUR0.format(cheapest.jahr) : "–"}</div>
-          <div class="s">${cheapest ? esc(nameOf(cheapest.a)) + " · Leistung " + Math.round(cheapest.fs * 100) + " %" : ""}</div>
-        </div>
-        <div class="stat">
-          <h3>Gewichtung</h3>
-          <div class="v">${Math.round(wP * 100)} % Preis</div>
-          <div class="s">${100 - Math.round(wP * 100)} % Leistung · Schadenfälle ${NUM.format(quote * 100)} % pro Jahr</div>
-        </div>
-      </div>
-
-      <div class="grid">
-        <div class="col">
-          ${scanCard("vers")}
-          ${portalCard("vers", "vers", kat.angebote)}
-          <div class="card">
-            <h2>Was ist dir wichtig?</h2>
-            <label class="f">Preis ↔ Leistung: <span class="mono">${Math.round(wP * 100)} % Preis</span>
-              <input type="range" id="vers-gewicht" min="0" max="100" step="5" value="${Math.round(wP * 100)}" style="accent-color:var(--accent)">
-            </label>
-            <label class="f">Erwartete Schadenfälle pro Jahr in %, um die Selbstbeteiligung einzurechnen
-              <input type="number" id="vers-quote" min="0" max="100" step="5" value="${esc(v.schadenquote)}">
-            </label>
-            <h3>Leistungen in ${esc(kat.name)}</h3>
-            <div class="feat-list">
-              ${kat.features.map((ft, n) => `
-                <div class="feat">
-                  <span>${esc(ft.name)}</span>
-                  <select data-fw="${n}" aria-label="Gewicht ${esc(ft.name)}">${Object.entries(GEWICHT).map(([w, l]) => `<option value="${w}" ${num(ft.w) === +w ? "selected" : ""}>${l}</option>`).join("")}</select>
-                  <button class="btn small danger" data-fdel="${n}" aria-label="Leistung entfernen" title="Leistung entfernen">✕</button>
-                </div>`).join("")}
-            </div>
-            <form class="row" id="feat-form">
-              <input type="text" id="feat-name" placeholder="Weitere Leistung, z. B. Ehrenamt" style="flex:1;min-width:140px">
-              <button class="btn small" type="submit">Hinzufügen</button>
-            </form>
-          </div>
-
-          <form class="card" id="vers-form" autocomplete="off">
-            ${formHead(edit, draft)}
-            <div class="fields">
-              ${inp("Versicherer", "vers-f-anbieter", "anbieter", f.anbieter, { type: "text", req: true })}
-              ${inp("Tarif", "vers-f-tarif", "tarif", f.tarif, { type: "text" })}
-              ${inp("Beitrag €", "vers-f-beitrag", "beitrag", f.beitrag, { req: true })}
-              <label class="f">Zahlweise
-                <select name="zahlweise" id="vers-f-zahlweise">${Object.entries(ZAHLWEISE).map(([k, l]) => `<option value="${k}" ${num(f.zahlweise) === +k ? "selected" : ""}>${l}</option>`).join("")}</select></label>
-              ${inp("Selbstbeteiligung €", "vers-f-sb", "sb", f.sb, { step: "1" })}
-              ${inp("Quelle (Portal)", "vers-f-quelle", "quelle", f.quelle, { type: "text", ph: "z. B. Check24" })}
-            </div>
-            <h3>Enthaltene Leistungen</h3>
-            <div class="feat-list">
-              ${kat.features.map((ft) => `<label class="check"><input type="checkbox" name="feat-${esc(ft.id)}" id="vers-f-feat-${esc(ft.id)}" ${f.features && f.features[ft.id] ? "checked" : ""}>${esc(ft.name)}</label>`).join("") || '<p class="hint">Lege oben Leistungen an, um Tarife zu vergleichen.</p>'}
-            </div>
-            <button class="btn primary" type="submit">${edit ? "Änderungen speichern" : "Angebot hinzufügen"}</button>
-          </form>
-        </div>
-
-        <div class="col">
-          ${vergleichCard("vers", findings)}
-          <div class="tbl-wrap">
-            ${rows.length ? `<table>
-              <thead><tr>
-                <th class="l">#</th><th class="l">Angebot</th><th>Gesamt</th><th>Beitrag/Jahr</th><th>SB</th><th>Leistung</th>
-                ${kat.features.map((ft) => `<th title="${esc(ft.name)}">${esc(ft.name.length > 14 ? ft.name.slice(0, 13) + "…" : ft.name)}</th>`).join("")}
-                <th></th>
-              </tr></thead>
-              <tbody>
-                ${rows.map((r, n) => `
-                  <tr class="${n === 0 ? "best" : ""}">
-                    <td class="l"><span class="rank">${n + 1}</span></td>
-                    <td class="l"><div class="tname">${esc(r.a.anbieter)}</div><div class="tsub">${esc(r.a.tarif)} · ${EUR2.format(num(r.a.beitrag))} ${ZAHLWEISE[r.a.zahlweise] || ""}${r.a.quelle ? " · über " + esc(r.a.quelle) : ""}</div>
-                      <div class="pills">${r === cheapest ? '<span class="pill good">günstigster</span>' : ""}${num(r.a.sb) > 0 ? `<span class="pill warn">SB ${EUR0.format(num(r.a.sb))}</span>` : '<span class="pill good">ohne SB</span>'}${kat.features.some((ft) => num(ft.w) === 2 && !r.a.features[ft.id]) ? '<span class="pill bad">Wichtiges fehlt</span>' : ""}${r.a.anzeige ? '<span class="pill info">Anzeige</span>' : ""}</div></td>
-                    <td><span class="score"><span class="mini"><i style="width:${r.score}%"></i></span>${r.score}</span></td>
-                    <td>${EUR0.format(r.jahr)}</td>
-                    <td>${num(r.a.sb) ? EUR0.format(num(r.a.sb)) : "–"}</td>
-                    <td>${Math.round(r.fs * 100)} %</td>
-                    ${kat.features.map((ft) => `<td>${r.a.features[ft.id] ? '<span class="yes" aria-label="ja">✓</span>' : '<span class="no" aria-label="nein">–</span>'}</td>`).join("")}
-                    <td><div class="actions"><button class="btn small" data-edit="${r.i}">Bearbeiten</button><button class="btn small danger" data-del="${r.i}">Löschen</button></div></td>
-                  </tr>`).join("")}
-              </tbody></table>` : '<div class="empty">Noch keine Angebote für diese Versicherungsart. Trage links das erste Angebot ein.</div>'}
-          </div>
-          <p class="hint">Gesamtwert = Preisanteil × (günstigster Beitrag ÷ Beitrag) + Leistungsanteil × erfüllte Leistungen (wichtig zählt doppelt, egal gar nicht).</p>
-          ${v.kategorie.startsWith("eigen-") ? '<div class="row" id="kat-del-row"><button class="btn small danger" data-del="0">Versicherungsart löschen</button></div>' : ""}
-        </div>
-      </div>`;
-
-    const rerender = () => { save(); renderVers(); updateDue(); };
-    el.querySelectorAll("[data-kat]").forEach((b) => b.addEventListener("click", () => { v.kategorie = b.dataset.kat; ui.edit = null; ui.draft = null; rerender(); }));
-    document.getElementById("kat-add").addEventListener("click", () => { document.getElementById("kat-form").hidden = false; document.getElementById("kat-name").focus(); });
-    document.getElementById("kat-form").addEventListener("submit", (e) => {
-      e.preventDefault();
-      const name = document.getElementById("kat-name").value.trim();
-      if (!name) return;
-      const id = "eigen-" + Date.now();
-      v.kategorien[id] = { name, features: [], angebote: [] };
-      v.kategorie = id; rerender(); toast(`${name} angelegt`);
-    });
-    const rng = document.getElementById("vers-gewicht");
-    rng.addEventListener("input", () => { rng.parentElement.querySelector(".mono").textContent = rng.value + " % Preis"; });
-    rng.addEventListener("change", () => { v.gewichtPreis = num(rng.value); rerender(); document.getElementById("vers-gewicht").focus(); });
-    document.getElementById("vers-quote").addEventListener("change", (e) => { v.schadenquote = Math.min(100, Math.max(0, num(e.target.value))); rerender(); });
-    el.querySelectorAll("[data-fw]").forEach((s) => s.addEventListener("change", () => { kat.features[+s.dataset.fw].w = num(s.value); rerender(); }));
-    el.querySelectorAll("[data-fdel]").forEach((b) => b.addEventListener("click", () => { kat.features.splice(+b.dataset.fdel, 1); rerender(); }));
-    document.getElementById("feat-form").addEventListener("submit", (e) => {
-      e.preventDefault();
-      const name = document.getElementById("feat-name").value.trim();
-      if (!name) return;
-      kat.features.push({ id: "f" + Date.now().toString(36), name, w: 1 }); rerender();
-    });
-    const form = document.getElementById("vers-form");
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const fd = new FormData(form);
-      const a = keepMeta({ anbieter: String(fd.get("anbieter")).trim(), tarif: String(fd.get("tarif")).trim(), beitrag: num(fd.get("beitrag")), zahlweise: num(fd.get("zahlweise"), 1), sb: num(fd.get("sb")), quelle: String(fd.get("quelle")).trim(), features: {} }, edit || draft);
-      kat.features.forEach((ft) => { if (fd.get("feat-" + ft.id) === "on") a.features[ft.id] = true; });
-      if (edit) { kat.angebote[ui.edit.i] = a; ui.edit = null; toast("Angebot gespeichert"); }
-      else { kat.angebote.push(a); toast("Angebot hinzugefügt"); }
-      ui.draft = null; rerender();
-    });
-    bindEditCancel();
-    bindEditButtons(el, "vers");
-    bindDelete(el.querySelector(".tbl-wrap"), (i) => { kat.angebote.splice(i, 1); ui.edit = null; rerender(); });
-    bindDelete(document.getElementById("kat-del-row"), () => { delete v.kategorien[v.kategorie]; v.kategorie = Object.keys(v.kategorien)[0]; rerender(); });
-    bindScan("vers");
-    bindVergleich("vers", kat.name, { versicherungsart: kat.name, leistungen: kat.features.map((ft) => ({ id: ft.id, name: ft.name, gewicht: GEWICHT[ft.w] })), angebote: rows.map((r) => ({ ...r.a, jahresbeitrag: r.jahr, gesamtwert: r.score })) }, findings);
   }
 
   // ---------- Fristen ----------
@@ -1224,126 +769,6 @@ Form: höchstens 220 Wörter, Deutsch, Du-Form, schlichte Aufzählung mit "• "
     return lines.join("\r\n");
   }
 
-  function renderFristen() {
-    const vs = state.vertraege.map((v, i) => ({ v, i, fi: fristInfo(v) }));
-    const mitFrist = vs.filter((x) => x.fi && !x.fi.jederzeit).sort((a, b) => a.fi.kuendBis - b.fi.kuendBis);
-    const sorted = [...mitFrist, ...vs.filter((x) => x.fi && x.fi.jederzeit), ...vs.filter((x) => !x.fi)];
-    const naechste = mitFrist[0];
-    const faellig = mitFrist.filter((x) => x.fi.faellig);
-    const kostenSumme = state.vertraege.reduce((s, v) => s + num(v.kosten), 0);
-    const edit = ui.edit && ui.edit.kind === "vertrag" ? state.vertraege[ui.edit.i] : null;
-    const draft = !edit && ui.draft && ui.draft.kind === "vertrag" ? ui.draft.data : null;
-    const f = edit || draft || { name: "", kategorie: "strom", anbieter: "", beginn: "", mindest: 12, verl: 0, frist: 1, einheit: "monate", kosten: "" };
-    const lokal = !window.claude;
-
-    const el = document.getElementById("panel-fristen");
-    el.style.setProperty("--kind", "var(--frist)");
-    el.innerHTML = `
-      <div class="summary">
-        <div class="stat hero">
-          <h3>Nächster Kündigungstermin</h3>
-          <div class="v">${naechste ? DATE.format(naechste.fi.kuendBis) : "–"}</div>
-          <div class="s">${naechste ? esc(naechste.v.name) + " · noch " + naechste.fi.tage + " Tage" : "Noch keine Verträge mit Frist"}</div>
-        </div>
-        <div class="stat">
-          <h3>Jetzt entscheiden</h3>
-          <div class="v ${faellig.length ? "neg" : "pos"}">${faellig.length}</div>
-          <div class="s">${faellig.length ? esc(list(faellig.map((x) => x.v.name))) : "Keine Frist innerhalb der Erinnerungszeit"}</div>
-        </div>
-        <div class="stat">
-          <h3>Laufende Kosten</h3>
-          <div class="v">${EUR0.format(kostenSumme)}</div>
-          <div class="s">pro Monat · ${EUR0.format(kostenSumme * 12)} im Jahr</div>
-        </div>
-      </div>
-
-      <div class="grid">
-        <div class="col">
-          ${scanCard("vertrag")}
-          <form class="card" id="vertrag-form" autocomplete="off">
-            ${formHead(edit, draft, "Vertrag")}
-            <div class="fields">
-              ${inp("Bezeichnung", "vertrag-f-name", "name", f.name, { type: "text", req: true, full: true, ph: "z. B. Strom Wohnung" })}
-              <label class="f">Art<select name="kategorie" id="vertrag-f-kategorie">${Object.entries(KAT_V).map(([k, l]) => `<option value="${k}" ${f.kategorie === k ? "selected" : ""}>${l}</option>`).join("")}</select></label>
-              ${inp("Anbieter", "vertrag-f-anbieter", "anbieter", f.anbieter, { type: "text" })}
-              ${inp("Vertragsbeginn", "vertrag-f-beginn", "beginn", f.beginn, { type: "date", req: true })}
-              ${inp("Mindestlaufzeit Monate", "vertrag-f-mindest", "mindest", f.mindest, { step: "1" })}
-              <label class="f full">Danach
-                <select name="verl" id="vertrag-f-verl">
-                  <option value="0" ${num(f.verl) === 0 ? "selected" : ""}>unbefristet, jederzeit mit Frist kündbar</option>
-                  <option value="12" ${num(f.verl) === 12 ? "selected" : ""}>verlängert sich um 12 Monate</option>
-                  <option value="24" ${num(f.verl) === 24 ? "selected" : ""}>verlängert sich um 24 Monate</option>
-                  <option value="1" ${num(f.verl) === 1 ? "selected" : ""}>verlängert sich um 1 Monat</option>
-                </select></label>
-              ${inp("Kündigungsfrist", "vertrag-f-frist", "frist", f.frist, { step: "1" })}
-              <label class="f">Einheit<select name="einheit" id="vertrag-f-einheit">${Object.entries(EINHEIT).map(([k, l]) => `<option value="${k}" ${f.einheit === k ? "selected" : ""}>${l}</option>`).join("")}</select></label>
-              ${inp("Kosten €/Monat", "vertrag-f-kosten", "kosten", f.kosten, { full: true })}
-            </div>
-            <button class="btn primary" type="submit">${edit ? "Änderungen speichern" : "Vertrag hinzufügen"}</button>
-          </form>
-          <div class="card">
-            <h2>Gut zu wissen</h2>
-            <ul class="legal">
-              <li>Strom, Gas, Internet und Mobilfunk: Verträge, die seit März 2022 geschlossen wurden (Telefon und Internet seit Dezember 2021), laufen nach der Mindestlaufzeit unbefristet weiter und sind mit höchstens einem Monat Frist kündbar.</li>
-              <li>Versicherungen verlängern sich meist um ein Jahr. Die Kündigung muss oft drei Monate vor Ablauf eingehen.</li>
-              <li>Bei einer Preis- oder Beitragserhöhung hast du in der Regel ein Sonderkündigungsrecht, bei Versicherungen auch nach einem Schadenfall.</li>
-              <li>Maßgeblich ist der Eingang beim Anbieter. Kündige einige Tage vorher und lass dir die Kündigung bestätigen.</li>
-            </ul>
-            <p class="hint">Das sind allgemeine Regeln. Was für deinen Vertrag gilt, steht in den Vertragsbedingungen.</p>
-          </div>
-        </div>
-
-        <div class="col">
-          <div class="card">
-            <div class="card-head"><h2>Erinnerungen</h2>
-              <label class="f inline">Erinnern
-                <select id="vorlauf">${[1, 2, 3].map((m) => `<option value="${m}" ${num(state.vorlauf) === m ? "selected" : ""}>${m} Monat${m > 1 ? "e" : ""} vorher</option>`).join("")}</select></label>
-            </div>
-            <p class="hint">Mit „Outlook“ oder „Google“ legst du für jeden Vertrag einen Kalendertermin am Erinnerungstag an. Dein Kalender meldet sich dann auch auf dem Handy. Dabei gehen Vertragsname und Datum an Microsoft bzw. Google.${lokal ? " Oder lade alle Termine auf einmal als Kalenderdatei." : ""}</p>
-            ${lokal ? '<div class="row"><button class="btn small" id="ics-btn">Alle Termine als Kalenderdatei (.ics)</button></div>' : ""}
-          </div>
-          <div class="tbl-wrap">
-            ${sorted.length ? `<table>
-              <thead><tr><th class="l">Vertrag</th><th>Kosten/M</th><th>Vertragsende</th><th>Kündigen bis</th><th>Erinnerung</th><th>In Kalender</th><th></th></tr></thead>
-              <tbody>${sorted.map(({ v, i, fi }) => `
-                <tr class="${fi && fi.faellig ? "due-row" : ""}">
-                  <td class="l"><div class="tname">${esc(v.name)}</div><div class="tsub">${esc(KAT_V[v.kategorie] || "")}${v.anbieter ? " · " + esc(v.anbieter) : ""} · Frist ${esc(v.frist)} ${esc(EINHEIT[v.einheit] || "Monate")}</div>
-                    <div class="pills">${!fi ? '<span class="pill warn">Beginn fehlt</span>' : fi.jederzeit ? '<span class="pill good">jederzeit kündbar</span>' : `<span class="pill ${fi.status.cls}">${fi.status.t}</span>`}</div></td>
-                  <td>${num(v.kosten) ? EUR2.format(num(v.kosten)) : "–"}</td>
-                  <td>${fi ? (fi.jederzeit ? "frühestens " + DATE.format(fi.ende) : DATE.format(fi.ende)) : "–"}</td>
-                  <td>${fi && !fi.jederzeit ? `<strong>${DATE.format(fi.kuendBis)}</strong>` : "–"}</td>
-                  <td>${fi && !fi.jederzeit ? DATE.format(fi.erinnerung) : "–"}</td>
-                  <td>${calLinks(v, fi) || "–"}</td>
-                  <td><div class="actions"><button class="btn small" data-edit="${i}">Bearbeiten</button><button class="btn small danger" data-del="${i}">Löschen</button></div></td>
-                </tr>`).join("")}</tbody></table>` : '<div class="empty">Noch keine Verträge. Trage links deinen ersten Vertrag ein oder lies ihn per Foto ein.</div>'}
-          </div>
-          <p class="hint">„Kündigen bis“ ist der letzte Tag, an dem die Kündigung beim Anbieter eingehen muss. „Jederzeit kündbar“ heißt: Die Mindestlaufzeit ist vorbei, die Kündigung wirkt nach Ablauf der Frist.</p>
-        </div>
-      </div>`;
-
-    const rerender = () => { save(); renderFristen(); updateDue(); };
-    document.getElementById("vorlauf").addEventListener("change", (e) => { state.vorlauf = num(e.target.value, 1); rerender(); });
-    const ics = document.getElementById("ics-btn");
-    if (ics) ics.addEventListener("click", () => {
-      const blob = new Blob([buildIcs()], { type: "text/calendar" });
-      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "kuendigungsfristen.ics";
-      document.body.appendChild(a); a.click(); a.remove(); toast("Kalenderdatei erstellt");
-    });
-    const form = document.getElementById("vertrag-form");
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const fd = new FormData(form);
-      const v = { id: edit ? edit.id : "v" + Date.now().toString(36), name: String(fd.get("name")).trim(), kategorie: String(fd.get("kategorie")), anbieter: String(fd.get("anbieter")).trim(), beginn: String(fd.get("beginn")), mindest: num(fd.get("mindest")), verl: num(fd.get("verl")), frist: num(fd.get("frist")), einheit: String(fd.get("einheit")), kosten: num(fd.get("kosten")) };
-      if (edit) { state.vertraege[ui.edit.i] = v; ui.edit = null; toast("Vertrag gespeichert"); }
-      else { state.vertraege.push(v); toast("Vertrag hinzugefügt"); }
-      ui.draft = null; rerender();
-    });
-    bindEditCancel();
-    bindEditButtons(el, "vertrag");
-    bindDelete(el.querySelector(".tbl-wrap"), (i) => { state.vertraege.splice(i, 1); ui.edit = null; rerender(); });
-    bindScan("vertrag");
-  }
-
   function updateDue() {
     const due = state.vertraege.map((v) => ({ v, fi: fristInfo(v) })).filter((x) => x.fi && !x.fi.jederzeit && x.fi.faellig).sort((a, b) => a.fi.kuendBis - b.fi.kuendBis);
     const banner = document.getElementById("due-banner"), cnt = document.getElementById("due-count");
@@ -1388,7 +813,7 @@ Form: höchstens 220 Wörter, Deutsch, Du-Form, schlichte Aufzählung mit "• "
       <button class="btn ${!akt || r.dokument === "angebot" ? "primary" : ""}" id="scan-angebot">${akt ? "Als Angebot prüfen" : "Ins Formular übernehmen"}</button>
       <button class="btn small" id="scan-clear">Verwerfen</button></div>`;
 
-  function scanCard(kind) {
+  function scanReview(kind) {
     if (!canScan()) return "";
     const mine = scan.kind === kind;
     const r = mine ? scan.result : null;
@@ -1446,18 +871,10 @@ Form: höchstens 220 Wörter, Deutsch, Du-Form, schlichte Aufzählung mit "• "
         <dt>Laufzeit / Garantie</dt><dd>${fmtOrDash(r.laufzeit_monate)} / ${fmtOrDash(r.preisgarantie_monate)} Mon.</dd>
       </dl>${hinweis}${btnRow(r, true)}`;
     }
-    const busyHere = mine && scan.busy && scan.mode === "dokument";
-    return `<div class="card scan">
-      <div class="card-head"><h2>Foto einlesen</h2>${mine && scan.busy ? '<button class="btn small" id="scan-stop">Abbrechen</button>' : ""}</div>
-      ${r ? "" : `<p class="hint">Fotografiere deine ${SCAN_WAS[kind]}. Claude liest die Daten aus, du prüfst sie vor dem Übernehmen. Bis zu ${imgLimits.maxCount} Seiten auf einmal.</p>
-      <p class="hint"><strong>Datenschutz:</strong> Das Foto wird zur Auswertung über dein Claude-Konto an Anthropic gesendet und nicht in der Seite gespeichert. Decke Name, Adresse, IBAN, Kunden- und Zählernummer vorher ab. Für den Vergleich werden sie nicht gebraucht.</p>
-      <label class="btn primary scan-btn" ${scan.busy ? 'aria-disabled="true"' : ""}>${busyHere ? "Wird gelesen …" : "Foto aufnehmen oder auswählen"}
-        <input class="sr-only" type="file" id="scan-file" accept="${esc(imgLimits.mediaTypes.join(","))}" multiple ${scan.busy ? "disabled" : ""}>
-      </label>`}
-      ${mine && scan.status ? `<p class="hint">${esc(scan.status)}</p>` : ""}
+    return `${mine && scan.busy ? `<div class="row scan-status"><span class="spinner"></span><span class="hint" style="flex:1">${esc(scan.status)}</span><button class="btn small" id="scan-stop">Abbrechen</button></div>` : ""}
+      ${mine && !scan.busy && scan.status ? `<p class="hint"><strong>${esc(scan.status)}</strong></p>` : ""}
       ${mine && scan.error ? `<p class="err">${esc(scan.error)}</p>` : ""}
-      ${review}
-    </div>`;
+      ${review ? `<div class="scan-review">${review}</div>` : ""}`;
   }
 
   const PRIVACY = '- Unbekanntes = null. Gib keine Namen, Adressen, Kunden-, Zähler-, Vertrags- oder Kennzeichennummern aus.\n- "hinweis": ein kurzer deutscher Satz zu Unsicherheiten, sonst null.';
@@ -1648,6 +1065,784 @@ Antworte nur mit JSON in dieser Form:
     });
   }
 
+  // ---------- Bausteine der Oberfläche ----------
+  const stepTitle = (n, t, extra = "") => `<div class="card-head"><h2 class="step"><span class="step-num">${n}</span>${t}</h2>${extra}</div>`;
+  const deltaHtml = (v, fmt = EUR0.format, suffix = "") => v >= 0.5 ? `<span class="delta pos">spart ${fmt(v)}${suffix}</span>` : v <= -0.5 ? `<span class="delta neg">${fmt(-v)}${suffix} teurer</span>` : `<span class="delta">gleich teuer</span>`;
+  const factsHtml = (facts) => `<dl class="facts-grid">${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("")}</dl>`;
+  const bar = (val, max, ghost) => `<div class="track">${ghost ? `<div class="fill ghost" style="width:${Math.max(0, (ghost / max) * 100)}%"></div>` : ""}<div class="fill" style="width:${Math.max(0, (val / max) * 100)}%"></div></div>`;
+
+  function offerCard(o) {
+    return `<article class="offer ${o.best ? "best" : ""}">
+      <span class="rank">${o.rank}</span>
+      <div class="o-main">
+        <div class="o-title">${esc(o.t.anbieter)} <span class="o-tarif">${esc(o.t.tarif)}</span></div>
+        <div class="pills">${o.pills}${o.t.quelle ? `<span class="pill muted">über ${esc(o.t.quelle)}</span>` : ""}</div>
+        ${o.extra || ""}
+        ${o.bar || ""}
+      </div>
+      <div class="o-price"><span class="o-big">${o.price}</span><span class="hint">${o.priceSub}</span>${o.delta || ""}</div>
+      <details class="more"><summary>Details</summary>
+        ${factsHtml(o.facts)}
+        <div class="actions"><button class="btn small" data-edit="${o.i}">Bearbeiten</button><button class="btn small danger" data-del="${o.i}">Löschen</button></div>
+      </details>
+    </article>`;
+  }
+
+  function recoCard(html, stats) {
+    return `<div class="reco"><div class="reco-text">${html}</div>
+      <div class="reco-stats">${stats.map(([k, v, cls]) => `<div><span class="lbl">${k}</span><span class="val ${cls || ""}">${v}</span></div>`).join("")}</div></div>`;
+  }
+  const jumpLink = (kind, warns) => warns ? ` <button type="button" class="jump" data-jump="${kind}-checks">${warns} ${warns === 1 ? "Punkt" : "Punkte"} vorher prüfen</button>` : "";
+
+  function vergleichCard(kind, findings) {
+    const mine = ana.kind === kind;
+    const warns = findings.filter((x) => x.lvl === "warn").length;
+    const li = (x) => `<li><span class="tag ${x.lvl}">${TAG[x.lvl]}</span><span>${esc(x.t)}</span></li>`;
+    const first = findings.slice(0, 3), rest = findings.slice(3);
+    return `<div class="card" id="${kind}-checks">
+      <div class="card-head"><h2>Worauf du achten solltest</h2><span class="pill ${warns ? "warn" : "good"}">${warns ? `${warns} ${warns === 1 ? "Punkt" : "Punkte"} prüfen` : "gut vergleichbar"}</span></div>
+      <ul class="findings">${first.map(li).join("")}</ul>
+      ${rest.length ? `<details class="more"><summary>${rest.length} weitere${rest.length === 1 ? "r Hinweis" : " Hinweise"}</summary><ul class="findings" style="margin-top:8px">${rest.map(li).join("")}</ul></details>` : ""}
+      ${sampler ? `<div class="row"><button class="btn small" id="ana-btn" ${mine && ana.busy ? "disabled" : ""}>${mine && ana.busy ? "Claude prüft …" : "Von Claude erklären lassen"}</button></div>` : ""}
+      ${mine && ana.busy && !ana.text ? '<p class="hint">Claude prüft die Angebote, das dauert meist 10–30 Sekunden …</p>' : ""}
+      ${mine && ana.text ? `<p class="analysis" id="ana-out">${esc(ana.text)}</p>` : ""}
+      ${mine && ana.error ? `<p class="err">${esc(ana.error)}</p>` : ""}
+    </div>`;
+  }
+
+  function collectCard(kind, o) {
+    const busy = scan.busy;
+    const acc = canScan() ? esc(imgLimits.mediaTypes.join(",")) : "";
+    const qs = {};
+    (o.angebote || []).forEach((a) => { const q = a.quelle || "ohne Quelle"; qs[q] = (qs[q] || 0) + 1; });
+    return `<div class="card">
+      ${stepTitle(o.step || 2, o.title || "Angebote sammeln")}
+      <div class="bigbtns">
+        ${canScan() ? `<label class="bigbtn${busy ? " disabled" : ""}"><span class="bb-t">${o.docLabel}</span><span class="bb-s">${o.docSub}</span><input class="sr-only" type="file" id="scan-file" accept="${acc}" multiple ${busy ? "disabled" : ""}></label>` : ""}
+        ${canScan() && o.portalKey ? `<label class="bigbtn${busy ? " disabled" : ""}"><span class="bb-t">Ergebnisliste eines Vergleichsportals</span><span class="bb-s">Screenshot von Check24, Verivox &amp; Co. einlesen</span><input class="sr-only" type="file" id="scan-list-file" accept="${acc}" multiple ${busy ? "disabled" : ""}></label>` : ""}
+        <button type="button" class="bigbtn" id="form-toggle" aria-expanded="${o.open}"><span class="bb-t">${o.open ? "Eingabe schließen" : o.manualLabel || "Von Hand eingeben"}</span><span class="bb-s">${o.manualSub || "Preise selbst eintragen"}</span></button>
+      </div>
+      ${scanReview(kind)}
+      <div id="form-wrap" ${o.open ? "" : "hidden"}>${o.formHtml}</div>
+      ${o.portalKey ? `<details class="more"><summary>Vergleichsportale und Tipps</summary>
+        <div class="col" style="gap:8px;margin-top:8px">
+          <div class="chips">${PORTALE[o.portalKey].map(([n, u]) => `<a class="chip" href="${u}" target="_blank" rel="noopener noreferrer">${esc(n)}</a>`).join("")}</div>
+          <p class="hint">Rechne im Portal mit deinen Daten, mach einen Screenshot der Ergebnisliste und lies ihn hier ein. Wiederhole das für jedes Portal.</p>
+          <p class="hint">${esc(PORTAL_TIPP[o.tipKey])}</p>
+          ${Object.keys(qs).length ? `<div class="chips">${Object.entries(qs).map(([q, n]) => `<span class="pill info">${esc(q)}: ${n}</span>`).join("")}</div>` : ""}
+        </div></details>` : ""}
+      ${canScan() ? '<p class="hint small">Fotos gehen zur Auswertung über dein Claude-Konto an Anthropic und werden nicht gespeichert. Decke Name, Adresse, IBAN und Kundennummer vorher ab.</p>' : ""}
+    </div>`;
+  }
+  function bindCollect(kind) {
+    const t = document.getElementById("form-toggle");
+    if (!t) return;
+    t.addEventListener("click", () => {
+      const open = t.getAttribute("aria-expanded") === "true";
+      ui.form[kind] = !open;
+      if (open) { ui.edit = null; ui.draft = null; }
+      rerenderTab();
+      if (!open) {
+        const f = document.getElementById(kind + "-form");
+        if (f) { f.scrollIntoView({ behavior: "smooth", block: "center" }); const first = f.querySelector("input"); if (first) first.focus({ preventScroll: true }); }
+      }
+    });
+  }
+  const closeForm = (kind) => { ui.form[kind] = false; ui.edit = null; ui.draft = null; };
+
+  // ---------- Übersicht ----------
+  function bereichEnergie(kind) {
+    const d = state[kind], kwh = num(d.verbrauch);
+    const hasAkt = num(d.aktuell.gp) > 0 || num(d.aktuell.ap) > 0;
+    const akt = kostenEnergie(d.aktuell, kwh);
+    const best = d.angebote.map((t) => ({ t, k: kostenEnergie(t, kwh) })).sort((a, b) => a.k.y1 - b.k.y1)[0];
+    return { hasAkt, aktJahr: akt.folge, best: best && { name: nameOf(best.t), jahr: best.k.y1 }, spar: hasAkt && best ? akt.folge - best.k.y1 : null, n: d.angebote.length };
+  }
+  function bereichTk(art) {
+    const d = state.tk[art], H = num(state.tk.horizont, 24);
+    const hasAkt = num(d.aktuell.preis) > 0;
+    const best = d.angebote.map((t) => ({ t, k: kostenTk(t, H) })).sort((a, b) => a.k.monat - b.k.monat)[0];
+    return { hasAkt, aktJahr: num(d.aktuell.preis) * 12, best: best && { name: nameOf(best.t), jahr: best.k.monat * 12 }, spar: hasAkt && best ? (num(d.aktuell.preis) - best.k.monat) * 12 : null, n: d.angebote.length };
+  }
+
+  function renderUebersicht() {
+    const B = [
+      { key: "strom", tab: "strom", name: "Strom", c: "--strom", ...bereichEnergie("strom") },
+      { key: "gas", tab: "gas", name: "Gas", c: "--gas", ...bereichEnergie("gas") },
+      { key: "internet", tab: "internet", art: "internet", name: "Internet & Festnetz", c: "--tk", ...bereichTk("internet") },
+      { key: "mobil", tab: "internet", art: "mobil", name: "Handy", c: "--tk", ...bereichTk("mobil") },
+    ];
+    const total = B.reduce((s, b) => s + (b.spar > 0 ? b.spar : 0), 0);
+    const fr = state.vertraege.map((v) => ({ v, fi: fristInfo(v) })).filter((x) => x.fi && !x.fi.jederzeit).sort((a, b) => a.fi.kuendBis - b.fi.kuendBis);
+    const kosten = state.vertraege.reduce((s, v) => s + num(v.kosten), 0);
+    const versKats = Object.entries(state.vers.kategorien).filter(([, k]) => k.angebote.length);
+    const nAng = B.reduce((s, b) => s + b.n, 0) + versKats.reduce((s, [, k]) => s + k.angebote.length, 0);
+    const leer = !nAng && !state.vertraege.length;
+    const vergleichbar = B.some((b) => b.spar !== null);
+
+    const reco = leer
+      ? `<strong>Willkommen.</strong> Wähle oben einen Bereich und trag deinen aktuellen Tarif ein. Danach sammelst du Angebote, der Kompass rechnet und zeigt dir, ob sich ein Wechsel lohnt.`
+      : !vergleichbar
+        ? `<strong>Trag deine aktuellen Tarife ein.</strong> Sobald du in einem Bereich deinen heutigen Preis und mindestens ein Angebot erfasst hast, zeigt dir die Übersicht, wie viel du sparen kannst.`
+      : total > 0
+        ? `<strong>Du könntest rund ${EUR0.format(total)} im Jahr sparen.</strong> So viel bringt es, wenn du in jedem Bereich zum günstigsten erfassten Angebot wechselst (erstes Jahr, inklusive Bonus).`
+        : `<strong>Deine Tarife sind günstig.</strong> Keines der erfassten Angebote ist billiger als das, was du heute zahlst.`;
+
+    const el = document.getElementById("panel-uebersicht");
+    el.style.setProperty("--kind", "var(--accent)");
+    el.innerHTML = `
+      ${recoCard(reco, [
+        ["Sparpotenzial pro Jahr", total > 0 ? EUR0.format(total) : "–", total > 0 ? "pos" : ""],
+        ["Nächste Kündigungsfrist", fr[0] ? DATE.format(fr[0].fi.kuendBis) : "–", fr[0] && fr[0].fi.faellig ? "neg" : ""],
+        ["Laufende Verträge", kosten ? EUR0.format(kosten) + "/Monat" : "–"],
+      ])}
+      <div class="ov-grid">
+        ${B.map((b) => `
+          <div class="card ov" style="--c:var(${b.c})">
+            <div class="ov-head"><h2>${b.name}</h2>${b.spar > 0.5 ? `<span class="pill good">spart ${EUR0.format(b.spar)}/Jahr</span>` : b.spar !== null && b.best ? '<span class="pill muted">Tarif ist günstig</span>' : ""}</div>
+            <dl>
+              <dt>Dein Tarif</dt><dd>${b.hasAkt ? EUR0.format(b.aktJahr) + "/Jahr" : "noch nicht eingetragen"}</dd>
+              <dt>Bestes Angebot</dt><dd>${b.best ? esc(b.best.name) : "noch keins"}</dd>
+              <dt>Angebote</dt><dd>${b.n}</dd>
+            </dl>
+            <div class="row"><button class="btn small" data-go="${b.tab}" ${b.art ? `data-art="${b.art}"` : ""}>${b.n || b.hasAkt ? "Vergleich öffnen" : "Jetzt starten"}</button></div>
+          </div>`).join("")}
+        <div class="card ov" style="--c:var(--vers)">
+          <div class="ov-head"><h2>Versicherungen</h2></div>
+          ${versKats.length ? `<dl>${versKats.map(([, k]) => {
+            const best = k.angebote.slice().sort((a, b) => num(a.beitrag) * num(a.zahlweise, 1) - num(b.beitrag) * num(b.zahlweise, 1))[0];
+            return `<dt>${esc(k.name)} (${k.angebote.length})</dt><dd>ab ${EUR0.format(num(best.beitrag) * num(best.zahlweise, 1))}/Jahr</dd>`;
+          }).join("")}</dl>` : '<p class="hint">Noch keine Angebote erfasst.</p>'}
+          <div class="row"><button class="btn small" data-go="versicherung">${versKats.length ? "Vergleich öffnen" : "Jetzt starten"}</button></div>
+        </div>
+        <div class="card ov" style="--c:var(--frist)">
+          <div class="ov-head"><h2>Kündigungsfristen</h2>${fr.filter((x) => x.fi.faellig).length ? `<span class="pill bad">${fr.filter((x) => x.fi.faellig).length} bald fällig</span>` : ""}</div>
+          ${fr.length ? `<ul class="deadlines">${fr.slice(0, 4).map((x) => `<li><span>${esc(x.v.name)}</span><span class="pill ${x.fi.status.cls}">${DATE.format(x.fi.kuendBis)}</span></li>`).join("")}</ul>` : '<p class="hint">Trag deine Verträge ein, dann erinnert dich der Kompass rechtzeitig vor dem Kündigungstermin.</p>'}
+          <div class="row"><button class="btn small" data-go="fristen">Alle Fristen</button></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>So funktioniert es</h2>
+        <ol class="howto">
+          <li><strong>Aktuellen Tarif eintragen:</strong> von der letzten Rechnung abtippen oder fotografieren.</li>
+          <li><strong>Angebote sammeln:</strong> auf Vergleichsportalen rechnen, die Ergebnisliste als Screenshot einlesen oder Angebote von Hand eintragen.</li>
+          <li><strong>Vergleichen:</strong> Der Kompass rechnet alles gleich und zeigt, worauf du vor dem Wechsel achten solltest.</li>
+          <li><strong>Frist eintragen:</strong> Im Bereich „Fristen“ bekommst du eine Kalender-Erinnerung einen Monat vor dem Kündigungstermin.</li>
+        </ol>
+      </div>`;
+    el.querySelectorAll("[data-art]").forEach((b) => b.addEventListener("click", () => { state.tk.art = b.dataset.art; save(); }, { capture: true }));
+  }
+
+  // ---------- Energie ----------
+  function renderEnergy(kind) {
+    const d = state[kind];
+    const isStrom = kind === "strom";
+    const kwh = num(d.verbrauch);
+    const sortKey = ui.sort[kind];
+    const oekoLabel = isStrom ? "Ökostrom" : "Klimaneutral / Biogas";
+    const hasAkt = num(d.aktuell.gp) > 0 || num(d.aktuell.ap) > 0;
+    const akt = kostenEnergie(d.aktuell, kwh);
+    const all = d.angebote.map((t, i) => ({ t, i, k: kostenEnergie(t, kwh) }));
+    let rows = all.slice();
+    if (ui.nurOeko[kind]) rows = rows.filter((r) => r.t.oeko);
+    if (ui.maxLaufzeit[kind]) rows = rows.filter((r) => num(r.t.laufzeit) <= ui.maxLaufzeit[kind]);
+    rows.sort((a, b) => a.k[sortKey] - b.k[sortKey]);
+    const best = rows[0];
+    const maxVal = Math.max(hasAkt ? akt.folge : 0, ...rows.map((r) => Math.max(r.k.folge, r.k[sortKey])), 1);
+    const findings = checkEnergy(kind, all, kwh);
+    const warns = findings.filter((x) => x.lvl === "warn").length;
+
+    const edit = ui.edit && ui.edit.kind === kind ? d.angebote[ui.edit.i] : null;
+    const draft = !edit && ui.draft && ui.draft.kind === kind ? ui.draft.data : null;
+    const open = !!(edit || draft || ui.form[kind]);
+    const f = edit || draft || { anbieter: "", tarif: "", gp: "", ap: "", bonus: "", laufzeit: 12, garantie: 12, oeko: false, quelle: "" };
+    const presets = [["1 Person", 1500], ["2 Personen", 2500], ["3 Personen", 3500], ["4 Personen", 4250], ["5+", 5000]];
+
+    let reco;
+    if (!all.length) reco = `<strong>Noch keine Angebote.</strong> Sammle in Schritt 2 Angebote, dann siehst du hier, ob sich ein Wechsel lohnt.`;
+    else if (!best) reco = `<strong>Kein Angebot passt zu deinen Filtern.</strong> Lockere die Filter in Schritt 3.`;
+    else if (!hasAkt) reco = `<strong>Günstigstes Angebot: ${esc(nameOf(best.t))}</strong> mit ${EUR0.format(best.k.y1)} im ersten Jahr. Trag in Schritt 1 deinen aktuellen Tarif ein, dann siehst du deine Ersparnis.`;
+    else {
+      const s1 = akt.folge - best.k.y1, s2 = akt.folge - best.k.folge;
+      if (s1 > 0.5 && s2 > 0.5) reco = `<strong>Wechsel lohnt sich.</strong> Mit ${esc(nameOf(best.t))} sparst du ${EUR0.format(s1)} im ersten Jahr und danach ${EUR0.format(s2)} pro Jahr.`;
+      else if (s1 > 0.5) reco = `<strong>Wechsel lohnt sich nur im ersten Jahr.</strong> ${esc(nameOf(best.t))} spart dir dank Bonus ${EUR0.format(s1)}, ist danach aber ${EUR0.format(-s2)} pro Jahr teurer als dein Tarif. Nach einem Jahr also wieder wechseln.`;
+      else reco = `<strong>Dein Tarif ist günstig.</strong> Keines der ${all.length} Angebote ist billiger als dein aktueller Tarif.`;
+    }
+    reco += jumpLink(kind, warns);
+
+    const pillsFor = (t, k) => {
+      const p = [];
+      if (num(t.laufzeit) <= 1) p.push('<span class="pill good">monatlich kündbar</span>');
+      else if (num(t.laufzeit) > 12) p.push(`<span class="pill warn">${esc(t.laufzeit)} Mon. Bindung</span>`);
+      if (num(t.garantie) >= 12) p.push(`<span class="pill good">${esc(t.garantie)} Mon. Preisgarantie</span>`);
+      else p.push(`<span class="pill warn">${num(t.garantie) ? esc(t.garantie) + " Mon." : "keine"} Preisgarantie</span>`);
+      if (num(t.bonus) > 0 && num(t.bonus) / k.folge > 0.15) p.push('<span class="pill warn">Bonus-lastig</span>');
+      if (t.oeko) p.push(`<span class="pill good">${oekoLabel}</span>`);
+      if (t.anzeige) p.push('<span class="pill info">Anzeige</span>');
+      return p.join("");
+    };
+    const priceSub = sortKey === "y1" ? "im 1. Jahr" : sortKey === "folge" ? "pro Jahr ab dem 2. Jahr" : "Ø pro Jahr über 2 Jahre";
+
+    const formHtml = `<form class="col" id="${kind}-form" autocomplete="off" style="gap:10px">
+        ${formHead(edit, draft)}
+        <div class="fields">
+          ${inp("Anbieter", `${kind}-f-anbieter`, "anbieter", f.anbieter, { type: "text", req: true })}
+          ${inp("Tarif", `${kind}-f-tarif`, "tarif", f.tarif, { type: "text" })}
+          ${inp("Grundpreis €/Monat", `${kind}-f-gp`, "gp", f.gp, { req: true })}
+          ${inp("Arbeitspreis ct/kWh", `${kind}-f-ap`, "ap", f.ap, { req: true })}
+          ${inp("Bonus € (einmalig)", `${kind}-f-bonus`, "bonus", f.bonus, { step: "1" })}
+          ${inp("Laufzeit Monate", `${kind}-f-laufzeit`, "laufzeit", f.laufzeit, { step: "1" })}
+          ${inp("Preisgarantie Monate", `${kind}-f-garantie`, "garantie", f.garantie, { step: "1" })}
+          ${inp("Quelle (Portal)", `${kind}-f-quelle`, "quelle", f.quelle, { type: "text", ph: "z. B. Verivox" })}
+          <label class="check full"><input type="checkbox" name="oeko" id="${kind}-f-oeko" ${f.oeko ? "checked" : ""}>${oekoLabel}</label>
+        </div>
+        <button class="btn primary" type="submit">${edit ? "Änderungen speichern" : "Angebot speichern"}</button>
+      </form>`;
+
+    const el = document.getElementById("panel-energy");
+    el.style.setProperty("--kind", `var(--${kind})`);
+    el.innerHTML = `
+      ${recoCard(reco, [
+        ["Dein Tarif", hasAkt ? EUR0.format(akt.folge) + "/Jahr" : "–"],
+        ["Günstigstes Angebot", best ? EUR0.format(best.k[sortKey]) : "–"],
+        ["Ersparnis", hasAkt && best ? EUR0.format(akt.folge - best.k[sortKey]) : "–", hasAkt && best ? (akt.folge - best.k[sortKey] >= 0 ? "pos" : "neg") : ""],
+      ])}
+      <div class="grid">
+        <div class="col">
+          <div class="card">
+            ${stepTitle(1, "Dein aktueller Tarif")}
+            <div class="fields">
+              <label class="f full">Jahresverbrauch in kWh<input type="number" id="${kind}-verbrauch" min="0" step="100" value="${esc(d.verbrauch)}"></label>
+              ${isStrom ? `<div class="chips full">${presets.map(([l, v]) => `<button class="chip ${kwh === v ? "on" : ""}" data-preset="${v}">${l}</button>`).join("")}</div>`
+              : `<details class="more full"><summary>Verbrauch nicht zur Hand? Schätzen</summary>
+                  <div class="fields" style="margin-top:8px">
+                    <label class="f">Wohnfläche m²<input type="number" id="gas-flaeche" min="0" step="5" placeholder="z. B. 100"></label>
+                    <label class="f">Gebäude
+                      <select id="gas-standard">
+                        <option value="80">Neubau / saniert</option>
+                        <option value="140" selected>Durchschnitt</option>
+                        <option value="200">Altbau unsaniert</option>
+                      </select></label>
+                    <label class="f">oder Zählerstand-Differenz m³<input type="number" id="gas-m3" min="0" step="10" placeholder="z. B. 1400"></label>
+                    <label class="f">Umrechnungsfaktor<input type="number" id="gas-faktor" min="5" max="15" step="0.01" value="10.45"></label>
+                    <div class="full row"><button class="btn small" id="gas-calc">Verbrauch übernehmen</button><span class="hint">Faktor (Brennwert × Zustandszahl) steht auf der Gasrechnung.</span></div>
+                  </div></details>`}
+              <label class="f">Grundpreis €/Monat<input type="number" id="${kind}-akt-gp" step="0.01" min="0" value="${esc(d.aktuell.gp)}"></label>
+              <label class="f">Arbeitspreis ct/kWh<input type="number" id="${kind}-akt-ap" step="0.01" min="0" value="${esc(d.aktuell.ap)}"></label>
+            </div>
+            <p class="hint">Steht auf deiner letzten Jahresabrechnung (Brutto-Preise).${canScan() ? " Du kannst die Rechnung auch in Schritt 2 fotografieren." : ""}</p>
+          </div>
+          ${collectCard(kind, { formHtml, open, portalKey: "energie", tipKey: kind, angebote: d.angebote, docLabel: "Rechnung oder Angebot fotografieren", docSub: "Claude liest Grund- und Arbeitspreis aus" })}
+        </div>
+
+        <div class="col">
+          <div class="card">
+            ${stepTitle(3, "Vergleich")}
+            <div class="chips" role="group" aria-label="Sortieren nach">${Object.entries(SORTS).map(([k, l]) => `<button class="chip ${sortKey === k ? "on" : ""}" data-sort="${k}">${l}</button>`).join("")}</div>
+            <div class="row">
+              <label class="check"><input type="checkbox" id="${kind}-nuroeko" ${ui.nurOeko[kind] ? "checked" : ""}>nur ${oekoLabel}</label>
+              <label class="check"><input type="checkbox" id="${kind}-max12" ${ui.maxLaufzeit[kind] ? "checked" : ""}>höchstens 12 Monate Laufzeit</label>
+            </div>
+            ${hasAkt ? `<div class="ref"><span>Dein aktueller Tarif</span><strong class="mono">${EUR0.format(akt.folge)}/Jahr</strong>${bar(akt.folge, maxVal).replace('class="fill"', 'class="fill current"')}</div>` : ""}
+            <div class="offers">
+              ${rows.length ? rows.map((r, n) => offerCard({
+                t: r.t, i: r.i, rank: n + 1, best: n === 0,
+                pills: pillsFor(r.t, r.k),
+                bar: bar(r.k[sortKey], maxVal, sortKey === "y1" && num(r.t.bonus) > 0 ? r.k.folge : 0),
+                price: EUR0.format(r.k[sortKey]),
+                priceSub: sortKey === "y1" && num(r.t.bonus) > 0 ? `im 1. Jahr, danach ${EUR0.format(r.k.folge)}` : priceSub,
+                delta: hasAkt ? deltaHtml(akt.folge - r.k[sortKey]) : "",
+                facts: [["Grundpreis", EUR2.format(num(r.t.gp)) + "/Monat"], ["Arbeitspreis", NUM.format(num(r.t.ap)) + " ct/kWh"], ["Bonus", num(r.t.bonus) ? EUR0.format(num(r.t.bonus)) : "–"], ["Laufzeit", num(r.t.laufzeit) <= 1 ? "monatlich" : esc(r.t.laufzeit) + " Monate"], ["Preisgarantie", num(r.t.garantie) ? esc(r.t.garantie) + " Monate" : "keine"], ["1. Jahr", EUR0.format(r.k.y1)], ["ab 2. Jahr", EUR0.format(r.k.folge)], ["Abschlag ca.", EUR0.format(r.k.y1 / 12) + "/Monat"]],
+              })).join("") : `<div class="empty">${d.angebote.length ? "Kein Angebot passt zu den Filtern." : "Noch keine Angebote. Sammle sie in Schritt 2."}</div>`}
+            </div>
+            ${sortKey === "y1" && rows.some((r) => num(r.t.bonus) > 0) ? '<p class="hint">Gestrichelt: was der Tarif ab dem zweiten Jahr kostet, wenn der Bonus wegfällt.</p>' : ""}
+            ${best && kwh && hasAkt ? `<p class="hint">Ab einem Arbeitspreis von ${NUM.format(((akt.folge - num(best.t.gp) * 12) / kwh) * 100)} ct/kWh wäre das beste Angebot nicht mehr günstiger als dein Tarif.</p>` : ""}
+          </div>
+          ${vergleichCard(kind, findings)}
+        </div>
+      </div>`;
+
+    const rerender = () => { save(); renderEnergy(kind); updateDue(); };
+    const bindNum = (id, setter) => { const i = document.getElementById(id); i.addEventListener("change", () => { setter(num(i.value)); rerender(); }); };
+    bindNum(`${kind}-verbrauch`, (v) => (d.verbrauch = v));
+    bindNum(`${kind}-akt-gp`, (v) => (d.aktuell.gp = v));
+    bindNum(`${kind}-akt-ap`, (v) => (d.aktuell.ap = v));
+    el.querySelectorAll("[data-preset]").forEach((b) => b.addEventListener("click", () => { d.verbrauch = num(b.dataset.preset); rerender(); }));
+    el.querySelectorAll("[data-sort]").forEach((b) => b.addEventListener("click", () => { ui.sort[kind] = b.dataset.sort; renderEnergy(kind); }));
+    document.getElementById(`${kind}-nuroeko`).addEventListener("change", (e) => { ui.nurOeko[kind] = e.target.checked; renderEnergy(kind); });
+    document.getElementById(`${kind}-max12`).addEventListener("change", (e) => { ui.maxLaufzeit[kind] = e.target.checked ? 12 : 0; renderEnergy(kind); });
+    if (!isStrom) {
+      document.getElementById("gas-calc").addEventListener("click", () => {
+        const m3 = num(document.getElementById("gas-m3").value);
+        const fl = num(document.getElementById("gas-flaeche").value);
+        if (m3 > 0) d.verbrauch = Math.round(m3 * num(document.getElementById("gas-faktor").value, 10.45));
+        else if (fl > 0) d.verbrauch = Math.round(fl * num(document.getElementById("gas-standard").value, 140));
+        else { toast("Bitte Wohnfläche oder m³ eingeben"); return; }
+        rerender(); toast(`Verbrauch auf ${NUM.format(d.verbrauch)} kWh gesetzt`);
+      });
+    }
+    const form = document.getElementById(`${kind}-form`);
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const t = keepMeta({
+        anbieter: String(fd.get("anbieter")).trim(), tarif: String(fd.get("tarif")).trim(),
+        gp: num(fd.get("gp")), ap: num(fd.get("ap")), bonus: num(fd.get("bonus")),
+        laufzeit: num(fd.get("laufzeit")), garantie: num(fd.get("garantie")), oeko: fd.get("oeko") === "on",
+        quelle: String(fd.get("quelle")).trim(),
+      }, edit || draft);
+      if (edit) { d.angebote[ui.edit.i] = t; toast("Angebot gespeichert"); }
+      else { d.angebote.push(t); toast("Angebot hinzugefügt"); }
+      closeForm(kind); rerender();
+    });
+    bindCollect(kind);
+    bindEditCancel();
+    bindEditButtons(el, kind);
+    bindDelete(el.querySelector(".offers"), (i) => { d.angebote.splice(i, 1); ui.edit = null; rerender(); });
+    bindScan(kind);
+    bindVergleich(kind, isStrom ? "Strom" : "Gas", { verbrauch_kwh: kwh, aktueller_tarif: d.aktuell, angebote: all.map((r) => ({ ...r.t, kosten_1_jahr: Math.round(r.k.y1), kosten_ab_2_jahr: Math.round(r.k.folge) })) }, findings);
+  }
+
+  // ---------- Internet & Handy ----------
+  function renderTk() {
+    const tk = state.tk, art = tk.art, A = TK_ART[art], d = tk[art], H = num(tk.horizont, 24);
+    const hasAkt = num(d.aktuell.preis) > 0;
+    const aktTotal = num(d.aktuell.preis) * H;
+    const all = d.angebote.map((t, i) => ({ t, i, k: kostenTk(t, H) }));
+    let rows = all.slice();
+    if (ui.tkMin && num(d.aktuell.leistung) > 0) rows = rows.filter((r) => num(r.t.leistung) >= num(d.aktuell.leistung));
+    rows.sort((a, b) => a.k.monat - b.k.monat);
+    const best = rows[0];
+    const maxVal = Math.max(hasAkt ? num(d.aktuell.preis) : 0, ...rows.map((r) => r.k.monat), 1);
+    const findings = checkTk(art, all, d, H);
+    const warns = findings.filter((x) => x.lvl === "warn").length;
+    const edit = ui.edit && ui.edit.kind === "tk" ? d.angebote[ui.edit.i] : null;
+    const draft = !edit && ui.draft && ui.draft.kind === "tk" ? ui.draft.data : null;
+    const open = !!(edit || draft || ui.form.tk);
+    const f = edit || draft || { anbieter: "", tarif: "", preis: "", aktionPreis: "", aktionMonate: "", einmalig: "", router: "", bonus: "", leistung: "", upload: "", laufzeit: 24, technik: "", quelle: "" };
+
+    let reco;
+    if (!all.length) reco = `<strong>Noch keine Angebote.</strong> Sammle in Schritt 2 Angebote, dann siehst du hier, ob sich ein Wechsel lohnt.`;
+    else if (!best) reco = `<strong>Kein Angebot erfüllt den Filter.</strong> Kein Angebot bietet mindestens so viel wie dein aktueller Tarif.`;
+    else if (!hasAkt) reco = `<strong>Günstigstes Angebot: ${esc(nameOf(best.t))}</strong> mit Ø ${EUR2.format(best.k.monat)} im Monat. Trag in Schritt 1 deinen aktuellen Tarif ein, dann siehst du deine Ersparnis.`;
+    else {
+      const s = aktTotal - best.k.total;
+      const weniger = num(d.aktuell.leistung) > 0 && num(best.t.leistung) < num(d.aktuell.leistung);
+      reco = s > 0.5
+        ? `<strong>Wechsel lohnt sich.</strong> Mit ${esc(nameOf(best.t))} sparst du ${EUR0.format(s)} in ${H} Monaten, also im Schnitt ${EUR2.format(s / H)} im Monat.${weniger ? ` Achtung: Er bietet weniger als dein Tarif (${fmtLeistung(art, best.t.leistung)} statt ${fmtLeistung(art, d.aktuell.leistung)}).` : ""}`
+        : `<strong>Dein Tarif ist günstig.</strong> Keines der ${all.length} Angebote ist über ${H} Monate billiger.`;
+    }
+    reco += jumpLink("tk", warns);
+
+    const formHtml = `<form class="col" id="tk-form" autocomplete="off" style="gap:10px">
+        ${formHead(edit, draft)}
+        <div class="fields">
+          ${inp("Anbieter", "tk-f-anbieter", "anbieter", f.anbieter, { type: "text", req: true })}
+          ${inp("Tarif", "tk-f-tarif", "tarif", f.tarif, { type: "text" })}
+          ${inp("Regulärer Preis €/Monat", "tk-f-preis", "preis", f.preis, { req: true })}
+          ${inp(A.leistung, "tk-f-leistung", "leistung", f.leistung, { step: "1", ph: art === "mobil" ? "unbegrenzt = 1000" : "" })}
+          ${inp("Aktionspreis €/Monat", "tk-f-aktionPreis", "aktionPreis", f.aktionPreis)}
+          ${inp("Aktion für Monate", "tk-f-aktionMonate", "aktionMonate", f.aktionMonate, { step: "1" })}
+          ${inp("Einmalkosten €", "tk-f-einmalig", "einmalig", f.einmalig)}
+          ${inp("Gutschrift / Bonus €", "tk-f-bonus", "bonus", f.bonus)}
+          ${art === "mobil" ? "" : inp("Routermiete €/Monat", "tk-f-router", "router", f.router)}
+          ${art === "mobil" ? "" : inp("Upload Mbit/s", "tk-f-upload", "upload", f.upload, { step: "1" })}
+          ${inp("Laufzeit Monate", "tk-f-laufzeit", "laufzeit", f.laufzeit, { step: "1" })}
+          <label class="f">Technik<select name="technik" id="tk-f-technik"><option value="">–</option>${A.technik.map((x) => `<option ${f.technik === x ? "selected" : ""}>${x}</option>`).join("")}</select></label>
+          ${inp("Quelle (Portal)", "tk-f-quelle", "quelle", f.quelle, { type: "text", ph: "z. B. Check24", full: true })}
+        </div>
+        <button class="btn primary" type="submit">${edit ? "Änderungen speichern" : "Angebot speichern"}</button>
+      </form>`;
+
+    const el = document.getElementById("panel-tk");
+    el.style.setProperty("--kind", "var(--tk)");
+    el.innerHTML = `
+      <div class="chips" role="group" aria-label="Art">${Object.entries(TK_ART).map(([k, a]) => `<button class="chip ${k === art ? "on" : ""}" data-art="${k}">${k === "mobil" ? "Handy / Mobilfunk" : a.name} · ${tk[k].angebote.length}</button>`).join("")}</div>
+      ${recoCard(reco, [
+        ["Dein Tarif", hasAkt ? EUR2.format(num(d.aktuell.preis)) + "/Monat" : "–"],
+        ["Günstigstes Angebot", best ? "Ø " + EUR2.format(best.k.monat) : "–"],
+        [`Ersparnis in ${H} Monaten`, hasAkt && best ? EUR0.format(aktTotal - best.k.total) : "–", hasAkt && best ? (aktTotal - best.k.total >= 0 ? "pos" : "neg") : ""],
+      ])}
+      <div class="grid">
+        <div class="col">
+          <div class="card">
+            ${stepTitle(1, "Dein aktueller Tarif")}
+            <div class="fields">
+              <label class="f">Monatspreis €<input type="number" id="tk-akt-preis" step="0.01" min="0" value="${esc(d.aktuell.preis)}"></label>
+              <label class="f">${A.leistung}<input type="number" id="tk-akt-leistung" step="1" min="0" value="${esc(d.aktuell.leistung)}"></label>
+            </div>
+            <p class="hint">Was du heute monatlich zahlst, inklusive Routermiete und Zusatzoptionen.</p>
+          </div>
+          ${collectCard("tk", { formHtml, open, portalKey: art, tipKey: art, angebote: d.angebote, docLabel: "Rechnung oder Angebot fotografieren", docSub: "Claude liest Preise, Aktionen und Laufzeit aus" })}
+        </div>
+        <div class="col">
+          <div class="card">
+            ${stepTitle(3, "Vergleich", `<label class="f inline">Zeitraum <select id="tk-horizont">${[12, 24, 36].map((h) => `<option value="${h}" ${H === h ? "selected" : ""}>${h} Monate</option>`).join("")}</select></label>`)}
+            <label class="check"><input type="checkbox" id="tk-min" ${ui.tkMin ? "checked" : ""}>nur Angebote mit mindestens so viel ${art === "mobil" ? "Datenvolumen" : "Tempo"} wie bisher</label>
+            ${hasAkt ? `<div class="ref"><span>Dein aktueller Tarif · ${fmtLeistung(art, d.aktuell.leistung)}</span><strong class="mono">${EUR2.format(num(d.aktuell.preis))}/Monat</strong>${bar(num(d.aktuell.preis), maxVal).replace('class="fill"', 'class="fill current"')}</div>` : ""}
+            <div class="offers">
+              ${rows.length ? rows.map((r, n) => {
+                const aktion = num(r.t.aktionMonate) > 0 && num(r.t.aktionPreis) > 0;
+                return offerCard({
+                  t: r.t, i: r.i, rank: n + 1, best: n === 0,
+                  pills: `<span class="pill info">${fmtLeistung(art, r.t.leistung)}</span>${num(r.t.laufzeit) <= 1 ? '<span class="pill good">monatlich kündbar</span>' : `<span class="pill ${num(r.t.laufzeit) > 12 ? "warn" : "muted"}">${esc(r.t.laufzeit)} Mon. Laufzeit</span>`}${r.t.technik ? `<span class="pill muted">${esc(r.t.technik)}</span>` : ""}${aktion ? `<span class="pill warn">Aktionspreis ${esc(r.t.aktionMonate)} Mon.</span>` : ""}${num(r.t.router) > 0 ? '<span class="pill warn">Routermiete</span>' : ""}${r.t.anzeige ? '<span class="pill info">Anzeige</span>' : ""}`,
+                  bar: bar(Math.max(r.k.monat, 0), maxVal),
+                  price: EUR2.format(r.k.monat),
+                  priceSub: `Ø pro Monat über ${H} Monate`,
+                  delta: hasAkt ? deltaHtml(aktTotal - r.k.total, EUR0.format, ` in ${H} M.`) : "",
+                  facts: [["Preis", aktion ? `${EUR2.format(num(r.t.aktionPreis))} für ${esc(r.t.aktionMonate)} Mon., dann ${EUR2.format(num(r.t.preis))}` : EUR2.format(num(r.t.preis)) + "/Monat"], ["Einmalkosten", num(r.t.einmalig) ? EUR2.format(num(r.t.einmalig)) : "–"], ...(art === "mobil" ? [] : [["Routermiete", num(r.t.router) ? EUR2.format(num(r.t.router)) + "/Monat" : "–"], ["Upload", num(r.t.upload) ? NUM.format(num(r.t.upload)) + " Mbit/s" : "–"]]), ["Gutschrift", num(r.t.bonus) ? EUR0.format(num(r.t.bonus)) : "–"], [`Preis pro ${A.einheit}`, num(r.t.leistung) > 0 && !unbegrenzt(art, r.t.leistung) ? EUR2.format(r.k.monat / num(r.t.leistung)) : "–"], [`Gesamt ${H} Monate`, EUR0.format(r.k.total)]],
+                });
+              }).join("") : `<div class="empty">${d.angebote.length ? "Kein Angebot passt zum Filter." : "Noch keine Angebote. Sammle sie in Schritt 2."}</div>`}
+            </div>
+          </div>
+          ${vergleichCard("tk", findings)}
+        </div>
+      </div>`;
+
+    const rerender = () => { save(); renderTk(); updateDue(); };
+    el.querySelectorAll("[data-art]").forEach((b) => b.addEventListener("click", () => { tk.art = b.dataset.art; closeForm("tk"); rerender(); }));
+    document.getElementById("tk-horizont").addEventListener("change", (e) => { tk.horizont = num(e.target.value, 24); rerender(); });
+    document.getElementById("tk-min").addEventListener("change", (e) => { ui.tkMin = e.target.checked; renderTk(); });
+    document.getElementById("tk-akt-preis").addEventListener("change", (e) => { d.aktuell.preis = num(e.target.value); rerender(); });
+    document.getElementById("tk-akt-leistung").addEventListener("change", (e) => { d.aktuell.leistung = num(e.target.value); rerender(); });
+    const form = document.getElementById("tk-form");
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const t = { anbieter: String(fd.get("anbieter")).trim(), tarif: String(fd.get("tarif")).trim(), technik: String(fd.get("technik") || ""), quelle: String(fd.get("quelle")).trim() };
+      ["preis", "aktionPreis", "aktionMonate", "einmalig", "router", "bonus", "leistung", "upload", "laufzeit"].forEach((k) => { t[k] = num(fd.get(k)); });
+      keepMeta(t, edit || draft);
+      if (edit) { d.angebote[ui.edit.i] = t; toast("Angebot gespeichert"); }
+      else { d.angebote.push(t); toast("Angebot hinzugefügt"); }
+      closeForm("tk"); rerender();
+    });
+    bindCollect("tk");
+    bindEditCancel();
+    bindEditButtons(el, "tk");
+    bindDelete(el.querySelector(".offers"), (i) => { d.angebote.splice(i, 1); ui.edit = null; rerender(); });
+    bindScan("tk");
+    bindVergleich("tk", A.name, { art: A.name, vergleichszeitraum_monate: H, aktueller_tarif: d.aktuell, angebote: all.map((r) => ({ ...r.t, durchschnitt_monat: Math.round(r.k.monat * 100) / 100 })) }, findings);
+  }
+
+  // ---------- Versicherungen ----------
+  function renderVers() {
+    const v = state.vers;
+    const kat = currentKat();
+    const wP = num(v.gewichtPreis, 50) / 100;
+    const quote = num(v.schadenquote) / 100;
+    const sumW = kat.features.reduce((s, f) => s + num(f.w), 0);
+    const rows = kat.angebote.map((a, i) => {
+      a.features = a.features || {};
+      const jahr = num(a.beitrag) * num(a.zahlweise, 1);
+      const eff = jahr + num(a.sb) * quote;
+      const fs = sumW ? kat.features.reduce((s, f) => s + (a.features[f.id] ? num(f.w) : 0), 0) / sumW : 1;
+      return { a, i, jahr, eff, fs };
+    });
+    const minEff = Math.min(...rows.map((r) => r.eff).filter((x) => x > 0), Infinity);
+    rows.forEach((r) => { r.ps = r.eff > 0 ? minEff / r.eff : 1; r.score = Math.round((wP * r.ps + (1 - wP) * r.fs) * 100); });
+    rows.sort((a, b) => b.score - a.score || a.eff - b.eff);
+    const best = rows[0];
+    const cheapest = rows.slice().sort((a, b) => a.eff - b.eff)[0];
+    const findings = checkVers(kat, rows);
+    const warns = findings.filter((x) => x.lvl === "warn").length;
+
+    const edit = ui.edit && ui.edit.kind === "vers" ? kat.angebote[ui.edit.i] : null;
+    const draft = !edit && ui.draft && ui.draft.kind === "vers" ? ui.draft.data : null;
+    const open = !!(edit || draft || ui.form.vers);
+    const f = edit || draft || { anbieter: "", tarif: "", beitrag: "", zahlweise: 1, sb: 0, features: {}, quelle: "" };
+
+    let reco;
+    if (!rows.length) reco = `<strong>Noch keine Angebote für ${esc(kat.name)}.</strong> Leg in Schritt 1 fest, was dir wichtig ist, und sammle in Schritt 2 Angebote.`;
+    else {
+      reco = `<strong>Beste Wahl: ${esc(nameOf(best.a))}</strong> für ${EUR0.format(best.jahr)} im Jahr. Gesamtwert ${best.score} von 100 bei deiner Gewichtung.`;
+      if (cheapest && cheapest !== best) reco += ` Am günstigsten ist ${esc(nameOf(cheapest.a))} mit ${EUR0.format(cheapest.jahr)}, deckt aber nur ${Math.round(cheapest.fs * 100)} % der Leistungen ab, die dir wichtig sind.`;
+    }
+    reco += jumpLink("vers", warns);
+
+    const formHtml = `<form class="col" id="vers-form" autocomplete="off" style="gap:10px">
+        ${formHead(edit, draft)}
+        <div class="fields">
+          ${inp("Versicherer", "vers-f-anbieter", "anbieter", f.anbieter, { type: "text", req: true })}
+          ${inp("Tarif", "vers-f-tarif", "tarif", f.tarif, { type: "text" })}
+          ${inp("Beitrag €", "vers-f-beitrag", "beitrag", f.beitrag, { req: true })}
+          <label class="f">Zahlweise
+            <select name="zahlweise" id="vers-f-zahlweise">${Object.entries(ZAHLWEISE).map(([k, l]) => `<option value="${k}" ${num(f.zahlweise) === +k ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+          ${inp("Selbstbeteiligung €", "vers-f-sb", "sb", f.sb, { step: "1" })}
+          ${inp("Quelle (Portal)", "vers-f-quelle", "quelle", f.quelle, { type: "text", ph: "z. B. Check24" })}
+        </div>
+        <h3>Enthaltene Leistungen</h3>
+        <div class="feat-list">
+          ${kat.features.map((ft) => `<label class="check"><input type="checkbox" name="feat-${esc(ft.id)}" id="vers-f-feat-${esc(ft.id)}" ${f.features && f.features[ft.id] ? "checked" : ""}>${esc(ft.name)}</label>`).join("") || '<p class="hint">Lege in Schritt 1 Leistungen an.</p>'}
+        </div>
+        <button class="btn primary" type="submit">${edit ? "Änderungen speichern" : "Angebot speichern"}</button>
+      </form>`;
+
+    const el = document.getElementById("panel-versicherung");
+    el.style.setProperty("--kind", "var(--vers)");
+    el.innerHTML = `
+      <div class="chips" role="group" aria-label="Versicherungsart">
+        ${Object.entries(v.kategorien).map(([k, c]) => `<button class="chip ${k === v.kategorie ? "on" : ""}" data-kat="${esc(k)}">${esc(c.name)} · ${c.angebote.length}</button>`).join("")}
+        <button class="chip" id="kat-add">+ Weitere Art</button>
+      </div>
+      <form class="row" id="kat-form" hidden>
+        <input type="text" id="kat-name" placeholder="z. B. Berufsunfähigkeit" style="max-width:260px">
+        <button class="btn small primary" type="submit">Anlegen</button>
+      </form>
+      ${recoCard(reco, [
+        ["Beste Wahl", best ? EUR0.format(best.jahr) + "/Jahr" : "–"],
+        ["Günstigster Beitrag", cheapest ? EUR0.format(cheapest.jahr) + "/Jahr" : "–"],
+        ["Angebote", String(rows.length)],
+      ])}
+      <div class="grid">
+        <div class="col">
+          <div class="card">
+            ${stepTitle(1, "Was dir wichtig ist")}
+            <label class="f">Preis oder Leistung? <span class="mono" id="gewicht-label">${Math.round(wP * 100)} % Preis, ${100 - Math.round(wP * 100)} % Leistung</span>
+              <input type="range" id="vers-gewicht" min="0" max="100" step="5" value="${Math.round(wP * 100)}" style="accent-color:var(--accent)">
+            </label>
+            <div class="feat-list">
+              ${kat.features.map((ft, n) => `
+                <div class="feat">
+                  <span>${esc(ft.name)}</span>
+                  <select data-fw="${n}" aria-label="Gewicht ${esc(ft.name)}">${Object.entries(GEWICHT).map(([w, l]) => `<option value="${w}" ${num(ft.w) === +w ? "selected" : ""}>${l}</option>`).join("")}</select>
+                  <button class="btn small danger" data-fdel="${n}" aria-label="Leistung entfernen" title="Leistung entfernen">✕</button>
+                </div>`).join("") || '<p class="hint">Noch keine Leistungen. Füge unten hinzu, was dir wichtig ist.</p>'}
+            </div>
+            <form class="row" id="feat-form">
+              <input type="text" id="feat-name" placeholder="Weitere Leistung, z. B. Ehrenamt" style="flex:1;min-width:140px">
+              <button class="btn small" type="submit">Hinzufügen</button>
+            </form>
+            <details class="more"><summary>Selbstbeteiligung einrechnen</summary>
+              <label class="f" style="margin-top:8px">Erwartete Schadenfälle pro Jahr in %
+                <input type="number" id="vers-quote" min="0" max="100" step="5" value="${esc(v.schadenquote)}"></label>
+              <p class="hint">Bei 20 % rechnet der Kompass die Selbstbeteiligung zu einem Fünftel auf den Beitrag auf.</p>
+            </details>
+          </div>
+          ${collectCard("vers", { formHtml, open, portalKey: "vers", tipKey: "vers", angebote: kat.angebote, docLabel: "Police oder Angebot fotografieren", docSub: "Claude liest Beitrag, Selbstbeteiligung und Leistungen aus" })}
+        </div>
+        <div class="col">
+          <div class="card">
+            ${stepTitle(3, "Vergleich")}
+            <div class="offers">
+              ${rows.length ? rows.map((r, n) => offerCard({
+                t: r.a, i: r.i, rank: n + 1, best: n === 0,
+                pills: `${r === cheapest ? '<span class="pill good">günstigster</span>' : ""}${num(r.a.sb) > 0 ? `<span class="pill warn">SB ${EUR0.format(num(r.a.sb))}</span>` : '<span class="pill good">ohne SB</span>'}${r.a.anzeige ? '<span class="pill info">Anzeige</span>' : ""}`,
+                extra: kat.features.length ? `<div class="pills">${kat.features.filter((ft) => num(ft.w) > 0).map((ft) => r.a.features[ft.id] ? `<span class="pill good">✓ ${esc(ft.name)}</span>` : `<span class="pill ${num(ft.w) === 2 ? "bad" : "muted"}">✗ ${esc(ft.name)}</span>`).join("")}</div>` : "",
+                bar: bar(r.score, 100),
+                price: EUR0.format(r.jahr),
+                priceSub: `pro Jahr · Wert ${r.score}/100`,
+                facts: [["Beitrag", `${EUR2.format(num(r.a.beitrag))} ${ZAHLWEISE[r.a.zahlweise] || ""}`], ["Selbstbeteiligung", num(r.a.sb) ? EUR0.format(num(r.a.sb)) : "keine"], ["Leistungen erfüllt", Math.round(r.fs * 100) + " %"], ["Gesamtwert", r.score + " / 100"]],
+              })).join("") : '<div class="empty">Noch keine Angebote. Sammle sie in Schritt 2.</div>'}
+            </div>
+            ${rows.length ? '<p class="hint">Der Balken zeigt den Gesamtwert aus Preis und Leistung nach deiner Gewichtung. Rot markiert: Leistungen, die dir wichtig sind, aber fehlen.</p>' : ""}
+          </div>
+          ${vergleichCard("vers", findings)}
+          ${v.kategorie.startsWith("eigen-") ? '<div class="row" id="kat-del-row"><button class="btn small danger" data-del="0">Diese Versicherungsart löschen</button></div>' : ""}
+        </div>
+      </div>`;
+
+    const rerender = () => { save(); renderVers(); updateDue(); };
+    el.querySelectorAll("[data-kat]").forEach((b) => b.addEventListener("click", () => { v.kategorie = b.dataset.kat; closeForm("vers"); rerender(); }));
+    document.getElementById("kat-add").addEventListener("click", () => { document.getElementById("kat-form").hidden = false; document.getElementById("kat-name").focus(); });
+    document.getElementById("kat-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = document.getElementById("kat-name").value.trim();
+      if (!name) return;
+      const id = "eigen-" + Date.now();
+      v.kategorien[id] = { name, features: [], angebote: [] };
+      v.kategorie = id; rerender(); toast(`${name} angelegt`);
+    });
+    const rng = document.getElementById("vers-gewicht");
+    rng.addEventListener("input", () => { document.getElementById("gewicht-label").textContent = `${rng.value} % Preis, ${100 - rng.value} % Leistung`; });
+    rng.addEventListener("change", () => { v.gewichtPreis = num(rng.value); rerender(); document.getElementById("vers-gewicht").focus(); });
+    document.getElementById("vers-quote").addEventListener("change", (e) => { v.schadenquote = Math.min(100, Math.max(0, num(e.target.value))); rerender(); });
+    el.querySelectorAll("[data-fw]").forEach((s) => s.addEventListener("change", () => { kat.features[+s.dataset.fw].w = num(s.value); rerender(); }));
+    el.querySelectorAll("[data-fdel]").forEach((b) => b.addEventListener("click", () => { kat.features.splice(+b.dataset.fdel, 1); rerender(); }));
+    document.getElementById("feat-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = document.getElementById("feat-name").value.trim();
+      if (!name) return;
+      kat.features.push({ id: "f" + Date.now().toString(36), name, w: 1 }); rerender();
+    });
+    const form = document.getElementById("vers-form");
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const a = keepMeta({ anbieter: String(fd.get("anbieter")).trim(), tarif: String(fd.get("tarif")).trim(), beitrag: num(fd.get("beitrag")), zahlweise: num(fd.get("zahlweise"), 1), sb: num(fd.get("sb")), quelle: String(fd.get("quelle")).trim(), features: {} }, edit || draft);
+      kat.features.forEach((ft) => { if (fd.get("feat-" + ft.id) === "on") a.features[ft.id] = true; });
+      if (edit) { kat.angebote[ui.edit.i] = a; toast("Angebot gespeichert"); }
+      else { kat.angebote.push(a); toast("Angebot hinzugefügt"); }
+      closeForm("vers"); rerender();
+    });
+    bindCollect("vers");
+    bindEditCancel();
+    bindEditButtons(el, "vers");
+    bindDelete(el.querySelector(".offers"), (i) => { kat.angebote.splice(i, 1); ui.edit = null; rerender(); });
+    bindDelete(document.getElementById("kat-del-row"), () => { delete v.kategorien[v.kategorie]; v.kategorie = Object.keys(v.kategorien)[0]; rerender(); });
+    bindScan("vers");
+    bindVergleich("vers", kat.name, { versicherungsart: kat.name, leistungen: kat.features.map((ft) => ({ id: ft.id, name: ft.name, gewicht: GEWICHT[ft.w] })), angebote: rows.map((r) => ({ ...r.a, jahresbeitrag: r.jahr, gesamtwert: r.score })) }, findings);
+  }
+
+  // ---------- Fristen ----------
+  function renderFristen() {
+    const vs = state.vertraege.map((v, i) => ({ v, i, fi: fristInfo(v) }));
+    const mitFrist = vs.filter((x) => x.fi && !x.fi.jederzeit).sort((a, b) => a.fi.kuendBis - b.fi.kuendBis);
+    const sorted = [...mitFrist, ...vs.filter((x) => x.fi && x.fi.jederzeit), ...vs.filter((x) => !x.fi)];
+    const naechste = mitFrist[0];
+    const faellig = mitFrist.filter((x) => x.fi.faellig);
+    const kostenSumme = state.vertraege.reduce((s, v) => s + num(v.kosten), 0);
+    const edit = ui.edit && ui.edit.kind === "vertrag" ? state.vertraege[ui.edit.i] : null;
+    const draft = !edit && ui.draft && ui.draft.kind === "vertrag" ? ui.draft.data : null;
+    const open = !!(edit || draft || ui.form.vertrag);
+    const f = edit || draft || { name: "", kategorie: "strom", anbieter: "", beginn: "", mindest: 12, verl: 0, frist: 1, einheit: "monate", kosten: "" };
+    const lokal = !window.claude;
+
+    let reco;
+    if (!state.vertraege.length) reco = `<strong>Noch keine Verträge.</strong> Trag links deinen ersten Vertrag ein. Der Kompass rechnet den letzten Kündigungstag aus und erinnert dich rechtzeitig.`;
+    else if (faellig.length) reco = `<strong>Jetzt entscheiden: ${esc(list(faellig.map((x) => x.v.name)))}.</strong> ${faellig.length === 1 ? "Die Kündigung muss" : "Die erste Kündigung muss"} bis ${DATE.format(faellig[0].fi.kuendBis)} beim Anbieter sein, also in ${faellig[0].fi.tage} Tagen.`;
+    else if (naechste) reco = `<strong>Alles im grünen Bereich.</strong> Die nächste Kündigungsfrist ist der ${DATE.format(naechste.fi.kuendBis)} (${esc(naechste.v.name)}). Du wirst ${num(state.vorlauf)} Monat${num(state.vorlauf) > 1 ? "e" : ""} vorher erinnert, wenn du den Termin in deinen Kalender überträgst.`;
+    else reco = `<strong>Alle Verträge sind jederzeit kündbar.</strong> Die Mindestlaufzeiten sind vorbei, du kannst mit der vereinbarten Frist wechseln.`;
+
+    const formHtml = `<form class="col" id="vertrag-form" autocomplete="off" style="gap:10px">
+        ${formHead(edit, draft, "Vertrag")}
+        <div class="fields">
+          ${inp("Bezeichnung", "vertrag-f-name", "name", f.name, { type: "text", req: true, full: true, ph: "z. B. Strom Wohnung" })}
+          <label class="f">Art<select name="kategorie" id="vertrag-f-kategorie">${Object.entries(KAT_V).map(([k, l]) => `<option value="${k}" ${f.kategorie === k ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+          ${inp("Anbieter", "vertrag-f-anbieter", "anbieter", f.anbieter, { type: "text" })}
+          ${inp("Vertragsbeginn", "vertrag-f-beginn", "beginn", f.beginn, { type: "date", req: true })}
+          ${inp("Mindestlaufzeit Monate", "vertrag-f-mindest", "mindest", f.mindest, { step: "1" })}
+          <label class="f full">Danach
+            <select name="verl" id="vertrag-f-verl">
+              <option value="0" ${num(f.verl) === 0 ? "selected" : ""}>unbefristet, jederzeit mit Frist kündbar</option>
+              <option value="12" ${num(f.verl) === 12 ? "selected" : ""}>verlängert sich um 12 Monate</option>
+              <option value="24" ${num(f.verl) === 24 ? "selected" : ""}>verlängert sich um 24 Monate</option>
+              <option value="1" ${num(f.verl) === 1 ? "selected" : ""}>verlängert sich um 1 Monat</option>
+            </select></label>
+          ${inp("Kündigungsfrist", "vertrag-f-frist", "frist", f.frist, { step: "1" })}
+          <label class="f">Einheit<select name="einheit" id="vertrag-f-einheit">${Object.entries(EINHEIT).map(([k, l]) => `<option value="${k}" ${f.einheit === k ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+          ${inp("Kosten €/Monat", "vertrag-f-kosten", "kosten", f.kosten, { full: true })}
+        </div>
+        <button class="btn primary" type="submit">${edit ? "Änderungen speichern" : "Vertrag speichern"}</button>
+      </form>`;
+
+    const el = document.getElementById("panel-fristen");
+    el.style.setProperty("--kind", "var(--frist)");
+    el.innerHTML = `
+      ${recoCard(reco, [
+        ["Nächste Frist", naechste ? DATE.format(naechste.fi.kuendBis) : "–", naechste && naechste.fi.faellig ? "neg" : ""],
+        ["Jetzt entscheiden", String(faellig.length), faellig.length ? "neg" : "pos"],
+        ["Laufende Kosten", kostenSumme ? EUR0.format(kostenSumme) + "/Monat" : "–"],
+      ])}
+      <div class="grid">
+        <div class="col">
+          ${collectCard("vertrag", { formHtml, open, step: "+", title: "Vertrag hinzufügen", docLabel: "Vertrag oder Police fotografieren", docSub: "Claude liest Beginn, Laufzeit und Kündigungsfrist aus", manualSub: "Daten selbst eintragen" })}
+          <div class="card">
+            <details class="more"><summary>Gut zu wissen: Kündigungsregeln</summary>
+              <ul class="facts" style="margin-top:8px">
+                <li>Strom, Gas, Internet und Handy: Verträge, die seit März 2022 geschlossen wurden (Telefon und Internet seit Dezember 2021), laufen nach der Mindestlaufzeit unbefristet weiter und sind mit höchstens einem Monat Frist kündbar.</li>
+                <li>Versicherungen verlängern sich meist um ein Jahr. Die Kündigung muss oft drei Monate vor Ablauf eingehen.</li>
+                <li>Bei einer Preis- oder Beitragserhöhung hast du in der Regel ein Sonderkündigungsrecht, bei Versicherungen auch nach einem Schadenfall.</li>
+                <li>Maßgeblich ist der Eingang beim Anbieter. Kündige einige Tage vorher und lass dir die Kündigung bestätigen.</li>
+              </ul>
+              <p class="hint" style="margin-top:6px">Das sind allgemeine Regeln. Was für deinen Vertrag gilt, steht in den Vertragsbedingungen.</p>
+            </details>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <div class="card-head"><h2>Deine Verträge</h2>
+              <label class="f inline">Erinnern <select id="vorlauf">${[1, 2, 3].map((m) => `<option value="${m}" ${num(state.vorlauf) === m ? "selected" : ""}>${m} Monat${m > 1 ? "e" : ""} vorher</option>`).join("")}</select></label>
+            </div>
+            <p class="hint">Tippe bei einem Vertrag auf „Outlook“ oder „Google“, um den Erinnerungstermin in deinen Kalender zu übernehmen. Dein Kalender meldet sich dann auch auf dem Handy. Dabei gehen Vertragsname und Datum an Microsoft bzw. Google.${lokal ? " Oder lade alle Termine auf einmal als Kalenderdatei." : ""}</p>
+            ${lokal ? '<div class="row"><button class="btn small" id="ics-btn">Alle Termine als Kalenderdatei (.ics)</button></div>' : ""}
+            <div class="offers">
+              ${sorted.length ? sorted.map(({ v, i, fi }) => `
+                <article class="offer nr ${fi && fi.faellig ? "due" : ""}">
+                  <div class="o-main">
+                    <div class="o-title">${esc(v.name)}</div>
+                    <div class="pills">${!fi ? '<span class="pill warn">Vertragsbeginn fehlt</span>' : fi.jederzeit ? '<span class="pill good">jederzeit kündbar</span>' : `<span class="pill ${fi.status.cls}">${fi.status.t}</span>`}<span class="pill muted">${esc(KAT_V[v.kategorie] || "")}</span>${v.anbieter ? `<span class="pill muted">${esc(v.anbieter)}</span>` : ""}</div>
+                    ${fi && !fi.jederzeit ? `<div class="cal"><span class="hint">Erinnerung am ${DATE.format(fi.erinnerung)} eintragen:</span>${calLinks(v, fi).replace(/^<div class="cal">|<\/div>$/g, "")}</div>` : ""}
+                  </div>
+                  <div class="o-price">${fi && !fi.jederzeit ? `<span class="hint">kündigen bis</span><span class="o-big">${DATE.format(fi.kuendBis)}</span><span class="hint">noch ${fi.tage} Tage</span>` : fi ? `<span class="hint">wirkt frühestens zum</span><span class="o-big">${DATE.format(fi.ende)}</span>` : ""}</div>
+                  <details class="more"><summary>Details</summary>
+                    ${factsHtml([["Vertragsbeginn", fi ? DATE.format(parseD(v.beginn)) : "–"], ["Mindestlaufzeit", esc(v.mindest) + " Monate"], ["Danach", num(v.verl) ? "verlängert um " + esc(v.verl) + " Monate" : "unbefristet"], ["Kündigungsfrist", esc(v.frist) + " " + esc(EINHEIT[v.einheit] || "Monate")], ["Vertragsende", fi && !fi.jederzeit ? DATE.format(fi.ende) : "–"], ["Kosten", num(v.kosten) ? EUR2.format(num(v.kosten)) + "/Monat" : "–"]])}
+                    <div class="actions"><button class="btn small" data-edit="${i}">Bearbeiten</button><button class="btn small danger" data-del="${i}">Löschen</button></div>
+                  </details>
+                </article>`).join("") : '<div class="empty">Noch keine Verträge.</div>'}
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+    const rerender = () => { save(); renderFristen(); updateDue(); };
+    document.getElementById("vorlauf").addEventListener("change", (e) => { state.vorlauf = num(e.target.value, 1); rerender(); });
+    const ics = document.getElementById("ics-btn");
+    if (ics) ics.addEventListener("click", () => {
+      const blob = new Blob([buildIcs()], { type: "text/calendar" });
+      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "kuendigungsfristen.ics";
+      document.body.appendChild(a); a.click(); a.remove(); toast("Kalenderdatei erstellt");
+    });
+    const form = document.getElementById("vertrag-form");
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const v = { id: edit ? edit.id : "v" + Date.now().toString(36), name: String(fd.get("name")).trim(), kategorie: String(fd.get("kategorie")), anbieter: String(fd.get("anbieter")).trim(), beginn: String(fd.get("beginn")), mindest: num(fd.get("mindest")), verl: num(fd.get("verl")), frist: num(fd.get("frist")), einheit: String(fd.get("einheit")), kosten: num(fd.get("kosten")) };
+      if (edit) { state.vertraege[ui.edit.i] = v; toast("Vertrag gespeichert"); }
+      else { state.vertraege.push(v); toast("Vertrag hinzugefügt"); }
+      closeForm("vertrag"); rerender();
+    });
+    bindCollect("vertrag");
+    bindEditCancel();
+    bindEditButtons(el, "vertrag");
+    bindDelete(el.querySelector(".offers"), (i) => { state.vertraege.splice(i, 1); ui.edit = null; rerender(); });
+    bindScan("vertrag");
+  }
+
+  // ---------- Beispieldaten ----------
+  const isEx = (s) => /^Beispiel/i.test(String(s || ""));
+  function hasExamples() {
+    if (["strom", "gas"].some((k) => state[k].angebote.some((t) => isEx(t.anbieter)))) return true;
+    if (["internet", "mobil"].some((k) => state.tk[k].angebote.some((t) => isEx(t.anbieter)))) return true;
+    if (Object.values(state.vers.kategorien).some((k) => k.angebote.some((a) => isEx(a.anbieter)))) return true;
+    return state.vertraege.some((v) => isEx(v.name));
+  }
+  function removeExamples() {
+    const d = defaults();
+    ["strom", "gas"].forEach((k) => {
+      state[k].angebote = state[k].angebote.filter((t) => !isEx(t.anbieter));
+      if (JSON.stringify(state[k].aktuell) === JSON.stringify(d[k].aktuell)) state[k].aktuell = { gp: 0, ap: 0 };
+    });
+    ["internet", "mobil"].forEach((k) => {
+      state.tk[k].angebote = state.tk[k].angebote.filter((t) => !isEx(t.anbieter));
+      if (JSON.stringify(state.tk[k].aktuell) === JSON.stringify(d.tk[k].aktuell)) state.tk[k].aktuell = { preis: 0, leistung: 0 };
+    });
+    Object.values(state.vers.kategorien).forEach((k) => { k.angebote = k.angebote.filter((a) => !isEx(a.anbieter)); });
+    state.vertraege = state.vertraege.filter((v) => !isEx(v.name));
+    closeForm("strom"); save(); rerenderTab(); toast("Beispiele entfernt. Jetzt kannst du deine eigenen Daten eintragen.");
+  }
+  function updateNotice() { document.getElementById("notice").hidden = vault.locked || !hasExamples(); }
+  function armThen(btn, label, fn) {
+    if (!btn.classList.contains("armed")) {
+      const orig = btn.textContent;
+      btn.classList.add("armed"); btn.textContent = label;
+      setTimeout(() => { if (btn.isConnected) { btn.classList.remove("armed"); btn.textContent = orig; } }, 3500);
+      return;
+    }
+    btn.classList.remove("armed"); fn();
+  }
+  ["btn-examples", "btn-examples-top"].forEach((id) => {
+    const b = document.getElementById(id);
+    b.addEventListener("click", () => armThen(b, "Wirklich entfernen?", () => { b.textContent = "Beispiele entfernen"; removeExamples(); }));
+  });
+
+  // Klicks auf „Öffnen“-Knöpfe und Sprungmarken
+  document.addEventListener("click", (e) => {
+    const g = e.target.closest("[data-go]");
+    if (g) { go(g.dataset.go); return; }
+    const j = e.target.closest("[data-jump]");
+    if (j) { const t = document.getElementById(j.dataset.jump); if (t) t.scrollIntoView({ behavior: "smooth", block: "start" }); }
+  });
+
   // ---------- Sperre & Sicherheit ----------
   const APP_IDS = ["tabs-nav", "notice", "due-banner", "panels", "app-footer"];
   function setLockedView(locked) {
@@ -1663,7 +1858,7 @@ Antworte nur mit JSON in dieser Form:
     Object.assign(scan, { kind: null, result: null, status: "", error: "", busy: false });
     Object.assign(ana, { kind: null, text: "", error: "", busy: false });
     state = defaults(); ui.edit = null; ui.draft = null;
-    ["panel-energy", "panel-tk", "panel-versicherung", "panel-fristen", "sec-card"].forEach((id) => { document.getElementById(id).innerHTML = ""; });
+    ["panel-uebersicht", "panel-energy", "panel-tk", "panel-versicherung", "panel-fristen", "sec-card"].forEach((id) => { document.getElementById(id).innerHTML = ""; });
     document.getElementById("io-text").value = "";
     setLockedView(true);
     const err = document.getElementById("lock-err");
@@ -1751,27 +1946,30 @@ Antworte nur mit JSON in dieser Form:
   }
 
   // ---------- Reiter ----------
-  const TABS = ["strom", "gas", "internet", "versicherung", "fristen"];
+  const TABS = ["uebersicht", "strom", "gas", "internet", "versicherung", "fristen", "sicherheit"];
+  const PANELS = { uebersicht: "panel-uebersicht", strom: "panel-energy", gas: "panel-energy", internet: "panel-tk", versicherung: "panel-versicherung", fristen: "panel-fristen", sicherheit: "panel-sicherheit" };
   function show(tab) {
-    if (!TABS.includes(tab)) tab = "strom";
-    if (ui.tab !== tab) { ui.edit = null; ui.draft = null; }
+    if (!TABS.includes(tab)) tab = "uebersicht";
+    if (ui.tab !== tab) { ui.edit = null; ui.draft = null; ui.form = {}; }
     ui.tab = tab;
     document.querySelectorAll(".tab").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === tab)));
-    document.getElementById("panel-energy").hidden = !(tab === "strom" || tab === "gas");
-    document.getElementById("panel-tk").hidden = tab !== "internet";
-    document.getElementById("panel-versicherung").hidden = tab !== "versicherung";
-    document.getElementById("panel-fristen").hidden = tab !== "fristen";
-    if (tab === "versicherung") renderVers();
+    const want = PANELS[tab];
+    new Set(Object.values(PANELS)).forEach((id) => { document.getElementById(id).hidden = id !== want; });
+    if (tab === "uebersicht") renderUebersicht();
+    else if (tab === "versicherung") renderVers();
     else if (tab === "internet") renderTk();
     else if (tab === "fristen") renderFristen();
+    else if (tab === "sicherheit") renderSecurity();
     else renderEnergy(tab);
     updateDue();
-    if (!document.getElementById("sec-card").innerHTML) renderSecurity();
+    updateNotice();
   }
   function go(tab) {
     try { history.replaceState(null, "", "#" + tab); } catch (e) {}
     show(tab);
     window.scrollTo({ top: 0 });
+    const t = document.getElementById("tab-" + ui.tab);
+    if (t) t.scrollIntoView({ block: "nearest", inline: "center" });
   }
   document.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => go(b.dataset.tab)));
   window.addEventListener("hashchange", () => show(location.hash.slice(1)));
@@ -1818,7 +2016,7 @@ Antworte nur mit JSON in dieser Form:
   });
 
   if (vault.locked) setLockedView(true);
-  else show(location.hash.slice(1) || "strom");
+  else show(location.hash.slice(1) || "uebersicht");
 })();
 </script>
 </body>
