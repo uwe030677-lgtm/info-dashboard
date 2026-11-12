@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-+w5PEj7C3pUiirnnxjpXP0PGJ4LZZ1d3+GIbZUHIN1I='; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; font-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-4UuwQgvaE2+D2Z42Zn3SXEy9ALKybVC+uoV8TXqDmMg='; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; font-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; form-action 'none'; base-uri 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tarif-Kompass</title>
@@ -138,6 +138,7 @@ details.more[open] > summary::before { content: "▾ "; }
 .bigbtn:hover, .bigbtn:focus-within { border-color: var(--kind, var(--accent)); }
 .bigbtn[aria-expanded="true"] { border-color: var(--kind, var(--accent)); background: var(--surface); }
 .bigbtn.disabled { opacity: .5; pointer-events: none; }
+div.bigbtn { cursor: default; }
 .bb-t { font-weight: 600; font-size: 0.92rem; }
 .bb-s { font-size: 0.8rem; color: var(--muted); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -223,6 +224,21 @@ details.more[open] > summary::before { content: "▾ "; }
 .lockcard { max-width: 420px; margin: 24px auto; }
 footer { margin-top: 28px; font-size: 0.8rem; color: var(--muted); max-width: 75ch; }
 footer a { color: var(--accent); }
+.vlink { display: flex; justify-content: space-between; align-items: center; gap: 8px 12px; flex-wrap: wrap; padding: 10px 12px; border-radius: 10px; background: var(--sunken); border-left: 4px solid var(--frist); font-size: 0.88rem; }
+.vlink.due { background: var(--bad-soft); }
+.vlink .hint { margin-top: 1px; }
+.vcard { display: flex; flex-direction: column; gap: 12px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); scroll-margin-top: 16px; }
+.vcard.due { border-color: var(--bad); box-shadow: inset 4px 0 0 var(--bad); }
+.vcard.flash { outline: 3px solid var(--accent); outline-offset: 2px; }
+.vhead { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; align-items: start; }
+@media (max-width: 520px) { .vhead { grid-template-columns: minmax(0, 1fr); } .vhead .o-price { align-items: flex-start; text-align: left; } }
+.vsec { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+.vsec section { background: var(--bg); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.kv { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; margin: 0; font-size: 0.85rem; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; text-align: right; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.photo-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.photo-row .btn { position: relative; }
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 999px; font-size: 0.86rem; z-index: 20; max-width: calc(100% - 32px); text-align: center; }
 </style>
 </head>
@@ -237,7 +253,7 @@ footer a { color: var(--accent); }
       <button class="tab" role="tab" id="tab-gas" data-tab="gas"><span class="dot" style="background:var(--gas)"></span>Gas</button>
       <button class="tab" role="tab" id="tab-internet" data-tab="internet"><span class="dot" style="background:var(--tk)"></span>Internet &amp; Handy</button>
       <button class="tab" role="tab" id="tab-versicherung" data-tab="versicherung"><span class="dot" style="background:var(--vers)"></span>Versicherungen</button>
-      <button class="tab" role="tab" id="tab-fristen" data-tab="fristen"><span class="dot" style="background:var(--frist)"></span>Fristen<span class="count" id="due-count" hidden></span></button>
+      <button class="tab" role="tab" id="tab-fristen" data-tab="fristen"><span class="dot" style="background:var(--frist)"></span>Verträge &amp; Fristen<span class="count" id="due-count" hidden></span></button>
       <button class="tab end" role="tab" id="tab-sicherheit" data-tab="sicherheit">Sicherheit &amp; Daten</button>
     </nav>
   </header>
@@ -1049,6 +1065,8 @@ Antworte nur mit JSON in dieser Form:
     if (!canScan()) return;
     const file = document.getElementById("scan-file");
     if (file) file.addEventListener("change", () => runScan(kind, "dokument", file.files));
+    const camIn = document.getElementById("scan-file-cam");
+    if (camIn) camIn.addEventListener("change", () => runScan(kind, "dokument", camIn.files));
     const lf = document.getElementById("scan-list-file");
     if (lf) lf.addEventListener("change", () => runScan(kind, "liste", lf.files));
     const stop = document.getElementById("scan-stop");
@@ -1149,7 +1167,15 @@ Antworte nur mit JSON in dieser Form:
   }
 
   function photoBtn(kind, id, label, sub) {
-    if (canScan()) return `<label class="bigbtn${scan.busy ? " disabled" : ""}"><span class="bb-t">${label}</span><span class="bb-s">${sub}</span><input class="sr-only" type="file" id="${id}" accept="image/*" multiple ${scan.busy ? "disabled" : ""}></label>`;
+    if (canScan()) {
+      const dis = scan.busy ? " disabled" : "";
+      const cam = id === "scan-file";
+      return `<div class="bigbtn${scan.busy ? " disabled" : ""}"><span class="bb-t">${label}</span><span class="bb-s">${sub}</span>
+        <div class="photo-row">
+          ${cam ? `<label class="btn small primary">Kamera öffnen<input class="sr-only" type="file" id="${id}-cam" accept="image/*" capture="environment"${dis}></label>` : ""}
+          <label class="btn small">${cam ? "Aus Galerie oder Datei" : "Screenshot auswählen"}<input class="sr-only" type="file" id="${id}" accept="image/*" multiple${dis}></label>
+        </div></div>`;
+    }
     return `<button type="button" class="bigbtn" data-noscan="${kind}"><span class="bb-t">${label}</span><span class="bb-s">${sub}</span></button>`;
   }
   function collectCard(kind, o) {
@@ -1172,7 +1198,7 @@ Antworte nur mit JSON in dieser Form:
           <p class="hint">${esc(PORTAL_TIPP[o.tipKey])}</p>
           ${Object.keys(qs).length ? `<div class="chips">${Object.entries(qs).map(([q, n]) => `<span class="pill info">${esc(q)}: ${n}</span>`).join("")}</div>` : ""}
         </div></details>` : ""}
-      ${scanAvail !== "local" ? '<p class="hint small">Fotos gehen zur Auswertung über dein Claude-Konto an Anthropic und werden nicht gespeichert. Decke Name, Adresse, IBAN und Kundennummer vorher ab.</p>' : ""}
+      ${scanAvail !== "local" ? '<p class="hint small">Fotos gehen zur Auswertung über dein Claude-Konto an Anthropic und werden nicht gespeichert. Decke Name, Adresse, IBAN und Kundennummer vorher ab. Startet die Kamera nicht, öffne den Link in Safari oder Chrome statt in der Claude-App. Am Computer kannst du ein Bild auch mit Strg+V einfügen.</p>' : ""}
     </div>`;
   }
   function bindCollect(kind) {
@@ -1190,6 +1216,60 @@ Antworte nur mit JSON in dieser Form:
     });
   }
   const closeForm = (kind) => { ui.form[kind] = false; ui.edit = null; ui.draft = null; };
+
+  // ---------- Verknüpfung: Vertrag <-> Vergleich ----------
+  const normTxt = (x) => String(x || "").toLowerCase().replace(/[^a-z0-9äöüß]/g, "");
+  function linkOf(v) {
+    if (v.link && v.link !== "auto") return v.link;
+    if (["strom", "gas", "internet", "mobil"].includes(v.kategorie)) return v.kategorie;
+    if (v.kategorie === "versicherung") {
+      const hay = normTxt(v.name) + normTxt(v.anbieter);
+      const hit = Object.entries(state.vers.kategorien).find(([, c]) => normTxt(c.name) && hay.includes(normTxt(c.name)));
+      return hit ? "vers:" + hit[0] : "none";
+    }
+    return "none";
+  }
+  const vertraegeFuer = (key) => state.vertraege.map((v, i) => ({ v, i, fi: fristInfo(v) })).filter((x) => linkOf(x.v) === key);
+  function fristText(fi) {
+    if (!fi) return "Vertragsbeginn fehlt, Frist kann nicht berechnet werden";
+    if (fi.jederzeit) return `jederzeit kündbar, wirkt frühestens zum ${DATE.format(fi.ende)}`;
+    return `kündigen bis ${DATE.format(fi.kuendBis)} · noch ${fi.tage} Tage`;
+  }
+  function vertragBox(key, art, name) {
+    const vs = vertraegeFuer(key);
+    if (!vs.length) return `<div class="vlink"><div><strong>Kündigungsfrist</strong><div class="hint">Noch kein Vertrag hinterlegt.</div></div><button class="btn small" data-newvertrag="${esc(art)}" data-link="${esc(key)}" data-name="${esc(name)}">Vertrag &amp; Frist eintragen</button></div>`;
+    return vs.map(({ v, i, fi }) => `<div class="vlink ${fi && fi.faellig ? "due" : ""}"><div><strong>Dein Vertrag: ${esc(v.name)}</strong><div class="hint">${fristText(fi)}</div></div><button class="btn small" data-showvertrag="${i}">Vertrag ansehen</button></div>`).join("");
+  }
+  function vertragVergleich(v) {
+    const L = linkOf(v);
+    if (L === "strom" || L === "gas") {
+      const b = bereichEnergie(L), d = state[L];
+      return { L, tab: L, titel: L === "strom" ? "Strom-Vergleich" : "Gas-Vergleich", monat: b.hasAkt ? b.aktJahr / 12 : null, facts: [
+        ["Verbrauch", NUM.format(num(d.verbrauch)) + " kWh/Jahr"], ["Grundpreis", EUR2.format(num(d.aktuell.gp)) + "/Monat"], ["Arbeitspreis", NUM.format(num(d.aktuell.ap)) + " ct/kWh"],
+        ["Kosten heute", b.hasAkt ? EUR0.format(b.aktJahr) + "/Jahr" : "–"], ["Bestes Angebot", b.best ? `${esc(b.best.name)} (${EUR0.format(b.best.jahr)})` : "noch keins"],
+        ["Ersparnis", b.spar === null ? "–" : b.spar > 0.5 ? `<span class="pos">${EUR0.format(b.spar)}/Jahr</span>` : "kein günstigeres Angebot"]] };
+    }
+    if (L === "internet" || L === "mobil") {
+      const b = bereichTk(L), d = state.tk[L];
+      return { L, tab: "internet", art: L, titel: L === "mobil" ? "Handy-Vergleich" : "Internet-Vergleich", monat: b.hasAkt ? num(d.aktuell.preis) : null, facts: [
+        ["Monatspreis heute", b.hasAkt ? EUR2.format(num(d.aktuell.preis)) : "–"], ["Leistung", num(d.aktuell.leistung) ? fmtLeistung(L, d.aktuell.leistung) : "–"],
+        ["Bestes Angebot", b.best ? `${esc(b.best.name)} (Ø ${EUR2.format(b.best.jahr / 12)})` : "noch keins"],
+        ["Ersparnis", b.spar === null ? "–" : b.spar > 0.5 ? `<span class="pos">${EUR0.format(b.spar)}/Jahr</span>` : "kein günstigeres Angebot"]] };
+    }
+    if (L.startsWith("vers:")) {
+      const key = L.slice(5), kat = state.vers.kategorien[key];
+      if (!kat) return null;
+      const ang = kat.angebote.map((a) => ({ a, jahr: num(a.beitrag) * num(a.zahlweise, 1) })).sort((x, y) => x.jahr - y.jahr);
+      const heute = num(v.kosten) * 12;
+      const spar = heute && ang[0] ? heute - ang[0].jahr : null;
+      return { L, tab: "versicherung", vkat: key, titel: kat.name + "-Vergleich", monat: null, facts: [
+        ["Versicherungsart", esc(kat.name)], ["Beitrag heute", heute ? EUR0.format(heute) + "/Jahr" : "–"], ["Erfasste Angebote", String(ang.length)],
+        ["Günstigstes Angebot", ang[0] ? `${esc(nameOf(ang[0].a))} (${EUR0.format(ang[0].jahr)})` : "noch keins"],
+        ["Ersparnis", spar === null ? "–" : spar > 0.5 ? `<span class="pos">${EUR0.format(spar)}/Jahr</span> (Leistungen prüfen)` : "kein günstigeres Angebot"]] };
+    }
+    return null;
+  }
+  const kostenVon = (v) => num(v.kosten) || ((vertragVergleich(v) || {}).monat || 0);
 
   // ---------- Übersicht ----------
   function bereichEnergie(kind) {
@@ -1215,7 +1295,7 @@ Antworte nur mit JSON in dieser Form:
     ];
     const total = B.reduce((s, b) => s + (b.spar > 0 ? b.spar : 0), 0);
     const fr = state.vertraege.map((v) => ({ v, fi: fristInfo(v) })).filter((x) => x.fi && !x.fi.jederzeit).sort((a, b) => a.fi.kuendBis - b.fi.kuendBis);
-    const kosten = state.vertraege.reduce((s, v) => s + num(v.kosten), 0);
+    const kosten = state.vertraege.reduce((s, v) => s + kostenVon(v), 0);
     const versKats = Object.entries(state.vers.kategorien).filter(([, k]) => k.angebote.length);
     const nAng = B.reduce((s, b) => s + b.n, 0) + versKats.reduce((s, [, k]) => s + k.angebote.length, 0);
     const leer = !nAng && !state.vertraege.length;
@@ -1245,6 +1325,7 @@ Antworte nur mit JSON in dieser Form:
               <dt>Dein Tarif</dt><dd>${b.hasAkt ? EUR0.format(b.aktJahr) + "/Jahr" : "noch nicht eingetragen"}</dd>
               <dt>Bestes Angebot</dt><dd>${b.best ? esc(b.best.name) : "noch keins"}</dd>
               <dt>Angebote</dt><dd>${b.n}</dd>
+              <dt>Kündbar bis</dt><dd>${(() => { const x = vertraegeFuer(b.key)[0]; return !x ? "kein Vertrag hinterlegt" : !x.fi ? "–" : x.fi.jederzeit ? "jederzeit" : `<span class="pill ${x.fi.status.cls}">${DATE.format(x.fi.kuendBis)}</span>`; })()}</dd>
             </dl>
             <div class="row"><button class="btn small" data-go="${b.tab}" ${b.art ? `data-art="${b.art}"` : ""}>${b.n || b.hasAkt ? "Vergleich öffnen" : "Jetzt starten"}</button></div>
           </div>`).join("")}
@@ -1271,7 +1352,6 @@ Antworte nur mit JSON in dieser Form:
           <li><strong>Frist eintragen:</strong> Im Bereich „Fristen“ bekommst du eine Kalender-Erinnerung einen Monat vor dem Kündigungstermin.</li>
         </ol>
       </div>`;
-    el.querySelectorAll("[data-art]").forEach((b) => b.addEventListener("click", () => { state.tk.art = b.dataset.art; save(); }, { capture: true }));
   }
 
   // ---------- Energie ----------
@@ -1372,6 +1452,7 @@ Antworte nur mit JSON in dieser Form:
               <label class="f">Arbeitspreis ct/kWh<input type="number" id="${kind}-akt-ap" step="0.01" min="0" value="${esc(d.aktuell.ap)}"></label>
             </div>
             <p class="hint">Steht auf deiner letzten Jahresabrechnung (Brutto-Preise).${canScan() ? " Du kannst die Rechnung auch in Schritt 2 fotografieren." : ""}</p>
+            ${vertragBox(kind, kind, isStrom ? "Strom" : "Gas")}
           </div>
           ${collectCard(kind, { formHtml, open, portalKey: "energie", tipKey: kind, angebote: d.angebote, docLabel: "Rechnung oder Angebot fotografieren", docSub: "Claude liest Grund- und Arbeitspreis aus" })}
         </div>
@@ -1513,6 +1594,7 @@ Antworte nur mit JSON in dieser Form:
               <label class="f">${A.leistung}<input type="number" id="tk-akt-leistung" step="1" min="0" value="${esc(d.aktuell.leistung)}"></label>
             </div>
             <p class="hint">Was du heute monatlich zahlst, inklusive Routermiete und Zusatzoptionen.</p>
+            ${vertragBox(art, art, art === "mobil" ? "Handy" : "Internet")}
           </div>
           ${collectCard("tk", { formHtml, open, portalKey: art, tipKey: art, angebote: d.angebote, docLabel: "Rechnung oder Angebot fotografieren", docSub: "Claude liest Preise, Aktionen und Laufzeit aus" })}
         </div>
@@ -1634,6 +1716,7 @@ Antworte nur mit JSON in dieser Form:
         ["Günstigster Beitrag", cheapest ? EUR0.format(cheapest.jahr) + "/Jahr" : "–"],
         ["Angebote", String(rows.length)],
       ])}
+      ${vertragBox("vers:" + v.kategorie, "versicherung", kat.name)}
       <div class="grid">
         <div class="col">
           <div class="card">
@@ -1731,7 +1814,7 @@ Antworte nur mit JSON in dieser Form:
     const sorted = [...mitFrist, ...vs.filter((x) => x.fi && x.fi.jederzeit), ...vs.filter((x) => !x.fi)];
     const naechste = mitFrist[0];
     const faellig = mitFrist.filter((x) => x.fi.faellig);
-    const kostenSumme = state.vertraege.reduce((s, v) => s + num(v.kosten), 0);
+    const kostenSumme = state.vertraege.reduce((s, v) => s + kostenVon(v), 0);
     const edit = ui.edit && ui.edit.kind === "vertrag" ? state.vertraege[ui.edit.i] : null;
     const draft = !edit && ui.draft && ui.draft.kind === "vertrag" ? ui.draft.data : null;
     const open = !!(edit || draft || ui.form.vertrag);
@@ -1761,7 +1844,12 @@ Antworte nur mit JSON in dieser Form:
             </select></label>
           ${inp("Kündigungsfrist", "vertrag-f-frist", "frist", f.frist, { step: "1" })}
           <label class="f">Einheit<select name="einheit" id="vertrag-f-einheit">${Object.entries(EINHEIT).map(([k, l]) => `<option value="${k}" ${f.einheit === k ? "selected" : ""}>${l}</option>`).join("")}</select></label>
-          ${inp("Kosten €/Monat", "vertrag-f-kosten", "kosten", f.kosten, { full: true })}
+          ${inp("Kosten €/Monat", "vertrag-f-kosten", "kosten", f.kosten, { ph: "leer = aus Vergleich" })}
+          ${inp("Vertrags- oder Kundennummer", "vertrag-f-nummer", "nummer", f.nummer || "", { type: "text", ph: "für die Kündigung" })}
+          <label class="f full">Mit Vergleich verknüpfen
+            <select name="link" id="vertrag-f-link">${[["auto", "automatisch nach Art"], ["strom", "Strom"], ["gas", "Gas"], ["internet", "Internet & Festnetz"], ["mobil", "Handy"], ...Object.entries(state.vers.kategorien).map(([k, c]) => ["vers:" + k, "Versicherung: " + c.name]), ["none", "keinem Vergleich"]].map(([k, l]) => `<option value="${esc(k)}" ${(f.link || "auto") === k ? "selected" : ""}>${esc(l)}</option>`).join("")}</select></label>
+          ${inp("Notiz", "vertrag-f-notiz", "notiz", f.notiz || "", { type: "text", full: true, ph: "z. B. Kündigung per Online-Formular" })}
+          <p class="hint full">Alles bleibt nur in deinem Browser, mit Passwortschutz verschlüsselt.</p>
         </div>
         <button class="btn primary" type="submit">${edit ? "Änderungen speichern" : "Vertrag speichern"}</button>
       </form>`;
@@ -1797,19 +1885,45 @@ Antworte nur mit JSON in dieser Form:
             <p class="hint">Tippe bei einem Vertrag auf „Outlook“ oder „Google“, um den Erinnerungstermin in deinen Kalender zu übernehmen. Dein Kalender meldet sich dann auch auf dem Handy. Dabei gehen Vertragsname und Datum an Microsoft bzw. Google.${lokal ? " Oder lade alle Termine auf einmal als Kalenderdatei." : ""}</p>
             ${lokal ? '<div class="row"><button class="btn small" id="ics-btn">Alle Termine als Kalenderdatei (.ics)</button></div>' : ""}
             <div class="offers">
-              ${sorted.length ? sorted.map(({ v, i, fi }) => `
-                <article class="offer nr ${fi && fi.faellig ? "due" : ""}">
-                  <div class="o-main">
-                    <div class="o-title">${esc(v.name)}</div>
-                    <div class="pills">${!fi ? '<span class="pill warn">Vertragsbeginn fehlt</span>' : fi.jederzeit ? '<span class="pill good">jederzeit kündbar</span>' : `<span class="pill ${fi.status.cls}">${fi.status.t}</span>`}<span class="pill muted">${esc(KAT_V[v.kategorie] || "")}</span>${v.anbieter ? `<span class="pill muted">${esc(v.anbieter)}</span>` : ""}</div>
-                    ${fi && !fi.jederzeit ? `<div class="cal"><span class="hint">Erinnerung am ${DATE.format(fi.erinnerung)} eintragen:</span>${calLinks(v, fi).replace(/^<div class="cal">|<\/div>$/g, "")}</div>` : ""}
+              ${sorted.length ? sorted.map(({ v, i, fi }) => {
+                const vv = vertragVergleich(v);
+                const k = kostenVon(v);
+                return `
+                <article class="vcard ${fi && fi.faellig ? "due" : ""}" id="vertrag-${i}">
+                  <div class="vhead">
+                    <div class="o-main">
+                      <div class="o-title">${esc(v.name)}</div>
+                      <div class="pills">${!fi ? '<span class="pill warn">Vertragsbeginn fehlt</span>' : fi.jederzeit ? '<span class="pill good">jederzeit kündbar</span>' : `<span class="pill ${fi.status.cls}">${fi.status.t}</span>`}<span class="pill muted">${esc(KAT_V[v.kategorie] || "")}</span></div>
+                    </div>
+                    <div class="o-price">${fi && !fi.jederzeit ? `<span class="hint">kündigen bis</span><span class="o-big">${DATE.format(fi.kuendBis)}</span><span class="hint">noch ${fi.tage} Tage</span>` : fi ? `<span class="hint">wirkt frühestens zum</span><span class="o-big">${DATE.format(fi.ende)}</span>` : ""}</div>
                   </div>
-                  <div class="o-price">${fi && !fi.jederzeit ? `<span class="hint">kündigen bis</span><span class="o-big">${DATE.format(fi.kuendBis)}</span><span class="hint">noch ${fi.tage} Tage</span>` : fi ? `<span class="hint">wirkt frühestens zum</span><span class="o-big">${DATE.format(fi.ende)}</span>` : ""}</div>
-                  <details class="more"><summary>Details</summary>
-                    ${factsHtml([["Vertragsbeginn", fi ? DATE.format(parseD(v.beginn)) : "–"], ["Mindestlaufzeit", esc(v.mindest) + " Monate"], ["Danach", num(v.verl) ? "verlängert um " + esc(v.verl) + " Monate" : "unbefristet"], ["Kündigungsfrist", esc(v.frist) + " " + esc(EINHEIT[v.einheit] || "Monate")], ["Vertragsende", fi && !fi.jederzeit ? DATE.format(fi.ende) : "–"], ["Kosten", num(v.kosten) ? EUR2.format(num(v.kosten)) + "/Monat" : "–"]])}
-                    <div class="actions"><button class="btn small" data-edit="${i}">Bearbeiten</button><button class="btn small danger" data-del="${i}">Löschen</button></div>
-                  </details>
-                </article>`).join("") : '<div class="empty">Noch keine Verträge.</div>'}
+                  <div class="vsec">
+                    <section><h3>Vertrag</h3><dl class="kv">
+                      <dt>Anbieter</dt><dd>${esc(v.anbieter) || "–"}</dd>
+                      <dt>Art</dt><dd>${esc(KAT_V[v.kategorie] || "–")}</dd>
+                      <dt>Vertragsnummer</dt><dd>${esc(v.nummer) || "–"}</dd>
+                      <dt>Kosten</dt><dd>${k ? EUR2.format(k) + "/Monat" + (num(v.kosten) ? "" : '<br><span class="hint">aus dem Vergleich</span>') : "–"}</dd>
+                      <dt>Pro Jahr</dt><dd>${k ? EUR0.format(k * 12) : "–"}</dd>
+                      ${v.notiz ? `<dt>Notiz</dt><dd>${esc(v.notiz)}</dd>` : ""}
+                    </dl></section>
+                    <section><h3>Laufzeit &amp; Kündigung</h3><dl class="kv">
+                      <dt>Beginn</dt><dd>${parseD(v.beginn) ? DATE.format(parseD(v.beginn)) : "–"}</dd>
+                      <dt>Mindestlaufzeit</dt><dd>${esc(v.mindest)} Monate</dd>
+                      <dt>Danach</dt><dd>${num(v.verl) ? "verlängert um " + esc(v.verl) + " Monate" : "unbefristet"}</dd>
+                      <dt>Kündigungsfrist</dt><dd>${esc(v.frist)} ${esc(EINHEIT[v.einheit] || "Monate")}</dd>
+                      <dt>Vertragsende</dt><dd>${fi && !fi.jederzeit ? DATE.format(fi.ende) : fi ? "unbefristet" : "–"}</dd>
+                      <dt>Kündigen bis</dt><dd>${fi && !fi.jederzeit ? "<strong>" + DATE.format(fi.kuendBis) + "</strong>" : fi ? "jederzeit" : "–"}</dd>
+                      <dt>Erinnerung</dt><dd>${fi && !fi.jederzeit ? DATE.format(fi.erinnerung) : "–"}</dd>
+                    </dl>
+                    ${fi && !fi.jederzeit ? `<div class="cal"><span class="hint">In Kalender:</span>${calLinks(v, fi).replace(/^<div class="cal">|<\/div>$/g, "")}</div>` : ""}</section>
+                    <section><h3>${vv ? esc(vv.titel) : "Vergleich"}</h3>
+                    ${vv ? `<dl class="kv">${vv.facts.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join("")}</dl>
+                      <div class="row"><button class="btn small" data-go="${vv.tab}"${vv.art ? ` data-art="${vv.art}"` : ""}${vv.vkat ? ` data-vkat="${esc(vv.vkat)}"` : ""}>Zum Vergleich</button></div>`
+                    : '<p class="hint">Nicht mit einem Vergleich verknüpft. Unter „Bearbeiten“ kannst du einen Vergleich zuordnen.</p>'}</section>
+                  </div>
+                  <div class="actions"><button class="btn small" data-edit="${i}">Bearbeiten</button><button class="btn small danger" data-del="${i}">Löschen</button></div>
+                </article>`;
+              }).join("") : '<div class="empty">Noch keine Verträge.</div>'}
             </div>
           </div>
         </div>
@@ -1827,7 +1941,7 @@ Antworte nur mit JSON in dieser Form:
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       const fd = new FormData(form);
-      const v = { id: edit ? edit.id : "v" + Date.now().toString(36), name: String(fd.get("name")).trim(), kategorie: String(fd.get("kategorie")), anbieter: String(fd.get("anbieter")).trim(), beginn: String(fd.get("beginn")), mindest: num(fd.get("mindest")), verl: num(fd.get("verl")), frist: num(fd.get("frist")), einheit: String(fd.get("einheit")), kosten: num(fd.get("kosten")) };
+      const v = { id: edit ? edit.id : "v" + Date.now().toString(36), name: String(fd.get("name")).trim(), kategorie: String(fd.get("kategorie")), anbieter: String(fd.get("anbieter")).trim(), beginn: String(fd.get("beginn")), mindest: num(fd.get("mindest")), verl: num(fd.get("verl")), frist: num(fd.get("frist")), einheit: String(fd.get("einheit")), kosten: num(fd.get("kosten")), nummer: String(fd.get("nummer") || "").trim(), link: String(fd.get("link") || "auto"), notiz: String(fd.get("notiz") || "").trim() };
       if (edit) { state.vertraege[ui.edit.i] = v; toast("Vertrag gespeichert"); }
       else { state.vertraege.push(v); toast("Vertrag hinzugefügt"); }
       closeForm("vertrag"); rerender();
@@ -1876,10 +1990,42 @@ Antworte nur mit JSON in dieser Form:
     b.addEventListener("click", () => armThen(b, "Wirklich entfernen?", () => { b.textContent = "Beispiele entfernen"; removeExamples(); }));
   });
 
+  // Bild aus der Zwischenablage einfügen (Computer)
+  const TAB_KIND = { strom: "strom", gas: "gas", internet: "tk", versicherung: "vers", fristen: "vertrag" };
+  document.addEventListener("paste", (e) => {
+    const kind = TAB_KIND[ui.tab];
+    if (!kind || !canScan() || scan.busy || vault.locked) return;
+    if (e.target && /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
+    const files = Array.from((e.clipboardData && e.clipboardData.files) || []).filter((f) => /^image\//.test(f.type));
+    if (!files.length) return;
+    e.preventDefault(); runScan(kind, "dokument", files);
+  });
+
   // Klicks auf „Öffnen“-Knöpfe und Sprungmarken
   document.addEventListener("click", (e) => {
     const g = e.target.closest("[data-go]");
-    if (g) { go(g.dataset.go); return; }
+    if (g) {
+      if (g.dataset.art && state.tk[g.dataset.art]) state.tk.art = g.dataset.art;
+      if (g.dataset.vkat && state.vers.kategorien[g.dataset.vkat]) state.vers.kategorie = g.dataset.vkat;
+      save(); go(g.dataset.go); return;
+    }
+    const sv = e.target.closest("[data-showvertrag]");
+    if (sv) {
+      go("fristen");
+      const card = document.getElementById("vertrag-" + sv.dataset.showvertrag);
+      if (card) { card.scrollIntoView({ behavior: "smooth", block: "start" }); card.classList.add("flash"); setTimeout(() => card.classList.remove("flash"), 2000); }
+      return;
+    }
+    const nv = e.target.closest("[data-newvertrag]");
+    if (nv) {
+      go("fristen");
+      ui.form.vertrag = true;
+      ui.draft = { kind: "vertrag", data: { name: nv.dataset.name || "", kategorie: nv.dataset.newvertrag, anbieter: "", beginn: "", mindest: 12, verl: nv.dataset.newvertrag === "versicherung" ? 12 : 0, frist: nv.dataset.newvertrag === "versicherung" ? 3 : 1, einheit: "monate", kosten: "", link: nv.dataset.link || "auto" } };
+      rerenderTab();
+      const f = document.getElementById("vertrag-form");
+      if (f) { f.scrollIntoView({ behavior: "smooth", block: "center" }); const n = document.getElementById("vertrag-f-anbieter"); if (n) n.focus({ preventScroll: true }); }
+      return;
+    }
     const n = e.target.closest("[data-noscan]");
     if (n) { Object.assign(scan, { kind: n.dataset.noscan, busy: false, result: null, status: "", error: SCAN_WHY[scanAvail] + CHAT_TIPP }); rerenderTab(); return; }
     const j = e.target.closest("[data-jump]");
