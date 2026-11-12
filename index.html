@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
-/* Layout: Kopfzeile mit Reitern; je Reiter links Eingaben (Verbrauch, Angebot erfassen), rechts Ergebnis (Bestes Angebot, Balken, Tabelle). */
+/* Layout: Kopfzeile mit Reitern und Fristen-Hinweis; je Reiter links Eingaben (Foto, Portale, Formulare), rechts Ergebnis (Kennzahlen, Vergleichbarkeit, Tabelle). */
 :root {
   --bg: #f5f6f3;
   --surface: #ffffff;
@@ -22,13 +22,17 @@
   --accent-soft: #dcefe6;
   --strom: #c98a06;
   --gas: #2f6fb3;
+  --tk: #7a4fb5;
   --vers: #1f6b52;
+  --frist: #b3261e;
   --good: #1d7a45;
   --good-soft: #def3e6;
   --warn: #9a5b00;
   --warn-soft: #fbecd2;
   --bad: #b3261e;
   --bad-soft: #fbe1de;
+  --info: #2f5f8f;
+  --info-soft: #e1ecf7;
   --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
   --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-data: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -38,33 +42,35 @@
   :root:not([data-theme="light"]) {
     --bg: #121613; --surface: #1a1f1b; --sunken: #232924; --fg: #e6ebe6; --muted: #9aa59c; --line: #2f3731;
     --accent: #5cc49b; --accent-fg: #0d1a14; --accent-soft: #1d3a2e;
-    --strom: #f0b429; --gas: #6aa8ea; --vers: #5cc49b;
-    --good: #6fd39a; --good-soft: #1b3826; --warn: #f2b45a; --warn-soft: #3a2c14; --bad: #ff8a80; --bad-soft: #3d1f1d;
+    --strom: #f0b429; --gas: #6aa8ea; --tk: #b28ef0; --vers: #5cc49b; --frist: #ff8a80;
+    --good: #6fd39a; --good-soft: #1b3826; --warn: #f2b45a; --warn-soft: #3a2c14; --bad: #ff8a80; --bad-soft: #3d1f1d; --info: #8fbcef; --info-soft: #1c2c3d;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #121613; --surface: #1a1f1b; --sunken: #232924; --fg: #e6ebe6; --muted: #9aa59c; --line: #2f3731;
   --accent: #5cc49b; --accent-fg: #0d1a14; --accent-soft: #1d3a2e;
-  --strom: #f0b429; --gas: #6aa8ea; --vers: #5cc49b;
-  --good: #6fd39a; --good-soft: #1b3826; --warn: #f2b45a; --warn-soft: #3a2c14; --bad: #ff8a80; --bad-soft: #3d1f1d;
+  --strom: #f0b429; --gas: #6aa8ea; --tk: #b28ef0; --vers: #5cc49b; --frist: #ff8a80;
+  --good: #6fd39a; --good-soft: #1b3826; --warn: #f2b45a; --warn-soft: #3a2c14; --bad: #ff8a80; --bad-soft: #3d1f1d; --info: #8fbcef; --info-soft: #1c2c3d;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
 .wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 24px 48px; }
-header.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 24px; margin-bottom: 20px; }
+header.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 24px; margin-bottom: 16px; }
 h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.7rem, 4vw, 2.3rem); margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
 h1 small { display: block; font-family: var(--font-body); font-weight: 400; font-size: 0.9rem; color: var(--muted); letter-spacing: 0; margin-top: 2px; }
 h2 { font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; margin: 0; text-wrap: balance; }
 h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0; font-weight: 600; }
-.tabs { display: flex; gap: 4px; background: var(--sunken); padding: 4px; border-radius: 999px; flex-wrap: wrap; }
-.tab { border: 0; background: transparent; color: var(--fg); font: 600 0.92rem var(--font-body); padding: 8px 16px; border-radius: 999px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+.tabs { display: flex; gap: 4px; background: var(--sunken); padding: 4px; border-radius: 18px; flex-wrap: wrap; }
+.tab { border: 0; background: transparent; color: var(--fg); font: 600 0.9rem var(--font-body); padding: 8px 14px; border-radius: 999px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
 .tab .dot { width: 9px; height: 9px; border-radius: 50%; }
+.tab .count { font: 600 0.7rem var(--font-data); background: var(--bad); color: var(--surface); border-radius: 999px; padding: 0 6px; }
 .tab[aria-selected="true"] { background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
-.tab:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.notice { font-size: 0.85rem; color: var(--warn); background: var(--warn-soft); border-radius: var(--radius); padding: 8px 12px; margin-bottom: 20px; }
+.tab:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.notice { font-size: 0.85rem; color: var(--warn); background: var(--warn-soft); border-radius: var(--radius); padding: 8px 12px; margin: 0 0 12px; }
+.due { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; font-size: 0.9rem; color: var(--bad); background: var(--bad-soft); border-radius: var(--radius); padding: 10px 12px; margin: 0 0 16px; font-weight: 500; }
 .grid { display: grid; grid-template-columns: minmax(0, 360px) minmax(0, 1fr); gap: 20px; align-items: start; }
 @media (max-width: 920px) { .grid { grid-template-columns: minmax(0, 1fr); } }
 .col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
@@ -73,17 +79,21 @@ h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; colo
 .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .fields .full { grid-column: 1 / -1; }
 label.f { display: flex; flex-direction: column; gap: 4px; font-size: 0.8rem; color: var(--muted); font-weight: 500; min-width: 0; }
-input[type="number"], input[type="text"], select, textarea { font: 0.95rem var(--font-body); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 7px; padding: 7px 9px; width: 100%; min-width: 0; }
-input[type="number"] { font-family: var(--font-data); font-size: 0.9rem; }
+label.f.inline { flex-direction: row; align-items: center; gap: 8px; }
+label.f.inline select { width: auto; }
+input[type="number"], input[type="text"], input[type="date"], select, textarea { font: 0.95rem var(--font-body); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 7px; padding: 7px 9px; width: 100%; min-width: 0; }
+input[type="number"], input[type="date"] { font-family: var(--font-data); font-size: 0.9rem; }
 textarea { font-family: var(--font-data); font-size: 0.8rem; min-height: 90px; resize: vertical; }
 .check { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: var(--fg); cursor: pointer; }
-.check input { width: 16px; height: 16px; accent-color: var(--accent); }
+.check input { width: 16px; height: 16px; accent-color: var(--accent); flex: none; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip { border: 1px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 999px; padding: 4px 10px; font: 500 0.8rem var(--font-body); cursor: pointer; }
+.chip { border: 1px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 999px; padding: 4px 10px; font: 500 0.8rem var(--font-body); cursor: pointer; text-decoration: none; }
 .chip:hover { border-color: var(--accent); }
 .chip.on { background: var(--accent-soft); border-color: var(--accent); }
-.btn { border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 7px; padding: 8px 14px; font: 600 0.88rem var(--font-body); cursor: pointer; }
+a.chip::after { content: " ↗"; color: var(--muted); }
+.btn { border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 7px; padding: 8px 14px; font: 600 0.88rem var(--font-body); cursor: pointer; text-decoration: none; }
 .btn:hover { border-color: var(--accent); }
+.btn:disabled { opacity: .5; cursor: default; }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
 .btn.small { padding: 4px 9px; font-size: 0.78rem; }
 .btn.danger { color: var(--bad); }
@@ -91,8 +101,6 @@ textarea { font-family: var(--font-data); font-size: 0.8rem; min-height: 90px; r
 .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .hint { font-size: 0.8rem; color: var(--muted); margin: 0; }
 .mono { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
-
-/* Summary */
 .summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 @media (max-width: 640px) { .summary { grid-template-columns: minmax(0, 1fr); } }
 .stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
@@ -100,10 +108,8 @@ textarea { font-family: var(--font-data); font-size: 0.8rem; min-height: 90px; r
 .stat .v { font-family: var(--font-data); font-size: 1.45rem; font-weight: 600; font-variant-numeric: tabular-nums; }
 .stat .s { font-size: 0.82rem; color: var(--muted); overflow-wrap: anywhere; }
 .pos { color: var(--good); } .neg { color: var(--bad); }
-
-/* Bars */
 .bars { display: flex; flex-direction: column; gap: 8px; }
-.bar-row { display: grid; grid-template-columns: minmax(0, 170px) minmax(0, 1fr) auto; gap: 10px; align-items: center; font-size: 0.85rem; }
+.bar-row { display: grid; grid-template-columns: minmax(0, 190px) minmax(0, 1fr) auto; gap: 10px; align-items: center; font-size: 0.85rem; }
 @media (max-width: 560px) { .bar-row { grid-template-columns: minmax(0, 1fr) auto; } .bar-row .track { grid-column: 1 / -1; order: 3; } }
 .bar-row .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .track { position: relative; height: 14px; background: var(--sunken); border-radius: 4px; }
@@ -111,16 +117,15 @@ textarea { font-family: var(--font-data); font-size: 0.8rem; min-height: 90px; r
 .fill.ghost { background: transparent; border: 1.5px dashed var(--kind); opacity: .55; }
 .fill.current { background: var(--muted); opacity: .55; }
 .bar-row .val { font-family: var(--font-data); font-variant-numeric: tabular-nums; text-align: right; min-width: 82px; }
-
-/* Table */
 .tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
 table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
 th, td { padding: 9px 10px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
-th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; background: var(--sunken); position: sticky; top: 0; }
+th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; background: var(--sunken); }
 th.l, td.l { text-align: left; }
 td { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
 td.l { font-family: var(--font-body); white-space: normal; min-width: 180px; }
 tr.best td { background: var(--accent-soft); }
+tr.due-row td { background: var(--bad-soft); }
 tr:last-child td { border-bottom: 0; }
 .rank { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--sunken); font-weight: 600; font-size: 0.78rem; }
 tr.best .rank { background: var(--kind); color: var(--surface); }
@@ -131,7 +136,8 @@ tr.best .rank { background: var(--kind); color: var(--surface); }
 .pill.good { background: var(--good-soft); color: var(--good); }
 .pill.warn { background: var(--warn-soft); color: var(--warn); }
 .pill.bad { background: var(--bad-soft); color: var(--bad); }
-.actions { display: flex; gap: 4px; justify-content: flex-end; }
+.pill.info { background: var(--info-soft); color: var(--info); }
+.actions { display: flex; gap: 4px; justify-content: flex-end; flex-wrap: wrap; }
 .score { display: inline-flex; align-items: center; gap: 6px; }
 .score .mini { width: 52px; height: 6px; background: var(--sunken); border-radius: 3px; position: relative; overflow: hidden; }
 .score .mini i { position: absolute; inset: 0 auto 0 0; background: var(--kind); }
@@ -141,9 +147,13 @@ tr.best .rank { background: var(--kind); color: var(--surface); }
 .yes { color: var(--good); font-weight: 600; } .no { color: var(--bad); }
 .empty { padding: 24px; text-align: center; color: var(--muted); font-size: 0.9rem; }
 .panel { display: flex; flex-direction: column; gap: 16px; }
-details.io summary { cursor: pointer; font-size: 0.85rem; color: var(--muted); }
-footer { margin-top: 28px; font-size: 0.8rem; color: var(--muted); max-width: 70ch; }
-footer a { color: var(--accent); }
+.findings { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.findings li { display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 10px; font-size: 0.88rem; align-items: start; }
+.tag { font: 600 0.66rem var(--font-body); padding: 2px 7px; border-radius: 999px; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.04em; text-align: center; }
+.tag.good { background: var(--good-soft); color: var(--good); }
+.tag.warn { background: var(--warn-soft); color: var(--warn); }
+.tag.info { background: var(--info-soft); color: var(--info); }
+.analysis { white-space: pre-wrap; font-size: 0.88rem; background: var(--sunken); border-radius: 8px; padding: 12px; margin: 0; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .scan { border-style: dashed; border-color: var(--kind); }
 .scan-btn { display: inline-flex; justify-content: center; align-items: center; gap: 8px; text-align: center; }
@@ -151,8 +161,16 @@ footer a { color: var(--accent); }
 .scan dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; margin: 0; font-size: 0.86rem; }
 .scan dt { color: var(--muted); }
 .scan dd { margin: 0; font-family: var(--font-data); overflow-wrap: anywhere; }
-.scan .err { color: var(--bad); font-size: 0.85rem; margin: 0; }
-.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 8px 16px; border-radius: 999px; font-size: 0.85rem; z-index: 20; }
+.err { color: var(--bad); font-size: 0.85rem; margin: 0; }
+.picklist { display: flex; flex-direction: column; gap: 6px; max-height: 360px; overflow-y: auto; }
+.picklist label { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; align-items: center; font-size: 0.84rem; padding: 6px 8px; border: 1px solid var(--line); border-radius: 7px; cursor: pointer; }
+.picklist .p { font-family: var(--font-data); font-size: 0.8rem; text-align: right; }
+.cal { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+.legal { font-size: 0.82rem; color: var(--muted); margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+details.io summary { cursor: pointer; font-size: 0.85rem; color: var(--muted); }
+footer { margin-top: 28px; font-size: 0.8rem; color: var(--muted); max-width: 70ch; }
+footer a { color: var(--accent); }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 8px 16px; border-radius: 999px; font-size: 0.85rem; z-index: 20; max-width: calc(100% - 32px); text-align: center; }
 @media (prefers-reduced-motion: no-preference) { .fill { transition: width .35s ease; } }
 </style>
 </head>
@@ -160,22 +178,27 @@ footer a { color: var(--accent); }
 
 <div class="wrap">
   <header class="top">
-    <h1>Tarif-Kompass<small>Strom, Gas und Versicherungen nüchtern nachrechnen</small></h1>
+    <h1>Tarif-Kompass<small>Strom, Gas, Internet und Versicherungen nüchtern nachrechnen</small></h1>
     <nav class="tabs" role="tablist" aria-label="Bereich">
       <button class="tab" role="tab" id="tab-strom" data-tab="strom"><span class="dot" style="background:var(--strom)"></span>Strom</button>
       <button class="tab" role="tab" id="tab-gas" data-tab="gas"><span class="dot" style="background:var(--gas)"></span>Gas</button>
+      <button class="tab" role="tab" id="tab-internet" data-tab="internet"><span class="dot" style="background:var(--tk)"></span>Internet &amp; Telefon</button>
       <button class="tab" role="tab" id="tab-versicherung" data-tab="versicherung"><span class="dot" style="background:var(--vers)"></span>Versicherungen</button>
+      <button class="tab" role="tab" id="tab-fristen" data-tab="fristen"><span class="dot" style="background:var(--frist)"></span>Fristen<span class="count" id="due-count" hidden></span></button>
     </nav>
   </header>
 
-  <p class="notice" id="example-notice">Die vorausgefüllten Angebote „Beispiel A, B, C …“ sind erfundene Beispielwerte, keine echten Tarife. Trage deine eigenen Daten ein oder lies sie per Foto ein.</p>
+  <p class="notice">Alles, was mit „Beispiel“ beginnt, sind erfundene Werte zum Ausprobieren, keine echten Tarife. Trage deine eigenen Daten ein oder lies sie per Foto ein.</p>
+  <p class="due" id="due-banner" hidden></p>
 
   <section class="panel" id="panel-energy"></section>
+  <section class="panel" id="panel-tk" hidden></section>
   <section class="panel" id="panel-versicherung" hidden></section>
+  <section class="panel" id="panel-fristen" hidden></section>
 
   <footer>
-    <p>Alle Eingaben bleiben nur in diesem Browser gespeichert. Rechnung Energie: Jahreskosten = Grundpreis × 12 + Arbeitspreis × Verbrauch − Bonus. Der Bonus gilt meist nur im ersten Vertragsjahr, deshalb zeigt der Vergleich auch die Kosten ab dem zweiten Jahr. Gasumrechnung: m³ × Brennwert × Zustandszahl = kWh (Werte stehen auf deiner Jahresabrechnung).</p>
-    <p>Unabhängige Beratung: <a href="https://www.verbraucherzentrale.de" target="_blank" rel="noopener">Verbraucherzentrale</a> · Versicherungstests: <a href="https://www.test.de" target="_blank" rel="noopener">Stiftung Warentest</a></p>
+    <p>Alle Eingaben bleiben nur in diesem Browser gespeichert. Energie: Jahreskosten = Grundpreis × 12 + Arbeitspreis × Verbrauch − Bonus; der Bonus gilt meist nur im ersten Jahr. Internet und Mobilfunk: alle Monatspreise, Routermiete und Einmalkosten abzüglich Gutschriften im Vergleichszeitraum, geteilt durch die Monate.</p>
+    <p>Unabhängige Beratung: <a href="https://www.verbraucherzentrale.de" target="_blank" rel="noopener">Verbraucherzentrale</a> · Tests: <a href="https://www.test.de" target="_blank" rel="noopener">Stiftung Warentest</a></p>
     <div class="row" style="margin-top:12px">
       <button class="btn small" id="btn-export">Daten in Zwischenablage kopieren</button>
       <button class="btn small danger" id="btn-reset">Auf Beispieldaten zurücksetzen</button>
@@ -198,30 +221,69 @@ footer a { color: var(--accent); }
   const EUR0 = new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
   const EUR2 = new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const NUM = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 2 });
+  const DATE = new Intl.DateTimeFormat("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const num = (v, d = 0) => { const n = parseFloat(String(v).replace(",", ".")); return Number.isFinite(n) ? n : d; };
+  const nameOf = (t) => [t.anbieter, t.tarif].filter(Boolean).join(" · ");
+  const list = (arr) => arr.length <= 1 ? arr.join("") : arr.slice(0, -1).join(", ") + " und " + arr[arr.length - 1];
+  const keyOf = (t) => (String(t.anbieter || "") + "|" + String(t.tarif || "")).toLowerCase().replace(/[^a-z0-9äöüß|]/g, "");
+
+  const PORTALE = {
+    energie: [["Check24", "https://www.check24.de"], ["Verivox", "https://www.verivox.de"], ["Tarifcheck", "https://www.tarifcheck.de"], ["Toptarif", "https://www.toptarif.de"]],
+    internet: [["Check24", "https://www.check24.de"], ["Verivox", "https://www.verivox.de"], ["Tarifcheck", "https://www.tarifcheck.de"], ["Verfügbarkeit: Gigabit-Grundbuch", "https://gigabitgrundbuch.bund.de"]],
+    mobil: [["Check24", "https://www.check24.de"], ["Verivox", "https://www.verivox.de"], ["Tarifcheck", "https://www.tarifcheck.de"]],
+    vers: [["Check24", "https://www.check24.de"], ["Verivox", "https://www.verivox.de"], ["Tarifcheck", "https://www.tarifcheck.de"], ["Finanztest", "https://www.test.de"]],
+  };
+  const PORTAL_TIPP = {
+    strom: "Stell im Portal ein: Preisgarantie mindestens 12 Monate, keine Vorauskasse, keine Pakettarife. Kein Portal listet alle Anbieter. Frag zusätzlich beim örtlichen Stadtwerk.",
+    gas: "Stell im Portal ein: Preisgarantie mindestens 12 Monate, keine Vorauskasse, keine Pakettarife. Kein Portal listet alle Anbieter. Frag zusätzlich beim örtlichen Stadtwerk.",
+    internet: "Vergleiche gleiche Geschwindigkeit und prüfe vorher, welche Technik an deiner Adresse verfügbar ist. Portale rechnen meist mit dem Durchschnittspreis über 24 Monate.",
+    mobil: "Vergleiche gleiches Datenvolumen und Netz. Viele Discounter-Tarife sind monatlich kündbar.",
+    vers: "Stell gleiche Deckungssumme und Selbstbeteiligung ein. Einige Versicherer sind in keinem Portal gelistet, frag dort direkt an.",
+  };
 
   // ---------- Beispieldaten ----------
   function defaults() {
     return {
       strom: {
         verbrauch: 2500,
-        aktuell: { name: "Mein aktueller Tarif", gp: 13.5, ap: 39.8 },
+        aktuell: { gp: 13.5, ap: 39.8 },
         angebote: [
-          { anbieter: "Beispiel A", tarif: "Strom Fix 24", gp: 12.9, ap: 29.4, bonus: 120, laufzeit: 24, garantie: 24, oeko: true },
-          { anbieter: "Beispiel B", tarif: "Öko Flex", gp: 14.5, ap: 30.9, bonus: 0, laufzeit: 1, garantie: 12, oeko: true },
-          { anbieter: "Beispiel C", tarif: "Bonus Plus", gp: 9.9, ap: 33.8, bonus: 250, laufzeit: 12, garantie: 12, oeko: false },
-          { anbieter: "Beispiel D", tarif: "Regional Basis", gp: 11.2, ap: 31.5, bonus: 50, laufzeit: 12, garantie: 12, oeko: false },
+          { anbieter: "Beispiel A", tarif: "Strom Fix 24", gp: 12.9, ap: 29.4, bonus: 120, laufzeit: 24, garantie: 24, oeko: true, quelle: "Portal 1" },
+          { anbieter: "Beispiel A", tarif: "Strom Fix 24", gp: 12.9, ap: 29.4, bonus: 80, laufzeit: 24, garantie: 24, oeko: true, quelle: "Portal 2" },
+          { anbieter: "Beispiel B", tarif: "Öko Flex", gp: 14.5, ap: 30.9, bonus: 0, laufzeit: 1, garantie: 12, oeko: true, quelle: "Portal 2" },
+          { anbieter: "Beispiel C", tarif: "Bonus Plus", gp: 9.9, ap: 33.8, bonus: 250, laufzeit: 12, garantie: 12, oeko: false, quelle: "Portal 1", anzeige: true },
+          { anbieter: "Beispiel D", tarif: "Regional Basis", gp: 11.2, ap: 31.5, bonus: 50, laufzeit: 12, garantie: 6, oeko: false, quelle: "Stadtwerk direkt" },
         ],
       },
       gas: {
         verbrauch: 15000,
-        aktuell: { name: "Mein aktueller Tarif", gp: 16.0, ap: 12.9 },
+        aktuell: { gp: 16.0, ap: 12.9 },
         angebote: [
-          { anbieter: "Beispiel A", tarif: "Gas Fix 12", gp: 14.9, ap: 10.2, bonus: 100, laufzeit: 12, garantie: 12, oeko: false },
-          { anbieter: "Beispiel B", tarif: "Klima Gas", gp: 17.5, ap: 9.8, bonus: 0, laufzeit: 1, garantie: 6, oeko: true },
-          { anbieter: "Beispiel C", tarif: "Gas Bonus", gp: 9.0, ap: 11.4, bonus: 300, laufzeit: 12, garantie: 12, oeko: false },
+          { anbieter: "Beispiel A", tarif: "Gas Fix 12", gp: 14.9, ap: 10.2, bonus: 100, laufzeit: 12, garantie: 12, oeko: false, quelle: "Portal 1" },
+          { anbieter: "Beispiel B", tarif: "Klima Gas", gp: 17.5, ap: 9.8, bonus: 0, laufzeit: 1, garantie: 6, oeko: true, quelle: "Portal 2" },
+          { anbieter: "Beispiel C", tarif: "Gas Bonus", gp: 9.0, ap: 11.4, bonus: 300, laufzeit: 12, garantie: 12, oeko: false, quelle: "Portal 1", portalPreis: 1418 },
         ],
+      },
+      tk: {
+        art: "internet",
+        horizont: 24,
+        internet: {
+          aktuell: { preis: 44.99, leistung: 100 },
+          angebote: [
+            { anbieter: "Beispiel A", tarif: "Glasfaser 300", preis: 49.99, aktionPreis: 24.99, aktionMonate: 12, einmalig: 69.99, router: 0, bonus: 100, leistung: 300, upload: 150, laufzeit: 24, technik: "Glasfaser", quelle: "Portal 1" },
+            { anbieter: "Beispiel B", tarif: "DSL 100", preis: 39.99, aktionPreis: 19.99, aktionMonate: 6, einmalig: 0, router: 5.99, bonus: 0, leistung: 100, upload: 40, laufzeit: 24, technik: "DSL", quelle: "Portal 2" },
+            { anbieter: "Beispiel C", tarif: "Kabel 250 Flex", preis: 42, aktionPreis: 0, aktionMonate: 0, einmalig: 0, router: 0, bonus: 0, leistung: 250, upload: 25, laufzeit: 1, technik: "Kabel", quelle: "Portal 1" },
+          ],
+        },
+        mobil: {
+          aktuell: { preis: 19.99, leistung: 10 },
+          angebote: [
+            { anbieter: "Beispiel A", tarif: "Allnet 20 GB", preis: 12.99, aktionPreis: 0, aktionMonate: 0, einmalig: 9.99, router: 0, bonus: 0, leistung: 20, upload: 0, laufzeit: 24, technik: "5G", quelle: "Portal 1" },
+            { anbieter: "Beispiel B", tarif: "Flex 15 GB", preis: 9.99, aktionPreis: 0, aktionMonate: 0, einmalig: 0, router: 0, bonus: 0, leistung: 15, upload: 0, laufzeit: 1, technik: "4G", quelle: "Portal 2" },
+            { anbieter: "Beispiel C", tarif: "Unlimited", preis: 39.99, aktionPreis: 29.99, aktionMonate: 12, einmalig: 39.99, router: 0, bonus: 0, leistung: 1000, upload: 0, laufzeit: 24, technik: "5G", quelle: "Portal 1" },
+          ],
+        },
       },
       vers: {
         kategorie: "haftpflicht",
@@ -239,9 +301,9 @@ footer a { color: var(--accent); }
               { id: "f6", name: "Mietsachschäden", w: 1 },
             ],
             angebote: [
-              { anbieter: "Beispiel A", tarif: "Basis", beitrag: 4.5, zahlweise: 12, sb: 150, features: { f2: true, f6: true } },
-              { anbieter: "Beispiel B", tarif: "Komfort", beitrag: 72, zahlweise: 1, sb: 0, features: { f1: true, f2: true, f3: true, f4: true, f6: true } },
-              { anbieter: "Beispiel C", tarif: "Premium", beitrag: 109, zahlweise: 1, sb: 0, features: { f1: true, f2: true, f3: true, f4: true, f5: true, f6: true } },
+              { anbieter: "Beispiel A", tarif: "Basis", beitrag: 4.5, zahlweise: 12, sb: 150, features: { f2: true, f6: true }, quelle: "Portal 1" },
+              { anbieter: "Beispiel B", tarif: "Komfort", beitrag: 72, zahlweise: 1, sb: 0, features: { f1: true, f2: true, f3: true, f4: true, f6: true }, quelle: "Portal 2" },
+              { anbieter: "Beispiel C", tarif: "Premium", beitrag: 109, zahlweise: 1, sb: 0, features: { f1: true, f2: true, f3: true, f4: true, f5: true, f6: true }, quelle: "Portal 1" },
             ],
           },
           hausrat: {
@@ -304,31 +366,187 @@ footer a { color: var(--accent); }
           },
         },
       },
+      vorlauf: 1,
+      vertraege: [
+        { id: "v1", name: "Beispiel: Strom Wohnung", kategorie: "strom", anbieter: "Beispiel-Werk", beginn: "2025-01-01", mindest: 12, verl: 0, frist: 1, einheit: "monate", kosten: 96 },
+        { id: "v2", name: "Beispiel: Internet", kategorie: "internet", anbieter: "Beispiel-Net", beginn: "2024-12-15", mindest: 24, verl: 0, frist: 1, einheit: "monate", kosten: 44.99 },
+        { id: "v3", name: "Beispiel: Kfz-Versicherung", kategorie: "versicherung", anbieter: "Beispiel-Vers", beginn: "2024-01-01", mindest: 12, verl: 12, frist: 1, einheit: "monate", kosten: 58.5 },
+        { id: "v4", name: "Beispiel: Privathaftpflicht", kategorie: "versicherung", anbieter: "Beispiel-Vers", beginn: "2023-01-01", mindest: 12, verl: 12, frist: 3, einheit: "monate", kosten: 6 },
+        { id: "v5", name: "Beispiel: Handy", kategorie: "mobil", anbieter: "Beispiel-Mobil", beginn: "2025-06-01", mindest: 24, verl: 0, frist: 1, einheit: "monate", kosten: 19.99 },
+      ],
     };
   }
 
   // ---------- Zustand ----------
+  function migrate(s) {
+    if (!s || !s.strom || !s.gas || !s.vers) return defaults();
+    const d = defaults();
+    if (!s.tk) s.tk = d.tk;
+    if (!Array.isArray(s.vertraege)) s.vertraege = d.vertraege;
+    if (!s.vorlauf) s.vorlauf = 1;
+    return s;
+  }
   let state;
-  try { state = JSON.parse(localStorage.getItem(STORE_KEY)) || defaults(); } catch (e) { state = defaults(); }
-  if (!state.strom || !state.gas || !state.vers) state = defaults();
-  const ui = { tab: "strom", sort: { strom: "y1", gas: "y1" }, nurOeko: { strom: false, gas: false }, maxLaufzeit: { strom: 0, gas: 0 }, edit: null, draft: null };
+  try { state = migrate(JSON.parse(localStorage.getItem(STORE_KEY))); } catch (e) { state = defaults(); }
+  const ui = { tab: "strom", sort: { strom: "y1", gas: "y1" }, nurOeko: { strom: false, gas: false }, maxLaufzeit: { strom: 0, gas: 0 }, tkMin: false, edit: null, draft: null };
   const save = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} };
 
   function toast(msg) {
     const t = document.getElementById("toast");
     t.textContent = msg; t.hidden = false;
-    clearTimeout(toast._t); toast._t = setTimeout(() => (t.hidden = true), 2200);
+    clearTimeout(toast._t); toast._t = setTimeout(() => (t.hidden = true), 2600);
+  }
+  const rerenderTab = () => show(ui.tab);
+
+  // Löschen mit zweitem Klick bestätigen
+  function bindDelete(root, onDelete) {
+    if (!root) return;
+    root.querySelectorAll("[data-del]").forEach((b) => b.addEventListener("click", () => {
+      if (b.classList.contains("armed")) { onDelete(+b.dataset.del); return; }
+      const label = b.textContent;
+      b.classList.add("armed"); b.textContent = "Sicher?";
+      setTimeout(() => { if (b.isConnected) { b.classList.remove("armed"); b.textContent = label; } }, 3000);
+    }));
+  }
+  function bindEditCancel() {
+    const cancel = document.getElementById("cancel-edit");
+    if (cancel) cancel.addEventListener("click", () => { ui.edit = null; ui.draft = null; rerenderTab(); });
+  }
+  function bindEditButtons(root, kind) {
+    root.querySelectorAll("[data-edit]").forEach((b) => b.addEventListener("click", () => {
+      ui.edit = { kind, i: +b.dataset.edit }; ui.draft = null; rerenderTab();
+      const f = document.getElementById(kind + "-form"); if (f) f.scrollIntoView({ behavior: "smooth", block: "center" });
+    }));
+  }
+  const formHead = (edit, draft, what = "Angebot") => `<div class="card-head"><h2>${edit ? what + " bearbeiten" : draft ? "Erkannte Daten prüfen" : what + " hinzufügen"}</h2>${edit || draft ? '<button type="button" class="btn small" id="cancel-edit">Abbrechen</button>' : ""}</div>`;
+  const inp = (label, id, name, val, o = {}) => {
+    const type = o.type || "number";
+    return `<label class="f${o.full ? " full" : ""}">${label}<input type="${type}" name="${name}" id="${id}"${type === "number" ? ` step="${o.step || "0.01"}" min="0"` : ""}${o.req ? " required" : ""} value="${esc(val)}"${o.ph ? ` placeholder="${esc(o.ph)}"` : ""}></label>`;
+  };
+  const keepMeta = (t, base) => { if (base && base.portalPreis) t.portalPreis = base.portalPreis; if (base && base.anzeige) t.anzeige = true; return t; };
+
+  // ---------- Foto einlesen & Claude (Grundlagen) ----------
+  let sampler = null, imgLimits = null;
+  const canScan = () => !!(sampler && imgLimits);
+  const ERR = {
+    not_granted: "Du hast der Seite nicht erlaubt, Claude zu nutzen. Trage die Werte bitte von Hand ein.",
+    sampling_disabled: "Claude ist für dein Konto hier nicht verfügbar.",
+    rate_limited: "Gerade zu viele Anfragen. Versuch es in ein paar Minuten noch einmal.",
+    image_rejected: "Das Bild konnte nicht gelesen werden. Nimm ein JPEG- oder PNG-Foto mit höchstens 20 MB.",
+    refused: "Claude hat diese Anfrage abgelehnt. Versuch es mit einem anderen Bild.",
+    invalid_json: "Die Antwort war unvollständig. Bitte noch einmal versuchen.",
+    session_expired: "Bitte melde dich neu an und versuche es noch einmal.",
+  };
+
+  // ---------- Vergleichbarkeit ----------
+  function commonFindings(items, opts) {
+    const f = [];
+    const groups = {};
+    items.forEach((it) => { (groups[keyOf(it.t)] = groups[keyOf(it.t)] || []).push(it); });
+    Object.values(groups).filter((g) => g.length > 1).forEach((g) => {
+      const sorted = g.slice().sort((a, b) => a.preis - b.preis);
+      const spread = sorted[sorted.length - 1].preis - sorted[0].preis;
+      const detail = sorted.map((x) => `${x.t.quelle || "ohne Quelle"} ${opts.fmt(x.preis)}`).join(", ");
+      if (spread >= 1) f.push({ lvl: "warn", t: `Gleicher Tarif „${nameOf(g[0].t)}“ in mehreren Quellen mit unterschiedlichem Preis: ${detail}. Am günstigsten über ${sorted[0].t.quelle || "die Quelle ohne Namen"}, ${opts.fmt(spread)} Unterschied.` });
+      else f.push({ lvl: "info", t: `„${nameOf(g[0].t)}“ steht in mehreren Quellen zum gleichen Preis (${detail}).` });
+    });
+    items.filter((it) => num(it.t.portalPreis) > 0 && it.portalVergleich > 0).forEach((it) => {
+      const dev = (num(it.t.portalPreis) - it.portalVergleich) / it.portalVergleich;
+      if (Math.abs(dev) > 0.03) f.push({ lvl: "warn", t: `${it.t.quelle || "Das Portal"} zeigt für ${nameOf(it.t)} ${opts.fmt(num(it.t.portalPreis))}, nachgerechnet sind es ${opts.fmt(it.portalVergleich)} ${opts.portalNote}. Das Portal rechnet vermutlich mit anderen Annahmen, etwa anderem Verbrauch, Bonus oder Zeitraum.` });
+    });
+    const ads = items.filter((it) => it.t.anzeige).map((it) => nameOf(it.t));
+    if (ads.length) f.push({ lvl: "info", t: `${list(ads)} ${ads.length > 1 ? "sind" : "ist"} im Portal als Anzeige markiert. Bezahlte Platzierungen stehen oben, sind aber nicht unbedingt am günstigsten.` });
+    const qs = new Set(items.map((it) => it.t.quelle).filter(Boolean));
+    if (items.length && qs.size < 2) f.push({ lvl: "info", t: `Die Angebote stammen aus ${qs.size ? "nur einer Quelle" : "keiner angegebenen Quelle"}. Kein Portal listet alle Anbieter. Vergleiche mindestens zwei Portale und frag auch direkt an.` });
+    return f;
+  }
+  function finalize(f, n) {
+    if (n < 2) return [{ lvl: "info", t: "Für einen Vergleich brauchst du mindestens zwei Angebote." }, ...f.filter((x) => x.lvl !== "good")];
+    if (!f.some((x) => x.lvl === "warn")) f.unshift({ lvl: "good", t: "Die Angebote sind gut vergleichbar. Es gibt keine größeren Unterschiede bei Bedingungen und Leistung." });
+    const order = { warn: 0, good: 1, info: 2 };
+    return f.sort((a, b) => order[a.lvl] - order[b.lvl]);
+  }
+  const TAG = { warn: "Achtung", info: "Hinweis", good: "Passt" };
+
+  const ana = { kind: null, busy: false, text: "", error: "", ctl: null };
+  function vergleichCard(kind, findings) {
+    const mine = ana.kind === kind;
+    return `<div class="card">
+      <div class="card-head"><h2>Vergleichbarkeit</h2>${sampler ? `<button class="btn small" id="ana-btn" ${mine && ana.busy ? "disabled" : ""}>${mine && ana.busy ? "Claude prüft …" : "Mit Claude genauer prüfen"}</button>` : ""}</div>
+      <ul class="findings">${findings.map((x) => `<li><span class="tag ${x.lvl}">${TAG[x.lvl]}</span><span>${esc(x.t)}</span></li>`).join("")}</ul>
+      ${mine && ana.busy && !ana.text ? '<p class="hint">Claude prüft die Angebote, das dauert meist 10–30 Sekunden …</p>' : ""}
+      ${mine && ana.text ? `<p class="analysis" id="ana-out">${esc(ana.text)}</p>` : ""}
+      ${mine && ana.error ? `<p class="err">${esc(ana.error)}</p>` : ""}
+    </div>`;
+  }
+  function bindVergleich(kind, label, payload, findings) {
+    const b = document.getElementById("ana-btn");
+    if (!b) return;
+    b.addEventListener("click", async () => {
+      if (ana.ctl) ana.ctl.abort();
+      const ctl = new AbortController();
+      Object.assign(ana, { kind, busy: true, text: "", error: "", ctl });
+      rerenderTab();
+      const prompt = `Du hilfst einer Privatperson in Deutschland, ${label}-Angebote fair zu vergleichen.
+
+Daten (JSON):
+${JSON.stringify(payload)}
+
+Bereits automatisch erkannte Hinweise:
+${findings.map((x) => "- " + x.t).join("\n")}
+
+Aufgabe: Prüfe, ob die Angebote wirklich vergleichbar sind, und zeige die wichtigsten Unterschiede und Fallstricke auf (zum Beispiel Bonusbedingungen, Art der Preisgarantie, Laufzeit, Leistungsunterschiede, Aktionspreise). Wiederhole nicht einfach die Hinweise oben. Nenne am Ende 2 bis 4 Fragen, die man vor dem Abschluss klären sollte.
+Form: höchstens 220 Wörter, Deutsch, Du-Form, schlichte Aufzählung mit "• " am Zeilenanfang, keine Überschriften, kein Markdown. Erfinde keine Fakten über Anbieter, stütze dich nur auf die Daten.`;
+      try {
+        await sampler(prompt, { signal: ctl.signal, onText: ({ text }) => { ana.text = text; const o = document.getElementById("ana-out"); if (o) o.textContent = text; else rerenderTab(); } });
+        ana.busy = false;
+      } catch (e) {
+        Object.assign(ana, { busy: false, text: e && e.text ? e.text : "", error: e && e.code === "cancelled" ? "" : (ERR[e && e.code] || "Die Prüfung hat nicht geklappt. Bitte versuch es noch einmal.") });
+      }
+      rerenderTab();
+    });
   }
 
-  // ---------- Rechnen: Energie ----------
+  function portalCard(kind, portalKey, angebote) {
+    const qs = {};
+    angebote.forEach((a) => { const q = a.quelle || "ohne Quelle"; qs[q] = (qs[q] || 0) + 1; });
+    const busyHere = scan.busy && scan.kind === kind && scan.mode === "liste";
+    return `<div class="card">
+      <h2>Angebote aus Vergleichsportalen</h2>
+      <p class="hint">Rechne dort mit deinen Daten, mach einen Screenshot der Ergebnisliste und lies ihn hier ein. Wiederhole das für jedes Portal. Danach prüft der Kompass, ob die Angebote vergleichbar sind.</p>
+      <div class="chips">${PORTALE[portalKey].map(([n, u]) => `<a class="chip" href="${u}" target="_blank" rel="noopener">${esc(n)}</a>`).join("")}</div>
+      ${canScan() ? `<label class="btn scan-btn" ${scan.busy ? 'aria-disabled="true"' : ""}>${busyHere ? "Wird gelesen …" : "Screenshot der Ergebnisliste einlesen"}
+        <input class="sr-only" type="file" id="scan-list-file" accept="${esc(imgLimits.mediaTypes.join(","))}" multiple ${scan.busy ? "disabled" : ""}></label>` : ""}
+      <p class="hint">${esc(PORTAL_TIPP[portalKey === "energie" ? kind : portalKey])}</p>
+      ${Object.keys(qs).length ? `<div class="chips">${Object.entries(qs).map(([q, n]) => `<span class="pill info">${esc(q)}: ${n}</span>`).join("")}</div>` : ""}
+    </div>`;
+  }
+
+  // ---------- Energie ----------
   function kostenEnergie(t, kwh) {
-    const fix = num(t.gp) * 12;
-    const var_ = (num(t.ap) / 100) * kwh;
-    const folge = fix + var_;
+    const folge = num(t.gp) * 12 + (num(t.ap) / 100) * kwh;
     const y1 = folge - num(t.bonus);
-    return { fix, var_, y1, folge, avg2: (y1 + folge) / 2, abschlag: y1 / 12 };
+    return { y1, folge, avg2: (y1 + folge) / 2 };
   }
   const SORTS = { y1: "1. Jahr inkl. Bonus", folge: "Ab 2. Jahr (ohne Bonus)", avg2: "Ø über 2 Jahre" };
+
+  function checkEnergy(kind, rows, kwh) {
+    const f = [];
+    if (rows.length >= 2) {
+      const lz = rows.map((r) => num(r.t.laufzeit));
+      if (new Set(lz).size > 1) f.push({ lvl: "warn", t: `Unterschiedliche Laufzeiten (${Math.min(...lz)} bis ${Math.max(...lz)} Monate). Ein günstiger Tarif mit langer Bindung ist weniger flexibel, wenn die Preise sinken.` });
+      const kurz = rows.filter((r) => num(r.t.garantie) < 12).map((r) => nameOf(r.t));
+      if (kurz.length) f.push({ lvl: "warn", t: `Kurze oder keine Preisgarantie bei ${list(kurz)}. Der Preis kann dort schon im ersten Jahr steigen.` });
+      const by = (k) => rows.slice().sort((a, b) => a.k[k] - b.k[k])[0];
+      const b1 = by("y1"), b2 = by("folge");
+      if (keyOf(b1.t) !== keyOf(b2.t)) f.push({ lvl: "warn", t: `Ohne Bonus ändert sich die Reihenfolge: Im 1. Jahr ist ${nameOf(b1.t)} vorn, ab dem 2. Jahr ${nameOf(b2.t)}. Wenn du nicht jedes Jahr wechseln willst, zählt eher der Preis ab dem 2. Jahr.` });
+      const bonusLastig = rows.filter((r) => num(r.t.bonus) > 0 && num(r.t.bonus) / r.k.folge > 0.15).map((r) => nameOf(r.t));
+      if (bonusLastig.length) f.push({ lvl: "info", t: `Bei ${list(bonusLastig)} macht der Bonus über 15 % der Jahreskosten aus. Prüfe die Bedingungen: Oft wird er erst nach 12 Monaten Belieferung ausgezahlt und entfällt bei vorzeitiger Kündigung.` });
+      if (new Set(rows.map((r) => !!r.t.oeko)).size > 1) f.push({ lvl: "info", t: `Nicht alle Tarife sind ${kind === "strom" ? "Ökostrom" : "klimaneutral"}. Filtere unten, wenn dir das wichtig ist.` });
+    }
+    f.push(...commonFindings(rows.map((r) => ({ t: r.t, preis: r.k.y1, portalVergleich: r.k.y1 })), { fmt: EUR0.format, portalNote: `bei ${NUM.format(kwh)} kWh` }));
+    return finalize(f, rows.length);
+  }
 
   function renderEnergy(kind) {
     const d = state[kind];
@@ -337,21 +555,19 @@ footer a { color: var(--accent); }
     const sortKey = ui.sort[kind];
     const oekoLabel = isStrom ? "Ökostrom" : "Klimaneutral / Biogas";
     const akt = kostenEnergie(d.aktuell, kwh);
-
-    let rows = d.angebote.map((t, i) => ({ t, i, k: kostenEnergie(t, kwh) }));
+    const all = d.angebote.map((t, i) => ({ t, i, k: kostenEnergie(t, kwh) }));
+    let rows = all.slice();
     if (ui.nurOeko[kind]) rows = rows.filter((r) => r.t.oeko);
     if (ui.maxLaufzeit[kind]) rows = rows.filter((r) => num(r.t.laufzeit) <= ui.maxLaufzeit[kind]);
     rows.sort((a, b) => a.k[sortKey] - b.k[sortKey]);
     const best = rows[0];
     const maxVal = Math.max(akt.folge, ...rows.map((r) => Math.max(r.k.folge, r.k[sortKey])), 1);
+    const findings = checkEnergy(kind, all, kwh);
 
     const edit = ui.edit && ui.edit.kind === kind ? d.angebote[ui.edit.i] : null;
     const draft = !edit && ui.draft && ui.draft.kind === kind ? ui.draft.data : null;
-    const f = edit || draft || { anbieter: "", tarif: "", gp: "", ap: "", bonus: "", laufzeit: 12, garantie: 12, oeko: false };
-
-    const presets = isStrom
-      ? [["1 Person", 1500], ["2 Personen", 2500], ["3 Personen", 3500], ["4 Personen", 4250], ["5+ Personen", 5000]]
-      : [];
+    const f = edit || draft || { anbieter: "", tarif: "", gp: "", ap: "", bonus: "", laufzeit: 12, garantie: 12, oeko: false, quelle: "" };
+    const presets = [["1 Person", 1500], ["2 Personen", 2500], ["3 Personen", 3500], ["4 Personen", 4250], ["5+ Personen", 5000]];
 
     const pillsFor = (t, k) => {
       const p = [];
@@ -361,6 +577,7 @@ footer a { color: var(--accent); }
       else p.push(`<span class="pill warn">${num(t.garantie) ? esc(t.garantie) + " Mon." : "keine"} Preisgarantie</span>`);
       if (num(t.bonus) > 0 && num(t.bonus) / k.folge > 0.15) p.push('<span class="pill warn">Bonus-lastig</span>');
       if (t.oeko) p.push(`<span class="pill good">${oekoLabel}</span>`);
+      if (t.anzeige) p.push('<span class="pill info">Anzeige</span>');
       return p.join("");
     };
 
@@ -371,7 +588,7 @@ footer a { color: var(--accent); }
         <div class="stat hero">
           <h3>Günstigstes Angebot · ${esc(SORTS[sortKey])}</h3>
           <div class="v">${best ? EUR0.format(best.k[sortKey]) : "–"}</div>
-          <div class="s">${best ? esc(best.t.anbieter) + " · " + esc(best.t.tarif) + " · Abschlag ca. " + EUR0.format(best.k.y1 / 12) + "/Monat" : "Noch kein passendes Angebot"}</div>
+          <div class="s">${best ? esc(nameOf(best.t)) + (best.t.quelle ? " · " + esc(best.t.quelle) : "") + " · Abschlag ca. " + EUR0.format(best.k.y1 / 12) + "/Monat" : "Noch kein passendes Angebot"}</div>
         </div>
         <div class="stat">
           <h3>Dein aktueller Tarif</h3>
@@ -388,6 +605,7 @@ footer a { color: var(--accent); }
       <div class="grid">
         <div class="col">
           ${scanCard(kind)}
+          ${portalCard(kind, "energie", d.angebote)}
           <div class="card">
             <h2>Verbrauch</h2>
             <label class="f">Jahresverbrauch in kWh
@@ -419,22 +637,24 @@ footer a { color: var(--accent); }
           </div>
 
           <form class="card" id="${kind}-form" autocomplete="off">
-            <div class="card-head"><h2>${edit ? "Angebot bearbeiten" : draft ? "Erkanntes Angebot prüfen" : "Angebot hinzufügen"}</h2>${edit || draft ? '<button type="button" class="btn small" id="cancel-edit">Abbrechen</button>' : ""}</div>
+            ${formHead(edit, draft)}
             <div class="fields">
-              <label class="f">Anbieter<input type="text" name="anbieter" id="${kind}-f-anbieter" required value="${esc(f.anbieter)}"></label>
-              <label class="f">Tarif<input type="text" name="tarif" id="${kind}-f-tarif" value="${esc(f.tarif)}"></label>
-              <label class="f">Grundpreis €/Monat<input type="number" name="gp" id="${kind}-f-gp" step="0.01" min="0" required value="${esc(f.gp)}"></label>
-              <label class="f">Arbeitspreis ct/kWh<input type="number" name="ap" id="${kind}-f-ap" step="0.01" min="0" required value="${esc(f.ap)}"></label>
-              <label class="f">Bonus € (einmalig)<input type="number" name="bonus" id="${kind}-f-bonus" step="1" min="0" value="${esc(f.bonus)}"></label>
-              <label class="f">Laufzeit Monate<input type="number" name="laufzeit" id="${kind}-f-laufzeit" step="1" min="0" value="${esc(f.laufzeit)}"></label>
-              <label class="f">Preisgarantie Monate<input type="number" name="garantie" id="${kind}-f-garantie" step="1" min="0" value="${esc(f.garantie)}"></label>
-              <label class="check" style="align-self:end"><input type="checkbox" name="oeko" id="${kind}-f-oeko" ${f.oeko ? "checked" : ""}>${oekoLabel}</label>
+              ${inp("Anbieter", `${kind}-f-anbieter`, "anbieter", f.anbieter, { type: "text", req: true })}
+              ${inp("Tarif", `${kind}-f-tarif`, "tarif", f.tarif, { type: "text" })}
+              ${inp("Grundpreis €/Monat", `${kind}-f-gp`, "gp", f.gp, { req: true })}
+              ${inp("Arbeitspreis ct/kWh", `${kind}-f-ap`, "ap", f.ap, { req: true })}
+              ${inp("Bonus € (einmalig)", `${kind}-f-bonus`, "bonus", f.bonus, { step: "1" })}
+              ${inp("Laufzeit Monate", `${kind}-f-laufzeit`, "laufzeit", f.laufzeit, { step: "1" })}
+              ${inp("Preisgarantie Monate", `${kind}-f-garantie`, "garantie", f.garantie, { step: "1" })}
+              ${inp("Quelle (Portal)", `${kind}-f-quelle`, "quelle", f.quelle, { type: "text", ph: "z. B. Verivox" })}
+              <label class="check full"><input type="checkbox" name="oeko" id="${kind}-f-oeko" ${f.oeko ? "checked" : ""}>${oekoLabel}</label>
             </div>
             <button class="btn primary" type="submit">${edit ? "Änderungen speichern" : "Angebot hinzufügen"}</button>
           </form>
         </div>
 
         <div class="col">
+          ${vergleichCard(kind, findings)}
           <div class="card">
             <div class="card-head">
               <h2>Jahreskosten im Vergleich</h2>
@@ -450,7 +670,7 @@ footer a { color: var(--accent); }
               <div class="bar-row"><span class="name">Aktueller Tarif</span><div class="track"><div class="fill current" style="width:${(akt.folge / maxVal) * 100}%"></div></div><span class="val">${EUR0.format(akt.folge)}</span></div>
               ${rows.map((r) => `
                 <div class="bar-row" title="Gestrichelt: Kosten ab dem 2. Jahr">
-                  <span class="name">${esc(r.t.anbieter)} · ${esc(r.t.tarif)}</span>
+                  <span class="name">${esc(nameOf(r.t))}${r.t.quelle ? " · " + esc(r.t.quelle) : ""}</span>
                   <div class="track">
                     ${sortKey === "y1" && num(r.t.bonus) > 0 ? `<div class="fill ghost" style="width:${(r.k.folge / maxVal) * 100}%"></div>` : ""}
                     <div class="fill" style="width:${(r.k[sortKey] / maxVal) * 100}%"></div>
@@ -471,7 +691,7 @@ footer a { color: var(--accent); }
                 ${rows.map((r, n) => `
                   <tr class="${n === 0 ? "best" : ""}">
                     <td class="l"><span class="rank">${n + 1}</span></td>
-                    <td class="l"><div class="tname">${esc(r.t.anbieter)}</div><div class="tsub">${esc(r.t.tarif)}</div><div class="pills">${pillsFor(r.t, r.k)}</div></td>
+                    <td class="l"><div class="tname">${esc(r.t.anbieter)}</div><div class="tsub">${esc(r.t.tarif)}${r.t.quelle ? " · über " + esc(r.t.quelle) : ""}</div><div class="pills">${pillsFor(r.t, r.k)}</div></td>
                     <td>${EUR2.format(num(r.t.gp))}/M</td>
                     <td>${NUM.format(num(r.t.ap))} ct</td>
                     <td>${num(r.t.bonus) ? EUR0.format(num(r.t.bonus)) : "–"}</td>
@@ -482,16 +702,12 @@ footer a { color: var(--accent); }
                   </tr>`).join("")}
               </tbody></table>` : `<div class="empty">Keine Angebote${d.angebote.length ? " für diese Filter" : ""}. Trage links ein Angebot ein.</div>`}
           </div>
-          <p class="hint">* Ersparnis gegenüber deinem aktuellen Tarif nach der gewählten Sortierung (${esc(SORTS[sortKey])}). Grenzpreis: ab ${best ? NUM.format(((akt.folge - num(best.t.gp) * 12) / kwh) * 100) : "–"} ct/kWh Arbeitspreis wäre das beste Angebot nicht mehr günstiger als dein aktueller Tarif.</p>
+          <p class="hint">* Ersparnis gegenüber deinem aktuellen Tarif nach der gewählten Sortierung (${esc(SORTS[sortKey])}). ${best && kwh ? `Grenzpreis: Ab ${NUM.format(((akt.folge - num(best.t.gp) * 12) / kwh) * 100)} ct/kWh Arbeitspreis wäre das beste Angebot nicht mehr günstiger als dein aktueller Tarif.` : ""}</p>
         </div>
       </div>`;
 
-    // Events
-    const rerender = () => { save(); renderEnergy(kind); };
-    const bindNum = (id, setter) => {
-      const inp = document.getElementById(id);
-      inp.addEventListener("change", () => { setter(num(inp.value)); rerender(); });
-    };
+    const rerender = () => { save(); renderEnergy(kind); updateDue(); };
+    const bindNum = (id, setter) => { const i = document.getElementById(id); i.addEventListener("change", () => { setter(num(i.value)); rerender(); }); };
     bindNum(`${kind}-verbrauch`, (v) => (d.verbrauch = v));
     bindNum(`${kind}-akt-gp`, (v) => (d.aktuell.gp = v));
     bindNum(`${kind}-akt-ap`, (v) => (d.aktuell.ap = v));
@@ -513,46 +729,222 @@ footer a { color: var(--accent); }
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       const fd = new FormData(form);
-      const t = {
+      const t = keepMeta({
         anbieter: String(fd.get("anbieter")).trim(), tarif: String(fd.get("tarif")).trim(),
         gp: num(fd.get("gp")), ap: num(fd.get("ap")), bonus: num(fd.get("bonus")),
         laufzeit: num(fd.get("laufzeit")), garantie: num(fd.get("garantie")), oeko: fd.get("oeko") === "on",
-      };
+        quelle: String(fd.get("quelle")).trim(),
+      }, edit || draft);
       if (edit) { d.angebote[ui.edit.i] = t; ui.edit = null; toast("Angebot gespeichert"); }
       else { d.angebote.push(t); toast("Angebot hinzugefügt"); }
       ui.draft = null; rerender();
     });
-    const cancel = document.getElementById("cancel-edit");
-    if (cancel) cancel.addEventListener("click", () => { ui.edit = null; ui.draft = null; renderEnergy(kind); });
-    el.querySelectorAll("[data-edit]").forEach((b) => b.addEventListener("click", () => {
-      ui.edit = { kind, i: +b.dataset.edit }; renderEnergy(kind);
-      document.getElementById(`${kind}-form`).scrollIntoView({ behavior: "smooth", block: "center" });
-    }));
-    bindDelete(el, (i) => { d.angebote.splice(i, 1); ui.edit = null; rerender(); });
+    bindEditCancel();
+    bindEditButtons(el, kind);
+    bindDelete(el.querySelector(".tbl-wrap"), (i) => { d.angebote.splice(i, 1); ui.edit = null; rerender(); });
     bindScan(kind);
+    bindVergleich(kind, isStrom ? "Strom" : "Gas", { verbrauch_kwh: kwh, aktueller_tarif: d.aktuell, angebote: all.map((r) => ({ ...r.t, kosten_1_jahr: Math.round(r.k.y1), kosten_ab_2_jahr: Math.round(r.k.folge) })) }, findings);
   }
 
-  // Löschen mit zweitem Klick bestätigen
-  function bindDelete(root, onDelete) {
-    root.querySelectorAll("[data-del]").forEach((b) => b.addEventListener("click", () => {
-      if (b.classList.contains("armed")) { onDelete(+b.dataset.del); return; }
-      b.classList.add("armed"); b.textContent = "Sicher?";
-      setTimeout(() => { if (b.isConnected) { b.classList.remove("armed"); b.textContent = "Löschen"; } }, 3000);
-    }));
+  // ---------- Internet & Telefon ----------
+  const TK_ART = {
+    internet: { name: "Internet & Festnetz", einheit: "Mbit/s", leistung: "Download Mbit/s", technik: ["DSL", "Kabel", "Glasfaser", "5G"] },
+    mobil: { name: "Mobilfunk", einheit: "GB", leistung: "Datenvolumen GB", technik: ["5G", "4G"] },
+  };
+  const unbegrenzt = (art, v) => art === "mobil" && num(v) >= 1000;
+  const fmtLeistung = (art, v) => unbegrenzt(art, v) ? "unbegrenzt" : NUM.format(num(v)) + " " + TK_ART[art].einheit;
+  function kostenTk(t, H) {
+    const am = Math.min(num(t.aktionMonate), H);
+    const ap = num(t.aktionPreis) > 0 ? num(t.aktionPreis) : num(t.preis);
+    const total = am * ap + (H - am) * num(t.preis) + num(t.router) * H + num(t.einmalig) - num(t.bonus);
+    return { total, monat: total / H };
+  }
+  function checkTk(art, rows, d, H) {
+    const f = [];
+    const A = TK_ART[art];
+    if (rows.length >= 2) {
+      const ls = rows.map((r) => num(r.t.leistung)).filter((x) => x > 0);
+      if (ls.length > 1 && Math.max(...ls) / Math.min(...ls) >= 2) f.push({ lvl: "warn", t: `Die Angebote unterscheiden sich stark in der Leistung (${fmtLeistung(art, Math.min(...ls))} bis ${fmtLeistung(art, Math.max(...ls))}). Vergleiche den Preis pro ${A.einheit} oder filtere auf deine Mindestleistung.` });
+      const lz = rows.map((r) => num(r.t.laufzeit));
+      if (new Set(lz).size > 1) f.push({ lvl: "warn", t: `Unterschiedliche Laufzeiten (${Math.min(...lz)} bis ${Math.max(...lz)} Monate). Kurze Laufzeiten kosten oft etwas mehr, dafür kannst du jederzeit wechseln.` });
+      const router = rows.filter((r) => num(r.t.router) > 0);
+      if (router.length && router.length < rows.length) f.push({ lvl: "info", t: `Routermiete nur bei ${list(router.map((r) => `${nameOf(r.t)} (${EUR2.format(num(r.t.router))}/Monat)`))}. Sie ist eingerechnet. Mit eigenem Router entfällt sie oft.` });
+      const einm = rows.map((r) => num(r.t.einmalig));
+      if (new Set(einm).size > 1) f.push({ lvl: "info", t: `Einmalkosten (Anschluss, Bereitstellung, Aktivierung) unterscheiden sich: ${list(rows.map((r) => `${nameOf(r.t)} ${EUR0.format(num(r.t.einmalig))}`))}. Sie sind auf die ${H} Monate verteilt.` });
+      if (new Set(rows.map((r) => r.t.technik).filter(Boolean)).size > 1) f.push({ lvl: "info", t: art === "mobil" ? "Unterschiedliche Netzstandards (4G/5G). Prüfe die Netzabdeckung an deinem Wohn- und Arbeitsort." : "Unterschiedliche Technik (DSL, Kabel, Glasfaser). Prüfe, was an deiner Adresse verfügbar ist. Die Geschwindigkeit ist eine Höchstangabe." });
+    }
+    const lang = rows.filter((r) => num(r.t.laufzeit) > H).map((r) => nameOf(r.t));
+    if (lang.length) f.push({ lvl: "warn", t: `${list(lang)} ${lang.length > 1 ? "laufen" : "läuft"} länger als der Vergleichszeitraum von ${H} Monaten. Stell oben einen längeren Zeitraum ein.` });
+    rows.filter((r) => num(r.t.aktionMonate) > 0 && num(r.t.aktionPreis) > 0 && num(r.t.aktionPreis) < num(r.t.preis)).forEach((r) => {
+      f.push({ lvl: "info", t: `${nameOf(r.t)}: ${EUR2.format(num(r.t.aktionPreis))} für ${num(r.t.aktionMonate)} Monate, danach ${EUR2.format(num(r.t.preis))}. Nach der Aktion lohnt sich ein neuer Vergleich.` });
+    });
+    const langsam = rows.filter((r) => num(r.t.leistung) > 0 && num(d.aktuell.leistung) > 0 && num(r.t.leistung) < num(d.aktuell.leistung)).map((r) => nameOf(r.t));
+    if (langsam.length) f.push({ lvl: "warn", t: `${list(langsam)} ${langsam.length > 1 ? "bieten" : "bietet"} weniger als dein aktueller Tarif (${fmtLeistung(art, d.aktuell.leistung)}).` });
+    f.push(...commonFindings(rows.map((r) => ({ t: r.t, preis: r.k.monat, portalVergleich: kostenTk(r.t, 24).monat })), { fmt: EUR2.format, portalNote: "im Monat über 24 Monate" }));
+    return finalize(f, rows.length);
   }
 
-  // ---------- Rechnen: Versicherungen ----------
+  function renderTk() {
+    const tk = state.tk, art = tk.art, A = TK_ART[art], d = tk[art], H = num(tk.horizont, 24);
+    const aktTotal = num(d.aktuell.preis) * H;
+    const all = d.angebote.map((t, i) => ({ t, i, k: kostenTk(t, H) }));
+    let rows = all.slice();
+    if (ui.tkMin && num(d.aktuell.leistung) > 0) rows = rows.filter((r) => num(r.t.leistung) >= num(d.aktuell.leistung));
+    rows.sort((a, b) => a.k.monat - b.k.monat);
+    const best = rows[0];
+    const maxVal = Math.max(num(d.aktuell.preis), ...rows.map((r) => r.k.monat), 1);
+    const findings = checkTk(art, all, d, H);
+    const edit = ui.edit && ui.edit.kind === "tk" ? d.angebote[ui.edit.i] : null;
+    const draft = !edit && ui.draft && ui.draft.kind === "tk" ? ui.draft.data : null;
+    const f = edit || draft || { anbieter: "", tarif: "", preis: "", aktionPreis: "", aktionMonate: "", einmalig: "", router: "", bonus: "", leistung: "", upload: "", laufzeit: 24, technik: "", quelle: "" };
+
+    const el = document.getElementById("panel-tk");
+    el.style.setProperty("--kind", "var(--tk)");
+    el.innerHTML = `
+      <div class="row" style="justify-content:space-between">
+        <div class="chips" role="group" aria-label="Art">${Object.entries(TK_ART).map(([k, a]) => `<button class="chip ${k === art ? "on" : ""}" data-art="${k}">${a.name} <span class="mono">(${tk[k].angebote.length})</span></button>`).join("")}</div>
+        <label class="f inline">Vergleichszeitraum
+          <select id="tk-horizont">${[12, 24, 36].map((h) => `<option value="${h}" ${H === h ? "selected" : ""}>${h} Monate</option>`).join("")}</select></label>
+      </div>
+      <div class="summary">
+        <div class="stat hero">
+          <h3>Günstigstes Angebot · Ø pro Monat</h3>
+          <div class="v">${best ? EUR2.format(best.k.monat) : "–"}</div>
+          <div class="s">${best ? esc(nameOf(best.t)) + " · " + fmtLeistung(art, best.t.leistung) + (best.t.quelle ? " · " + esc(best.t.quelle) : "") : "Noch kein passendes Angebot"}</div>
+        </div>
+        <div class="stat">
+          <h3>Dein aktueller Tarif</h3>
+          <div class="v">${EUR2.format(num(d.aktuell.preis))}</div>
+          <div class="s">pro Monat · ${fmtLeistung(art, d.aktuell.leistung)}</div>
+        </div>
+        <div class="stat">
+          <h3>Ersparnis in ${H} Monaten</h3>
+          <div class="v ${best && aktTotal - best.k.total >= 0 ? "pos" : "neg"}">${best ? EUR0.format(aktTotal - best.k.total) : "–"}</div>
+          <div class="s">gegenüber deinem aktuellen Tarif</div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="col">
+          ${scanCard("tk")}
+          ${portalCard("tk", art, d.angebote)}
+          <div class="card">
+            <h2>Aktueller Tarif</h2>
+            <div class="fields">
+              <label class="f">Monatspreis €<input type="number" id="tk-akt-preis" step="0.01" min="0" value="${esc(d.aktuell.preis)}"></label>
+              <label class="f">${A.leistung}<input type="number" id="tk-akt-leistung" step="1" min="0" value="${esc(d.aktuell.leistung)}"></label>
+            </div>
+            <p class="hint">Was du heute monatlich zahlst, inklusive Routermiete und Zusatzoptionen.</p>
+          </div>
+          <form class="card" id="tk-form" autocomplete="off">
+            ${formHead(edit, draft)}
+            <div class="fields">
+              ${inp("Anbieter", "tk-f-anbieter", "anbieter", f.anbieter, { type: "text", req: true })}
+              ${inp("Tarif", "tk-f-tarif", "tarif", f.tarif, { type: "text" })}
+              ${inp("Regulärer Preis €/Monat", "tk-f-preis", "preis", f.preis, { req: true })}
+              ${inp(A.leistung, "tk-f-leistung", "leistung", f.leistung, { step: "1", ph: art === "mobil" ? "unbegrenzt = 1000" : "" })}
+              ${inp("Aktionspreis €/Monat", "tk-f-aktionPreis", "aktionPreis", f.aktionPreis)}
+              ${inp("Aktion für Monate", "tk-f-aktionMonate", "aktionMonate", f.aktionMonate, { step: "1" })}
+              ${inp("Einmalkosten €", "tk-f-einmalig", "einmalig", f.einmalig)}
+              ${inp("Gutschrift / Bonus €", "tk-f-bonus", "bonus", f.bonus)}
+              ${art === "mobil" ? "" : inp("Routermiete €/Monat", "tk-f-router", "router", f.router)}
+              ${art === "mobil" ? "" : inp("Upload Mbit/s", "tk-f-upload", "upload", f.upload, { step: "1" })}
+              ${inp("Laufzeit Monate", "tk-f-laufzeit", "laufzeit", f.laufzeit, { step: "1" })}
+              <label class="f">Technik<select name="technik" id="tk-f-technik"><option value="">–</option>${A.technik.map((x) => `<option ${f.technik === x ? "selected" : ""}>${x}</option>`).join("")}</select></label>
+              ${inp("Quelle (Portal)", "tk-f-quelle", "quelle", f.quelle, { type: "text", ph: "z. B. Check24", full: true })}
+            </div>
+            <button class="btn primary" type="submit">${edit ? "Änderungen speichern" : "Angebot hinzufügen"}</button>
+          </form>
+        </div>
+
+        <div class="col">
+          ${vergleichCard("tk", findings)}
+          <div class="card">
+            <div class="card-head"><h2>Ø Kosten pro Monat über ${H} Monate</h2>
+              <label class="check"><input type="checkbox" id="tk-min" ${ui.tkMin ? "checked" : ""}>mindestens so viel ${art === "mobil" ? "Datenvolumen" : "Tempo"} wie bisher</label></div>
+            <div class="bars">
+              <div class="bar-row"><span class="name">Aktueller Tarif</span><div class="track"><div class="fill current" style="width:${(num(d.aktuell.preis) / maxVal) * 100}%"></div></div><span class="val">${EUR2.format(num(d.aktuell.preis))}</span></div>
+              ${rows.map((r) => `<div class="bar-row"><span class="name">${esc(nameOf(r.t))}${r.t.quelle ? " · " + esc(r.t.quelle) : ""}</span><div class="track"><div class="fill" style="width:${(Math.max(r.k.monat, 0) / maxVal) * 100}%"></div></div><span class="val">${EUR2.format(r.k.monat)}</span></div>`).join("")}
+            </div>
+          </div>
+          <div class="tbl-wrap">
+            ${rows.length ? `<table>
+              <thead><tr><th class="l">#</th><th class="l">Angebot</th><th>${A.einheit}</th><th>Preis/Monat</th><th>Einmalig</th><th>Ø/Monat</th><th>€ pro ${A.einheit}</th><th>Ersparnis ${H} M.</th><th></th></tr></thead>
+              <tbody>${rows.map((r, n) => `
+                <tr class="${n === 0 ? "best" : ""}">
+                  <td class="l"><span class="rank">${n + 1}</span></td>
+                  <td class="l"><div class="tname">${esc(r.t.anbieter)}</div><div class="tsub">${esc(r.t.tarif)}${r.t.quelle ? " · über " + esc(r.t.quelle) : ""}</div>
+                    <div class="pills">${num(r.t.laufzeit) <= 1 ? '<span class="pill good">monatlich kündbar</span>' : `<span class="pill ${num(r.t.laufzeit) > 12 ? "warn" : "info"}">${esc(r.t.laufzeit)} Mon. Laufzeit</span>`}${r.t.technik ? `<span class="pill info">${esc(r.t.technik)}</span>` : ""}${num(r.t.aktionMonate) > 0 && num(r.t.aktionPreis) > 0 ? `<span class="pill warn">Aktion ${esc(r.t.aktionMonate)} Mon.</span>` : ""}${num(r.t.router) > 0 ? `<span class="pill warn">Router ${EUR2.format(num(r.t.router))}/M</span>` : ""}${r.t.anzeige ? '<span class="pill info">Anzeige</span>' : ""}</div></td>
+                  <td>${unbegrenzt(art, r.t.leistung) ? "∞" : NUM.format(num(r.t.leistung))}${num(r.t.upload) ? ` / ${NUM.format(num(r.t.upload))}` : ""}</td>
+                  <td>${num(r.t.aktionMonate) > 0 && num(r.t.aktionPreis) > 0 ? `${EUR2.format(num(r.t.aktionPreis))} → ${EUR2.format(num(r.t.preis))}` : EUR2.format(num(r.t.preis))}</td>
+                  <td>${num(r.t.einmalig) ? EUR0.format(num(r.t.einmalig)) : "–"}</td>
+                  <td>${EUR2.format(r.k.monat)}</td>
+                  <td>${num(r.t.leistung) > 0 && !unbegrenzt(art, r.t.leistung) ? EUR2.format(r.k.monat / num(r.t.leistung)) : "–"}</td>
+                  <td class="${aktTotal - r.k.total >= 0 ? "pos" : "neg"}">${EUR0.format(aktTotal - r.k.total)}</td>
+                  <td><div class="actions"><button class="btn small" data-edit="${r.i}">Bearbeiten</button><button class="btn small danger" data-del="${r.i}">Löschen</button></div></td>
+                </tr>`).join("")}</tbody></table>` : '<div class="empty">Keine Angebote. Trage links ein Angebot ein oder lies einen Screenshot ein.</div>'}
+          </div>
+          <p class="hint">Ø/Monat = (Aktions- und Regulärpreise + Routermiete + Einmalkosten − Gutschriften) ÷ ${H} Monate.</p>
+        </div>
+      </div>`;
+
+    const rerender = () => { save(); renderTk(); updateDue(); };
+    el.querySelectorAll("[data-art]").forEach((b) => b.addEventListener("click", () => { tk.art = b.dataset.art; ui.edit = null; ui.draft = null; rerender(); }));
+    document.getElementById("tk-horizont").addEventListener("change", (e) => { tk.horizont = num(e.target.value, 24); rerender(); });
+    document.getElementById("tk-min").addEventListener("change", (e) => { ui.tkMin = e.target.checked; renderTk(); });
+    document.getElementById("tk-akt-preis").addEventListener("change", (e) => { d.aktuell.preis = num(e.target.value); rerender(); });
+    document.getElementById("tk-akt-leistung").addEventListener("change", (e) => { d.aktuell.leistung = num(e.target.value); rerender(); });
+    const form = document.getElementById("tk-form");
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const t = { anbieter: String(fd.get("anbieter")).trim(), tarif: String(fd.get("tarif")).trim(), technik: String(fd.get("technik") || ""), quelle: String(fd.get("quelle")).trim() };
+      ["preis", "aktionPreis", "aktionMonate", "einmalig", "router", "bonus", "leistung", "upload", "laufzeit"].forEach((k) => { t[k] = num(fd.get(k)); });
+      keepMeta(t, edit || draft);
+      if (edit) { d.angebote[ui.edit.i] = t; ui.edit = null; toast("Angebot gespeichert"); }
+      else { d.angebote.push(t); toast("Angebot hinzugefügt"); }
+      ui.draft = null; rerender();
+    });
+    bindEditCancel();
+    bindEditButtons(el, "tk");
+    bindDelete(el.querySelector(".tbl-wrap"), (i) => { d.angebote.splice(i, 1); ui.edit = null; rerender(); });
+    bindScan("tk");
+    bindVergleich("tk", A.name, { art: A.name, vergleichszeitraum_monate: H, aktueller_tarif: d.aktuell, angebote: all.map((r) => ({ ...r.t, durchschnitt_monat: Math.round(r.k.monat * 100) / 100 })) }, findings);
+  }
+
+  // ---------- Versicherungen ----------
   const ZAHLWEISE = { 1: "jährlich", 2: "halbjährlich", 4: "vierteljährlich", 12: "monatlich" };
   const GEWICHT = { 2: "wichtig", 1: "nett", 0: "egal" };
+  const currentKat = () => state.vers.kategorien[state.vers.kategorie] || Object.values(state.vers.kategorien)[0];
+
+  function checkVers(kat, rows) {
+    const f = [];
+    if (rows.length >= 2) {
+      const sbs = rows.map((r) => num(r.a.sb));
+      if (new Set(sbs).size > 1) f.push({ lvl: "warn", t: `Selbstbeteiligung unterschiedlich (${EUR0.format(Math.min(...sbs))} bis ${EUR0.format(Math.max(...sbs))}). Ein niedriger Beitrag mit hoher Selbstbeteiligung lohnt sich nur, wenn du selten Schäden meldest. Stell links die Schadenfälle ein, um sie einzurechnen.` });
+      if (new Set(rows.map((r) => num(r.a.zahlweise, 1))).size > 1) f.push({ lvl: "info", t: "Die Zahlweisen sind unterschiedlich. Bei monatlicher Zahlung verlangen viele Versicherer 3–5 % Aufschlag. Frag nach dem Jahresbeitrag." });
+      kat.features.forEach((ft) => {
+        const ohne = rows.filter((r) => !r.a.features[ft.id]).map((r) => nameOf(r.a));
+        if (ohne.length && ohne.length < rows.length && num(ft.w) === 2) f.push({ lvl: "warn", t: `„${ft.name}“ (für dich wichtig) fehlt bei ${list(ohne)}.` });
+      });
+      const diffNett = kat.features.filter((ft) => num(ft.w) === 1 && new Set(rows.map((r) => !!r.a.features[ft.id])).size > 1).map((ft) => ft.name);
+      if (diffNett.length) f.push({ lvl: "info", t: `Leistungsunterschiede außerdem bei: ${list(diffNett)}.` });
+      const cheapest = rows.slice().sort((a, b) => a.eff - b.eff)[0];
+      const fehlt = kat.features.filter((ft) => num(ft.w) === 2 && !cheapest.a.features[ft.id]).map((ft) => ft.name);
+      if (fehlt.length) f.push({ lvl: "warn", t: `Der günstigste Tarif (${nameOf(cheapest.a)}) deckt Wichtiges nicht ab: ${list(fehlt)}. Ein reiner Preisvergleich ist hier nicht fair.` });
+    }
+    f.push(...commonFindings(rows.map((r) => ({ t: r.a, preis: r.jahr, portalVergleich: r.jahr })), { fmt: EUR0.format, portalNote: "im Jahr" }));
+    return finalize(f, rows.length);
+  }
 
   function renderVers() {
     const v = state.vers;
-    const kat = v.kategorien[v.kategorie] || Object.values(v.kategorien)[0];
+    const kat = currentKat();
     const wP = num(v.gewichtPreis, 50) / 100;
     const quote = num(v.schadenquote) / 100;
     const sumW = kat.features.reduce((s, f) => s + num(f.w), 0);
-
     const rows = kat.angebote.map((a, i) => {
+      a.features = a.features || {};
       const jahr = num(a.beitrag) * num(a.zahlweise, 1);
       const eff = jahr + num(a.sb) * quote;
       const fs = sumW ? kat.features.reduce((s, f) => s + (a.features[f.id] ? num(f.w) : 0), 0) / sumW : 1;
@@ -563,10 +955,11 @@ footer a { color: var(--accent); }
     rows.sort((a, b) => b.score - a.score || a.eff - b.eff);
     const best = rows[0];
     const cheapest = rows.slice().sort((a, b) => a.eff - b.eff)[0];
+    const findings = checkVers(kat, rows);
 
     const edit = ui.edit && ui.edit.kind === "vers" ? kat.angebote[ui.edit.i] : null;
     const draft = !edit && ui.draft && ui.draft.kind === "vers" ? ui.draft.data : null;
-    const f = edit || draft || { anbieter: "", tarif: "", beitrag: "", zahlweise: 1, sb: 0, features: {} };
+    const f = edit || draft || { anbieter: "", tarif: "", beitrag: "", zahlweise: 1, sb: 0, features: {}, quelle: "" };
 
     const el = document.getElementById("panel-versicherung");
     el.style.setProperty("--kind", "var(--vers)");
@@ -584,23 +977,24 @@ footer a { color: var(--accent); }
         <div class="stat hero">
           <h3>Bestes Preis-Leistungs-Verhältnis</h3>
           <div class="v">${best ? best.score + " / 100" : "–"}</div>
-          <div class="s">${best ? esc(best.a.anbieter) + " · " + esc(best.a.tarif) + " · " + EUR0.format(best.jahr) + " pro Jahr" : "Noch keine Angebote"}</div>
+          <div class="s">${best ? esc(nameOf(best.a)) + " · " + EUR0.format(best.jahr) + " pro Jahr" : "Noch keine Angebote"}</div>
         </div>
         <div class="stat">
           <h3>Günstigster Beitrag</h3>
           <div class="v">${cheapest ? EUR0.format(cheapest.jahr) : "–"}</div>
-          <div class="s">${cheapest ? esc(cheapest.a.anbieter) + " · " + esc(cheapest.a.tarif) + " · Leistung " + Math.round(cheapest.fs * 100) + " %" : ""}</div>
+          <div class="s">${cheapest ? esc(nameOf(cheapest.a)) + " · Leistung " + Math.round(cheapest.fs * 100) + " %" : ""}</div>
         </div>
         <div class="stat">
           <h3>Gewichtung</h3>
           <div class="v">${Math.round(wP * 100)} % Preis</div>
-          <div class="s">${100 - Math.round(wP * 100)} % Leistung · Schadenquote ${NUM.format(quote * 100)} %</div>
+          <div class="s">${100 - Math.round(wP * 100)} % Leistung · Schadenfälle ${NUM.format(quote * 100)} % pro Jahr</div>
         </div>
       </div>
 
       <div class="grid">
         <div class="col">
           ${scanCard("vers")}
+          ${portalCard("vers", "vers", kat.angebote)}
           <div class="card">
             <h2>Was ist dir wichtig?</h2>
             <label class="f">Preis ↔ Leistung: <span class="mono">${Math.round(wP * 100)} % Preis</span>
@@ -625,24 +1019,26 @@ footer a { color: var(--accent); }
           </div>
 
           <form class="card" id="vers-form" autocomplete="off">
-            <div class="card-head"><h2>${edit ? "Angebot bearbeiten" : draft ? "Erkanntes Angebot prüfen" : "Angebot hinzufügen"}</h2>${edit || draft ? '<button type="button" class="btn small" id="cancel-edit">Abbrechen</button>' : ""}</div>
+            ${formHead(edit, draft)}
             <div class="fields">
-              <label class="f">Versicherer<input type="text" name="anbieter" id="vers-f-anbieter" required value="${esc(f.anbieter)}"></label>
-              <label class="f">Tarif<input type="text" name="tarif" id="vers-f-tarif" value="${esc(f.tarif)}"></label>
-              <label class="f">Beitrag €<input type="number" name="beitrag" id="vers-f-beitrag" step="0.01" min="0" required value="${esc(f.beitrag)}"></label>
+              ${inp("Versicherer", "vers-f-anbieter", "anbieter", f.anbieter, { type: "text", req: true })}
+              ${inp("Tarif", "vers-f-tarif", "tarif", f.tarif, { type: "text" })}
+              ${inp("Beitrag €", "vers-f-beitrag", "beitrag", f.beitrag, { req: true })}
               <label class="f">Zahlweise
                 <select name="zahlweise" id="vers-f-zahlweise">${Object.entries(ZAHLWEISE).map(([k, l]) => `<option value="${k}" ${num(f.zahlweise) === +k ? "selected" : ""}>${l}</option>`).join("")}</select></label>
-              <label class="f full">Selbstbeteiligung € pro Schadenfall<input type="number" name="sb" id="vers-f-sb" step="1" min="0" value="${esc(f.sb)}"></label>
+              ${inp("Selbstbeteiligung €", "vers-f-sb", "sb", f.sb, { step: "1" })}
+              ${inp("Quelle (Portal)", "vers-f-quelle", "quelle", f.quelle, { type: "text", ph: "z. B. Check24" })}
             </div>
             <h3>Enthaltene Leistungen</h3>
             <div class="feat-list">
-              ${kat.features.map((ft) => `<label class="check"><input type="checkbox" name="feat-${ft.id}" id="vers-f-feat-${ft.id}" ${f.features[ft.id] ? "checked" : ""}>${esc(ft.name)}</label>`).join("") || '<p class="hint">Lege oben Leistungen an, um Tarife zu vergleichen.</p>'}
+              ${kat.features.map((ft) => `<label class="check"><input type="checkbox" name="feat-${ft.id}" id="vers-f-feat-${ft.id}" ${f.features && f.features[ft.id] ? "checked" : ""}>${esc(ft.name)}</label>`).join("") || '<p class="hint">Lege oben Leistungen an, um Tarife zu vergleichen.</p>'}
             </div>
             <button class="btn primary" type="submit">${edit ? "Änderungen speichern" : "Angebot hinzufügen"}</button>
           </form>
         </div>
 
         <div class="col">
+          ${vergleichCard("vers", findings)}
           <div class="tbl-wrap">
             ${rows.length ? `<table>
               <thead><tr>
@@ -654,8 +1050,8 @@ footer a { color: var(--accent); }
                 ${rows.map((r, n) => `
                   <tr class="${n === 0 ? "best" : ""}">
                     <td class="l"><span class="rank">${n + 1}</span></td>
-                    <td class="l"><div class="tname">${esc(r.a.anbieter)}</div><div class="tsub">${esc(r.a.tarif)} · ${EUR2.format(num(r.a.beitrag))} ${ZAHLWEISE[r.a.zahlweise] || ""}</div>
-                      <div class="pills">${r === cheapest ? '<span class="pill good">günstigster</span>' : ""}${num(r.a.sb) > 0 ? `<span class="pill warn">SB ${EUR0.format(num(r.a.sb))}</span>` : '<span class="pill good">ohne SB</span>'}${kat.features.some((ft) => num(ft.w) === 2 && !r.a.features[ft.id]) ? '<span class="pill bad">Wichtiges fehlt</span>' : ""}</div></td>
+                    <td class="l"><div class="tname">${esc(r.a.anbieter)}</div><div class="tsub">${esc(r.a.tarif)} · ${EUR2.format(num(r.a.beitrag))} ${ZAHLWEISE[r.a.zahlweise] || ""}${r.a.quelle ? " · über " + esc(r.a.quelle) : ""}</div>
+                      <div class="pills">${r === cheapest ? '<span class="pill good">günstigster</span>' : ""}${num(r.a.sb) > 0 ? `<span class="pill warn">SB ${EUR0.format(num(r.a.sb))}</span>` : '<span class="pill good">ohne SB</span>'}${kat.features.some((ft) => num(ft.w) === 2 && !r.a.features[ft.id]) ? '<span class="pill bad">Wichtiges fehlt</span>' : ""}${r.a.anzeige ? '<span class="pill info">Anzeige</span>' : ""}</div></td>
                     <td><span class="score"><span class="mini"><i style="width:${r.score}%"></i></span>${r.score}</span></td>
                     <td>${EUR0.format(r.jahr)}</td>
                     <td>${num(r.a.sb) ? EUR0.format(num(r.a.sb)) : "–"}</td>
@@ -665,14 +1061,14 @@ footer a { color: var(--accent); }
                   </tr>`).join("")}
               </tbody></table>` : '<div class="empty">Noch keine Angebote für diese Versicherungsart. Trage links das erste Angebot ein.</div>'}
           </div>
-          <p class="hint">Gesamtwert = Preisanteil × (günstigster Beitrag ÷ Beitrag) + Leistungsanteil × erfüllte Leistungen (wichtig zählt doppelt, egal gar nicht). „Wichtiges fehlt“ markiert Tarife ohne eine als wichtig markierte Leistung. Monatliche Zahlweise kostet bei vielen Versicherern einen Aufschlag von 3–5 %.</p>
-          ${v.kategorie.startsWith("eigen-") ? '<div class="row"><button class="btn small danger" id="kat-del" data-del="0">Löschen</button><span class="hint">Diese eigene Versicherungsart entfernen</span></div>' : ""}
+          <p class="hint">Gesamtwert = Preisanteil × (günstigster Beitrag ÷ Beitrag) + Leistungsanteil × erfüllte Leistungen (wichtig zählt doppelt, egal gar nicht).</p>
+          ${v.kategorie.startsWith("eigen-") ? '<div class="row" id="kat-del-row"><button class="btn small danger" data-del="0">Versicherungsart löschen</button></div>' : ""}
         </div>
       </div>`;
 
-    const rerender = () => { save(); renderVers(); };
-    el.querySelectorAll("[data-kat]").forEach((b) => b.addEventListener("click", () => { v.kategorie = b.dataset.kat; ui.edit = null; rerender(); }));
-    document.getElementById("kat-add").addEventListener("click", () => { const fm = document.getElementById("kat-form"); fm.hidden = false; document.getElementById("kat-name").focus(); });
+    const rerender = () => { save(); renderVers(); updateDue(); };
+    el.querySelectorAll("[data-kat]").forEach((b) => b.addEventListener("click", () => { v.kategorie = b.dataset.kat; ui.edit = null; ui.draft = null; rerender(); }));
+    document.getElementById("kat-add").addEventListener("click", () => { document.getElementById("kat-form").hidden = false; document.getElementById("kat-name").focus(); });
     document.getElementById("kat-form").addEventListener("submit", (e) => {
       e.preventDefault();
       const name = document.getElementById("kat-name").value.trim();
@@ -697,59 +1093,289 @@ footer a { color: var(--accent); }
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       const fd = new FormData(form);
-      const a = {
-        anbieter: String(fd.get("anbieter")).trim(), tarif: String(fd.get("tarif")).trim(),
-        beitrag: num(fd.get("beitrag")), zahlweise: num(fd.get("zahlweise"), 1), sb: num(fd.get("sb")), features: {},
-      };
+      const a = keepMeta({ anbieter: String(fd.get("anbieter")).trim(), tarif: String(fd.get("tarif")).trim(), beitrag: num(fd.get("beitrag")), zahlweise: num(fd.get("zahlweise"), 1), sb: num(fd.get("sb")), quelle: String(fd.get("quelle")).trim(), features: {} }, edit || draft);
       kat.features.forEach((ft) => { if (fd.get("feat-" + ft.id) === "on") a.features[ft.id] = true; });
       if (edit) { kat.angebote[ui.edit.i] = a; ui.edit = null; toast("Angebot gespeichert"); }
       else { kat.angebote.push(a); toast("Angebot hinzugefügt"); }
       ui.draft = null; rerender();
     });
-    const cancel = document.getElementById("cancel-edit");
-    if (cancel) cancel.addEventListener("click", () => { ui.edit = null; ui.draft = null; renderVers(); });
-    el.querySelectorAll("[data-edit]").forEach((b) => b.addEventListener("click", () => {
-      ui.edit = { kind: "vers", i: +b.dataset.edit }; renderVers();
-      document.getElementById("vers-form").scrollIntoView({ behavior: "smooth", block: "center" });
-    }));
-    const katDel = document.getElementById("kat-del");
+    bindEditCancel();
+    bindEditButtons(el, "vers");
     bindDelete(el.querySelector(".tbl-wrap"), (i) => { kat.angebote.splice(i, 1); ui.edit = null; rerender(); });
-    if (katDel) bindDelete(katDel.parentElement, () => { delete v.kategorien[v.kategorie]; v.kategorie = Object.keys(v.kategorien)[0]; rerender(); });
+    bindDelete(document.getElementById("kat-del-row"), () => { delete v.kategorien[v.kategorie]; v.kategorie = Object.keys(v.kategorien)[0]; rerender(); });
     bindScan("vers");
+    bindVergleich("vers", kat.name, { versicherungsart: kat.name, leistungen: kat.features.map((ft) => ({ id: ft.id, name: ft.name, gewicht: GEWICHT[ft.w] })), angebote: rows.map((r) => ({ ...r.a, jahresbeitrag: r.jahr, gesamtwert: r.score })) }, findings);
   }
 
-  // ---------- Foto einlesen (Claude liest Dokumente aus) ----------
-  let sampler = null, imgLimits = null;
-  const scan = { kind: null, busy: false, status: "", error: "", result: null, ctl: null };
-  const ERR = {
-    not_granted: "Du hast der Seite nicht erlaubt, Claude zu nutzen. Trage die Werte bitte von Hand ein.",
-    sampling_disabled: "Claude ist für dein Konto hier nicht verfügbar.",
-    rate_limited: "Gerade zu viele Anfragen. Versuch es in ein paar Minuten noch einmal.",
-    image_rejected: "Das Bild konnte nicht gelesen werden. Nimm ein JPEG- oder PNG-Foto, höchstens " + "20 MB.",
-    refused: "Claude hat dieses Bild abgelehnt. Versuch ein anderes Foto.",
-    invalid_json: "Die Antwort war unvollständig. Bitte noch einmal versuchen.",
-    session_expired: "Bitte melde dich neu an und versuche es noch einmal.",
-  };
-  const rerenderTab = () => show(ui.tab);
+  // ---------- Fristen ----------
+  const KAT_V = { strom: "Strom", gas: "Gas", internet: "Internet & Festnetz", mobil: "Mobilfunk", versicherung: "Versicherung", sonstiges: "Sonstiges" };
+  const EINHEIT = { monate: "Monate", wochen: "Wochen", tage: "Tage" };
+  const parseD = (s) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ""); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; };
+  const isoD = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const ymd = (d) => isoD(d).replace(/-/g, "");
+  function addMonths(d, n) { const r = new Date(d.getFullYear(), d.getMonth() + n, 1); r.setDate(Math.min(d.getDate(), new Date(r.getFullYear(), r.getMonth() + 1, 0).getDate())); return r; }
+  function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
+  function today() { const t = new Date(); return new Date(t.getFullYear(), t.getMonth(), t.getDate()); }
+  function shiftFrist(d, n, einheit) { return einheit === "wochen" ? addDays(d, 7 * n) : einheit === "tage" ? addDays(d, n) : addMonths(d, n); }
 
+  // Vertragsende = Tag vor (Beginn + Laufzeit). Kündigen bis = Tag vor (Ende + 1 Tag − Frist).
+  function fristInfo(v) {
+    const b = parseD(v.beginn);
+    if (!b) return null;
+    const heute = today();
+    const kb = (endP1) => addDays(shiftFrist(endP1, -num(v.frist), v.einheit), -1);
+    let endP1 = addMonths(b, num(v.mindest));
+    let guard = 0;
+    while (kb(endP1) < heute && guard++ < 1200) {
+      if (num(v.verl) > 0) endP1 = addMonths(endP1, num(v.verl));
+      else return { jederzeit: true, ende: shiftFrist(heute, num(v.frist), v.einheit) };
+    }
+    const kuendBis = kb(endP1);
+    const erinnerung = addMonths(kuendBis, -num(state.vorlauf, 1));
+    const tage = Math.round((kuendBis - heute) / 864e5);
+    const faellig = erinnerung <= heute;
+    const status = tage <= 14 ? { cls: "bad", t: `noch ${tage} Tag${tage === 1 ? "" : "e"}` } : faellig ? { cls: "warn", t: "jetzt entscheiden" } : { cls: "good", t: "läuft" };
+    return { jederzeit: false, ende: addDays(endP1, -1), kuendBis, erinnerung, tage, status, faellig };
+  }
+
+  function calLinks(v, fi) {
+    if (!fi || fi.jederzeit) return "";
+    const title = `Kündigung prüfen: ${v.name}`;
+    const body = `Letzter Tag für die Kündigung von „${v.name}“${v.anbieter ? " bei " + v.anbieter : ""}: ${DATE.format(fi.kuendBis)} (Eingang beim Anbieter). Vertragsende: ${DATE.format(fi.ende)}. Jetzt Angebote vergleichen und rechtzeitig kündigen.`;
+    const s = fi.erinnerung, e = addDays(s, 1);
+    const g = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${ymd(s)}/${ymd(e)}&details=${encodeURIComponent(body)}`;
+    const o = `https://outlook.live.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&rru=addevent&allday=true&startdt=${isoD(s)}&enddt=${isoD(e)}&subject=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
+    return `<div class="cal"><a class="btn small" href="${o}" target="_blank" rel="noopener">Outlook</a><a class="btn small" href="${g}" target="_blank" rel="noopener">Google</a></div>`;
+  }
+
+  function buildIcs() {
+    const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Tarif-Kompass//DE", "CALSCALE:GREGORIAN"];
+    const stamp = new Date().toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z";
+    const icsEsc = (s) => String(s).replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+    state.vertraege.forEach((v) => {
+      const fi = fristInfo(v);
+      if (!fi || fi.jederzeit) return;
+      [["erinnerung", `Kündigung prüfen: ${v.name}`, fi.erinnerung], ["frist", `Letzter Kündigungstag: ${v.name}`, fi.kuendBis]].forEach(([typ, title, d]) => {
+        lines.push("BEGIN:VEVENT", `UID:${v.id}-${typ}-${ymd(d)}@tarif-kompass`, `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${ymd(d)}`, `DTEND;VALUE=DATE:${ymd(addDays(d, 1))}`,
+          `SUMMARY:${icsEsc(title)}`, `DESCRIPTION:${icsEsc(`Die Kündigung muss bis ${DATE.format(fi.kuendBis)} beim Anbieter${v.anbieter ? " " + v.anbieter : ""} eingegangen sein. Vertragsende ${DATE.format(fi.ende)}.`)}`,
+          "BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${icsEsc(title)}`, "TRIGGER;RELATED=START:PT9H", "END:VALARM", "END:VEVENT");
+      });
+    });
+    lines.push("END:VCALENDAR");
+    return lines.join("\r\n");
+  }
+
+  function renderFristen() {
+    const vs = state.vertraege.map((v, i) => ({ v, i, fi: fristInfo(v) }));
+    const mitFrist = vs.filter((x) => x.fi && !x.fi.jederzeit).sort((a, b) => a.fi.kuendBis - b.fi.kuendBis);
+    const sorted = [...mitFrist, ...vs.filter((x) => x.fi && x.fi.jederzeit), ...vs.filter((x) => !x.fi)];
+    const naechste = mitFrist[0];
+    const faellig = mitFrist.filter((x) => x.fi.faellig);
+    const kostenSumme = state.vertraege.reduce((s, v) => s + num(v.kosten), 0);
+    const edit = ui.edit && ui.edit.kind === "vertrag" ? state.vertraege[ui.edit.i] : null;
+    const draft = !edit && ui.draft && ui.draft.kind === "vertrag" ? ui.draft.data : null;
+    const f = edit || draft || { name: "", kategorie: "strom", anbieter: "", beginn: "", mindest: 12, verl: 0, frist: 1, einheit: "monate", kosten: "" };
+    const lokal = !window.claude;
+
+    const el = document.getElementById("panel-fristen");
+    el.style.setProperty("--kind", "var(--frist)");
+    el.innerHTML = `
+      <div class="summary">
+        <div class="stat hero">
+          <h3>Nächster Kündigungstermin</h3>
+          <div class="v">${naechste ? DATE.format(naechste.fi.kuendBis) : "–"}</div>
+          <div class="s">${naechste ? esc(naechste.v.name) + " · noch " + naechste.fi.tage + " Tage" : "Noch keine Verträge mit Frist"}</div>
+        </div>
+        <div class="stat">
+          <h3>Jetzt entscheiden</h3>
+          <div class="v ${faellig.length ? "neg" : "pos"}">${faellig.length}</div>
+          <div class="s">${faellig.length ? esc(list(faellig.map((x) => x.v.name))) : "Keine Frist innerhalb der Erinnerungszeit"}</div>
+        </div>
+        <div class="stat">
+          <h3>Laufende Kosten</h3>
+          <div class="v">${EUR0.format(kostenSumme)}</div>
+          <div class="s">pro Monat · ${EUR0.format(kostenSumme * 12)} im Jahr</div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="col">
+          ${scanCard("vertrag")}
+          <form class="card" id="vertrag-form" autocomplete="off">
+            ${formHead(edit, draft, "Vertrag")}
+            <div class="fields">
+              ${inp("Bezeichnung", "vertrag-f-name", "name", f.name, { type: "text", req: true, full: true, ph: "z. B. Strom Wohnung" })}
+              <label class="f">Art<select name="kategorie" id="vertrag-f-kategorie">${Object.entries(KAT_V).map(([k, l]) => `<option value="${k}" ${f.kategorie === k ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+              ${inp("Anbieter", "vertrag-f-anbieter", "anbieter", f.anbieter, { type: "text" })}
+              ${inp("Vertragsbeginn", "vertrag-f-beginn", "beginn", f.beginn, { type: "date", req: true })}
+              ${inp("Mindestlaufzeit Monate", "vertrag-f-mindest", "mindest", f.mindest, { step: "1" })}
+              <label class="f full">Danach
+                <select name="verl" id="vertrag-f-verl">
+                  <option value="0" ${num(f.verl) === 0 ? "selected" : ""}>unbefristet, jederzeit mit Frist kündbar</option>
+                  <option value="12" ${num(f.verl) === 12 ? "selected" : ""}>verlängert sich um 12 Monate</option>
+                  <option value="24" ${num(f.verl) === 24 ? "selected" : ""}>verlängert sich um 24 Monate</option>
+                  <option value="1" ${num(f.verl) === 1 ? "selected" : ""}>verlängert sich um 1 Monat</option>
+                </select></label>
+              ${inp("Kündigungsfrist", "vertrag-f-frist", "frist", f.frist, { step: "1" })}
+              <label class="f">Einheit<select name="einheit" id="vertrag-f-einheit">${Object.entries(EINHEIT).map(([k, l]) => `<option value="${k}" ${f.einheit === k ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+              ${inp("Kosten €/Monat", "vertrag-f-kosten", "kosten", f.kosten, { full: true })}
+            </div>
+            <button class="btn primary" type="submit">${edit ? "Änderungen speichern" : "Vertrag hinzufügen"}</button>
+          </form>
+          <div class="card">
+            <h2>Gut zu wissen</h2>
+            <ul class="legal">
+              <li>Strom, Gas, Internet und Mobilfunk: Verträge, die seit März 2022 geschlossen wurden (Telefon und Internet seit Dezember 2021), laufen nach der Mindestlaufzeit unbefristet weiter und sind mit höchstens einem Monat Frist kündbar.</li>
+              <li>Versicherungen verlängern sich meist um ein Jahr. Die Kündigung muss oft drei Monate vor Ablauf eingehen.</li>
+              <li>Bei einer Preis- oder Beitragserhöhung hast du in der Regel ein Sonderkündigungsrecht, bei Versicherungen auch nach einem Schadenfall.</li>
+              <li>Maßgeblich ist der Eingang beim Anbieter. Kündige einige Tage vorher und lass dir die Kündigung bestätigen.</li>
+            </ul>
+            <p class="hint">Das sind allgemeine Regeln. Was für deinen Vertrag gilt, steht in den Vertragsbedingungen.</p>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="card">
+            <div class="card-head"><h2>Erinnerungen</h2>
+              <label class="f inline">Erinnern
+                <select id="vorlauf">${[1, 2, 3].map((m) => `<option value="${m}" ${num(state.vorlauf) === m ? "selected" : ""}>${m} Monat${m > 1 ? "e" : ""} vorher</option>`).join("")}</select></label>
+            </div>
+            <p class="hint">Mit „Outlook“ oder „Google“ legst du für jeden Vertrag einen Kalendertermin am Erinnerungstag an. Dein Kalender meldet sich dann auch auf dem Handy.${lokal ? " Oder lade alle Termine auf einmal als Kalenderdatei." : ""}</p>
+            ${lokal ? '<div class="row"><button class="btn small" id="ics-btn">Alle Termine als Kalenderdatei (.ics)</button></div>' : ""}
+          </div>
+          <div class="tbl-wrap">
+            ${sorted.length ? `<table>
+              <thead><tr><th class="l">Vertrag</th><th>Kosten/M</th><th>Vertragsende</th><th>Kündigen bis</th><th>Erinnerung</th><th>In Kalender</th><th></th></tr></thead>
+              <tbody>${sorted.map(({ v, i, fi }) => `
+                <tr class="${fi && fi.faellig ? "due-row" : ""}">
+                  <td class="l"><div class="tname">${esc(v.name)}</div><div class="tsub">${esc(KAT_V[v.kategorie] || "")}${v.anbieter ? " · " + esc(v.anbieter) : ""} · Frist ${esc(v.frist)} ${esc(EINHEIT[v.einheit] || "Monate")}</div>
+                    <div class="pills">${!fi ? '<span class="pill warn">Beginn fehlt</span>' : fi.jederzeit ? '<span class="pill good">jederzeit kündbar</span>' : `<span class="pill ${fi.status.cls}">${fi.status.t}</span>`}</div></td>
+                  <td>${num(v.kosten) ? EUR2.format(num(v.kosten)) : "–"}</td>
+                  <td>${fi ? (fi.jederzeit ? "frühestens " + DATE.format(fi.ende) : DATE.format(fi.ende)) : "–"}</td>
+                  <td>${fi && !fi.jederzeit ? `<strong>${DATE.format(fi.kuendBis)}</strong>` : "–"}</td>
+                  <td>${fi && !fi.jederzeit ? DATE.format(fi.erinnerung) : "–"}</td>
+                  <td>${calLinks(v, fi) || "–"}</td>
+                  <td><div class="actions"><button class="btn small" data-edit="${i}">Bearbeiten</button><button class="btn small danger" data-del="${i}">Löschen</button></div></td>
+                </tr>`).join("")}</tbody></table>` : '<div class="empty">Noch keine Verträge. Trage links deinen ersten Vertrag ein oder lies ihn per Foto ein.</div>'}
+          </div>
+          <p class="hint">„Kündigen bis“ ist der letzte Tag, an dem die Kündigung beim Anbieter eingehen muss. „Jederzeit kündbar“ heißt: Die Mindestlaufzeit ist vorbei, die Kündigung wirkt nach Ablauf der Frist.</p>
+        </div>
+      </div>`;
+
+    const rerender = () => { save(); renderFristen(); updateDue(); };
+    document.getElementById("vorlauf").addEventListener("change", (e) => { state.vorlauf = num(e.target.value, 1); rerender(); });
+    const ics = document.getElementById("ics-btn");
+    if (ics) ics.addEventListener("click", () => {
+      const blob = new Blob([buildIcs()], { type: "text/calendar" });
+      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "kuendigungsfristen.ics";
+      document.body.appendChild(a); a.click(); a.remove(); toast("Kalenderdatei erstellt");
+    });
+    const form = document.getElementById("vertrag-form");
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const v = { id: edit ? edit.id : "v" + Date.now().toString(36), name: String(fd.get("name")).trim(), kategorie: String(fd.get("kategorie")), anbieter: String(fd.get("anbieter")).trim(), beginn: String(fd.get("beginn")), mindest: num(fd.get("mindest")), verl: num(fd.get("verl")), frist: num(fd.get("frist")), einheit: String(fd.get("einheit")), kosten: num(fd.get("kosten")) };
+      if (edit) { state.vertraege[ui.edit.i] = v; ui.edit = null; toast("Vertrag gespeichert"); }
+      else { state.vertraege.push(v); toast("Vertrag hinzugefügt"); }
+      ui.draft = null; rerender();
+    });
+    bindEditCancel();
+    bindEditButtons(el, "vertrag");
+    bindDelete(el.querySelector(".tbl-wrap"), (i) => { state.vertraege.splice(i, 1); ui.edit = null; rerender(); });
+    bindScan("vertrag");
+  }
+
+  function updateDue() {
+    const due = state.vertraege.map((v) => ({ v, fi: fristInfo(v) })).filter((x) => x.fi && !x.fi.jederzeit && x.fi.faellig).sort((a, b) => a.fi.kuendBis - b.fi.kuendBis);
+    const banner = document.getElementById("due-banner"), cnt = document.getElementById("due-count");
+    cnt.hidden = !due.length; cnt.textContent = due.length;
+    if (!due.length || ui.tab === "fristen") { banner.hidden = true; return; }
+    banner.hidden = false;
+    banner.innerHTML = `<span>Kündigungsfrist bald: ${due.map((x) => `${esc(x.v.name)} bis ${DATE.format(x.fi.kuendBis)}`).join(" · ")}</span><button class="btn small" id="due-go">Zu den Fristen</button>`;
+    document.getElementById("due-go").addEventListener("click", () => go("fristen"));
+  }
+
+  // ---------- Foto einlesen ----------
+  const scan = { kind: null, mode: "dokument", busy: false, status: "", error: "", result: null, ctl: null };
   if (window.claude && typeof window.claude.use === "function") {
     window.claude.use("sample").then(async (s) => {
       if (!s) return;
+      sampler = s;
       const lim = await s.limits().catch(() => null);
-      if (!lim || !lim.images) return;
-      sampler = s; imgLimits = lim.images; rerenderTab();
+      if (lim && lim.images) imgLimits = lim.images;
+      rerenderTab();
     }).catch(() => {});
   }
-
   const fmtOrDash = (v, fn) => (v === null || v === undefined || v === "" ? "–" : fn ? fn(v) : esc(v));
+  const n0 = (x) => { const n = typeof x === "string" ? parseFloat(x.replace(",", ".")) : x; return typeof n === "number" && Number.isFinite(n) ? Math.round(n * 100) / 100 : null; };
+
+  const SCAN_WAS = {
+    strom: "Jahresabrechnung, Preisblatt oder ein Angebot", gas: "Jahresabrechnung, Preisblatt oder ein Angebot",
+    tk: "Rechnung, Auftragsbestätigung oder ein Angebot", vers: "Police, Beitragsrechnung oder ein Angebot",
+    vertrag: "Vertragsbestätigung, Police oder Rechnung mit Laufzeit und Kündigungsfrist",
+  };
+
+  function offerFromRaw(kind, r, quelle) {
+    const meta = (o) => { if (r.portal_preis) o.portalPreis = r.portal_preis; if (r.anzeige === true) o.anzeige = true; return o; };
+    if (kind === "strom" || kind === "gas") return meta({ anbieter: r.anbieter || "", tarif: r.tarif || "", gp: r.grundpreis_eur_monat, ap: r.arbeitspreis_ct_kwh, bonus: r.bonus_eur ?? 0, laufzeit: r.laufzeit_monate ?? 12, garantie: r.preisgarantie_monate ?? 0, oeko: !!r.oeko, quelle: quelle || "" });
+    if (kind === "tk") return meta({ anbieter: r.anbieter || "", tarif: r.tarif || "", preis: r.preis_monat, aktionPreis: r.aktion_preis_monat ?? 0, aktionMonate: r.aktion_monate ?? 0, einmalig: r.einmalig_eur ?? 0, router: r.router_eur_monat ?? 0, bonus: r.bonus_eur ?? 0, leistung: r.leistung ?? 0, upload: r.upload_mbit ?? 0, laufzeit: r.laufzeit_monate ?? 24, technik: r.technik || "", quelle: quelle || "" });
+    const feats = {}; (Array.isArray(r.leistungen) ? r.leistungen : []).forEach((id) => { feats[id] = true; });
+    return meta({ anbieter: r.anbieter || "", tarif: r.tarif || "", beitrag: r.beitrag, zahlweise: [1, 2, 4, 12].includes(r.zahlweise) ? r.zahlweise : 1, sb: r.sb_eur ?? 0, features: feats, quelle: quelle || "" });
+  }
+  const offerComplete = (kind, o) => kind === "tk" ? o.preis != null : kind === "vers" ? o.beitrag != null : o.gp != null && o.ap != null;
+  const offerPrice = (kind, o) => kind === "tk" ? EUR2.format(num(o.aktionPreis) || num(o.preis)) + "/M" : kind === "vers" ? EUR2.format(num(o.beitrag)) + " " + (ZAHLWEISE[o.zahlweise] || "") : `${EUR2.format(num(o.gp))}/M · ${NUM.format(num(o.ap))} ct`;
+  const btnRow = (r, akt) => `<div class="row">
+      ${akt ? `<button class="btn ${r.dokument !== "angebot" ? "primary" : ""}" id="scan-aktuell">Als aktuellen Tarif übernehmen</button>` : ""}
+      <button class="btn ${!akt || r.dokument === "angebot" ? "primary" : ""}" id="scan-angebot">${akt ? "Als Angebot prüfen" : "Ins Formular übernehmen"}</button>
+      <button class="btn small" id="scan-clear">Verwerfen</button></div>`;
 
   function scanCard(kind) {
-    if (!sampler) return "";
+    if (!canScan()) return "";
     const mine = scan.kind === kind;
     const r = mine ? scan.result : null;
-    const was = kind === "vers" ? "Police, Beitragsrechnung oder ein Angebot" : "Jahresabrechnung, Preisblatt oder ein Angebot";
     let review = "";
-    if (r && kind !== "vers") {
+    const hinweis = r && r.hinweis ? `<p class="hint">${esc(r.hinweis)}</p>` : "";
+    if (r && scan.mode === "liste") {
+      const offers = (r.angebote || []).map((x) => offerFromRaw(kind, x, r.quelle));
+      review = `<p class="hint">${offers.length} Angebot${offers.length === 1 ? "" : "e"}${r.quelle ? " aus " + esc(r.quelle) : ""} erkannt. Wähle aus, was du übernehmen willst.</p>
+        <label class="f">Quelle<input type="text" id="scan-quelle" value="${esc(r.quelle || "")}" placeholder="z. B. Verivox"></label>
+        <div class="picklist">${offers.map((o, n) => { const ok = offerComplete(kind, o); return `<label><input type="checkbox" data-pick="${n}" ${ok ? "checked" : "disabled"}><span>${esc(nameOf(o))}${o.anzeige ? ' <span class="pill info">Anzeige</span>' : ""}${ok ? "" : '<br><span class="hint">Preise fehlen. Tarifdetails aufklappen und erneut fotografieren.</span>'}</span><span class="p">${ok ? offerPrice(kind, o) : "–"}</span></label>`; }).join("")}</div>
+        ${hinweis}
+        <div class="row"><button class="btn primary" id="scan-pick">Ausgewählte übernehmen</button><button class="btn small" id="scan-clear">Verwerfen</button></div>`;
+    } else if (r && kind === "vertrag") {
+      review = `<dl>
+        <dt>Bezeichnung</dt><dd>${fmtOrDash(r.bezeichnung)}</dd>
+        <dt>Art</dt><dd>${fmtOrDash(KAT_V[r.kategorie])}</dd>
+        <dt>Anbieter</dt><dd>${fmtOrDash(r.anbieter)}</dd>
+        <dt>Beginn</dt><dd>${fmtOrDash(parseD(r.beginn), (d) => DATE.format(d))}</dd>
+        <dt>Mindestlaufzeit</dt><dd>${fmtOrDash(r.mindestlaufzeit_monate, (x) => x + " Monate")}</dd>
+        <dt>Danach</dt><dd>${r.verlaengerung_monate ? "verlängert sich um " + r.verlaengerung_monate + " Monate" : "unbefristet, jederzeit kündbar"}</dd>
+        <dt>Kündigungsfrist</dt><dd>${fmtOrDash(r.kuendigungsfrist, (x) => x + " " + (EINHEIT[r.frist_einheit] || "Monate"))}</dd>
+        <dt>Kosten</dt><dd>${fmtOrDash(r.kosten_monat, (x) => EUR2.format(x) + " / Monat")}</dd>
+      </dl>${hinweis}${btnRow(r, false)}`;
+    } else if (r && kind === "vers") {
+      const kat = state.vers.kategorien[r.kategorie];
+      const feats = kat ? kat.features.filter((ft) => (r.leistungen || []).includes(ft.id)).map((ft) => ft.name) : [];
+      review = `<dl>
+        <dt>Art</dt><dd>${kat ? esc(kat.name) : "nicht erkannt, aktuelle Art wird genutzt"}</dd>
+        <dt>Versicherer</dt><dd>${fmtOrDash(r.anbieter)}</dd>
+        <dt>Tarif</dt><dd>${fmtOrDash(r.tarif)}</dd>
+        <dt>Beitrag</dt><dd>${fmtOrDash(r.beitrag, (x) => EUR2.format(x) + " " + (ZAHLWEISE[r.zahlweise] || ""))}</dd>
+        <dt>Selbstbeteiligung</dt><dd>${fmtOrDash(r.sb_eur, (x) => EUR0.format(x))}</dd>
+        <dt>Leistungen</dt><dd>${feats.length ? feats.map(esc).join(", ") : "keine der Liste erkannt"}</dd>
+      </dl>${hinweis}${btnRow(r, false)}`;
+    } else if (r && kind === "tk") {
+      const art = state.tk.art;
+      review = `<dl>
+        <dt>Dokument</dt><dd>${r.dokument === "angebot" ? "Angebot" : "Rechnung / Vertrag"}</dd>
+        <dt>Anbieter</dt><dd>${fmtOrDash(r.anbieter)}</dd>
+        <dt>Tarif</dt><dd>${fmtOrDash(r.tarif)}</dd>
+        <dt>Preis</dt><dd>${fmtOrDash(r.preis_monat, (x) => EUR2.format(x) + " / Monat")}${r.aktion_preis_monat ? ` (Aktion ${EUR2.format(r.aktion_preis_monat)} für ${r.aktion_monate || "?"} Mon.)` : ""}</dd>
+        <dt>${TK_ART[art].leistung}</dt><dd>${fmtOrDash(r.leistung, (x) => fmtLeistung(art, x))}</dd>
+        <dt>Einmalig / Router</dt><dd>${fmtOrDash(r.einmalig_eur, (x) => EUR0.format(x))} / ${fmtOrDash(r.router_eur_monat, (x) => EUR2.format(x) + "/M")}</dd>
+        <dt>Laufzeit</dt><dd>${fmtOrDash(r.laufzeit_monate, (x) => x + " Monate")}</dd>
+      </dl>${hinweis}${btnRow(r, true)}`;
+    } else if (r) {
       review = `<dl>
         <dt>Dokument</dt><dd>${r.dokument === "angebot" ? "Angebot" : "Rechnung / Vertrag"}</dd>
         <dt>Anbieter</dt><dd>${fmtOrDash(r.anbieter)}</dd>
@@ -759,35 +1385,14 @@ footer a { color: var(--accent); }
         <dt>Verbrauch</dt><dd>${fmtOrDash(r.verbrauch_kwh, (x) => NUM.format(x) + " kWh")}</dd>
         <dt>Bonus</dt><dd>${fmtOrDash(r.bonus_eur, (x) => EUR0.format(x))}</dd>
         <dt>Laufzeit / Garantie</dt><dd>${fmtOrDash(r.laufzeit_monate)} / ${fmtOrDash(r.preisgarantie_monate)} Mon.</dd>
-      </dl>
-      ${r.hinweis ? `<p class="hint">${esc(r.hinweis)}</p>` : ""}
-      <div class="row">
-        <button class="btn ${r.dokument !== "angebot" ? "primary" : ""}" id="scan-aktuell">Als aktuellen Tarif übernehmen</button>
-        <button class="btn ${r.dokument === "angebot" ? "primary" : ""}" id="scan-angebot">Als Angebot prüfen</button>
-        <button class="btn small" id="scan-clear">Verwerfen</button>
-      </div>`;
-    } else if (r) {
-      const kat = state.vers.kategorien[r.kategorie];
-      const feats = kat ? kat.features.filter((ft) => (r.leistungen || []).includes(ft.id)).map((ft) => ft.name) : [];
-      review = `<dl>
-        <dt>Art</dt><dd>${kat ? esc(kat.name) : "nicht erkannt (aktuelle Art wird genutzt)"}</dd>
-        <dt>Versicherer</dt><dd>${fmtOrDash(r.anbieter)}</dd>
-        <dt>Tarif</dt><dd>${fmtOrDash(r.tarif)}</dd>
-        <dt>Beitrag</dt><dd>${fmtOrDash(r.beitrag, (x) => EUR2.format(x) + " " + (ZAHLWEISE[r.zahlweise] || ""))}</dd>
-        <dt>Selbstbeteiligung</dt><dd>${fmtOrDash(r.sb_eur, (x) => EUR0.format(x))}</dd>
-        <dt>Leistungen</dt><dd>${feats.length ? feats.map(esc).join(", ") : "keine der Liste erkannt"}</dd>
-      </dl>
-      ${r.hinweis ? `<p class="hint">${esc(r.hinweis)}</p>` : ""}
-      <div class="row">
-        <button class="btn primary" id="scan-angebot">Ins Formular übernehmen</button>
-        <button class="btn small" id="scan-clear">Verwerfen</button>
-      </div>`;
+      </dl>${hinweis}${btnRow(r, true)}`;
     }
+    const busyHere = mine && scan.busy && scan.mode === "dokument";
     return `<div class="card scan">
       <div class="card-head"><h2>Foto einlesen</h2>${mine && scan.busy ? '<button class="btn small" id="scan-stop">Abbrechen</button>' : ""}</div>
-      ${r ? "" : `<p class="hint">Fotografiere deine ${was}. Claude liest die Tarifdaten aus, du prüfst sie vor dem Übernehmen. Bis zu ${imgLimits.maxCount} Seiten auf einmal. Namen, Adressen und Kundennummern werden nicht übernommen.</p>
-      <label class="btn primary scan-btn" ${mine && scan.busy ? 'aria-disabled="true"' : ""}>${mine && scan.busy ? "Wird gelesen …" : "Foto aufnehmen oder auswählen"}
-        <input class="sr-only" type="file" id="scan-file" accept="${esc(imgLimits.mediaTypes.join(","))}" multiple ${mine && scan.busy ? "disabled" : ""}>
+      ${r ? "" : `<p class="hint">Fotografiere deine ${SCAN_WAS[kind]}. Claude liest die Daten aus, du prüfst sie vor dem Übernehmen. Bis zu ${imgLimits.maxCount} Seiten auf einmal. Namen, Adressen und Kundennummern werden nicht übernommen.</p>
+      <label class="btn primary scan-btn" ${scan.busy ? 'aria-disabled="true"' : ""}>${busyHere ? "Wird gelesen …" : "Foto aufnehmen oder auswählen"}
+        <input class="sr-only" type="file" id="scan-file" accept="${esc(imgLimits.mediaTypes.join(","))}" multiple ${scan.busy ? "disabled" : ""}>
       </label>`}
       ${mine && scan.status ? `<p class="hint">${esc(scan.status)}</p>` : ""}
       ${mine && scan.error ? `<p class="err">${esc(scan.error)}</p>` : ""}
@@ -795,69 +1400,142 @@ footer a { color: var(--accent); }
     </div>`;
   }
 
-  function promptFor(kind) {
+  const PRIVACY = '- Unbekanntes = null. Gib keine Namen, Adressen, Kunden-, Zähler-, Vertrags- oder Kennzeichennummern aus.\n- "hinweis": ein kurzer deutscher Satz zu Unsicherheiten, sonst null.';
+  const ENERGY_RULES = (kind) => `- Alle Preise brutto inkl. MwSt.
+- "grundpreis_eur_monat": Grundpreis in Euro pro MONAT. Steht er pro Jahr, durch 12 teilen; pro Tag, mal 365 und durch 12.
+- "arbeitspreis_ct_kwh": Arbeitspreis in Cent pro kWh (bei €/kWh mal 100).
+- "bonus_eur": Neukunden- plus Sofortbonus in Euro, sonst null. "preisgarantie_monate": Dauer der Preisgarantie, sonst null.
+- "laufzeit_monate": Mindestvertragslaufzeit (1 = monatlich kündbar).
+- "oeko": true bei ${kind === "strom" ? "Ökostrom" : "Biogas oder klimaneutralem Gas"}, sonst false.`;
+  const TK_RULES = (art) => `- "preis_monat": regulärer Monatspreis nach Ablauf von Aktionen, brutto.
+- "aktion_preis_monat" und "aktion_monate": reduzierter Preis und dessen Dauer, sonst null.
+- "einmalig_eur": Anschluss-, Bereitstellungs- oder Aktivierungspreis. "router_eur_monat": Miete für Router oder Hardware pro Monat, sonst 0. "bonus_eur": Gutschriften oder Wechselbonus.
+- "leistung": ${art === "mobil" ? "Datenvolumen in GB (unbegrenzt = 1000)" : "maximale Download-Geschwindigkeit in Mbit/s"}.${art === "mobil" ? "" : ' "upload_mbit": Upload in Mbit/s.'}
+- "laufzeit_monate": Mindestvertragslaufzeit.
+- "technik": ${art === "mobil" ? '"5G" oder "4G"' : '"DSL", "Kabel", "Glasfaser" oder "5G"'}, sonst null.`;
+  const LIST_RULES = (preisText) => `- "quelle": Name des Portals, wenn erkennbar, sonst null.
+- "portal_preis": ${preisText}, sonst null.
+- "anzeige": true, wenn das Angebot als Anzeige, gesponsert oder Werbung markiert ist.`;
+
+  function promptFor(kind, mode) {
+    if (kind === "vertrag") return `Die Bilder zeigen ein deutsches Vertragsdokument (Vertragsbestätigung, Versicherungsschein oder Rechnung). Lies die Vertragsdaten für eine Kündigungs-Erinnerung aus.
+
+Regeln:
+- "bezeichnung": kurze Bezeichnung wie "Strom Wohnung", "Kfz-Versicherung" oder "Internet".
+- "kategorie": "strom", "gas", "internet", "mobil", "versicherung" oder "sonstiges".
+- "beginn": Vertrags- bzw. Versicherungsbeginn als "YYYY-MM-DD".
+- "mindestlaufzeit_monate": Mindestvertragslaufzeit bzw. erste Laufzeit bis zum ersten Ablauf in Monaten.
+- "verlaengerung_monate": Um wie viele Monate sich der Vertrag danach verlängert (Versicherungen meist 12). 0, wenn er danach unbefristet läuft und jederzeit kündbar ist.
+- "kuendigungsfrist" mit "frist_einheit" ("monate", "wochen" oder "tage").
+- "kosten_monat": Kosten pro Monat in Euro (Jahresbeitrag durch 12).
+${PRIVACY}
+
+Antworte nur mit JSON in dieser Form:
+{"bezeichnung":"…","kategorie":"versicherung","anbieter":"…","beginn":"2024-01-01","mindestlaufzeit_monate":12,"verlaengerung_monate":12,"kuendigungsfrist":3,"frist_einheit":"monate","kosten_monat":6.5,"hinweis":null}`;
+
     if (kind === "vers") {
       const cats = {};
       Object.entries(state.vers.kategorien).forEach(([k, c]) => { cats[k] = { name: c.name, leistungen: c.features.map((f) => ({ id: f.id, name: f.name })) }; });
-      return `Die Bilder zeigen Seiten eines deutschen Versicherungsdokuments (Police, Versicherungsschein, Beitragsrechnung oder Angebot). Lies die Tarifdaten aus.
-
-Bekannte Versicherungsarten mit ihren Leistungen (JSON):
+      const rules = `Bekannte Versicherungsarten mit ihren Leistungen (JSON):
 ${JSON.stringify(cats)}
 
 Regeln:
 - "kategorie": der passende Schlüssel aus der Liste oben, sonst null.
 - "beitrag": Betrag je Zahlungsperiode in Euro, brutto inkl. Versicherungsteuer. "zahlweise": 1 = jährlich, 2 = halbjährlich, 4 = vierteljährlich, 12 = monatlich.
-- "sb_eur": Selbstbeteiligung pro Schadenfall in Euro (0 wenn ausdrücklich keine), sonst null.
-- "leistungen": nur IDs aus der gewählten Kategorie, deren Leistung im Dokument klar als enthalten erkennbar ist.
-- Unbekanntes = null. Gib keine Namen, Adressen, Kennzeichen oder Vertragsnummern aus.
-- "hinweis": ein kurzer deutscher Satz zu Unsicherheiten, sonst null.
+- "sb_eur": Selbstbeteiligung pro Schadenfall in Euro (0, wenn ausdrücklich keine), sonst null.
+- "leistungen": nur IDs aus der gewählten Kategorie, deren Leistung klar als enthalten erkennbar ist.
+${PRIVACY}`;
+      if (mode === "liste") return `Die Bilder zeigen Screenshots einer Ergebnisliste eines deutschen Vergleichsportals für Versicherungen. Lies jedes Angebot aus.
+
+${rules}
+${LIST_RULES("vom Portal angezeigter Jahresbeitrag in Euro")}
+
+Antworte nur mit JSON in dieser Form:
+{"kategorie":"haftpflicht","quelle":"…","angebote":[{"anbieter":"…","tarif":"…","beitrag":65,"zahlweise":1,"sb_eur":0,"leistungen":["f1"],"portal_preis":65,"anzeige":false}],"hinweis":null}`;
+      return `Die Bilder zeigen Seiten eines deutschen Versicherungsdokuments (Police, Versicherungsschein, Beitragsrechnung oder Angebot). Lies die Tarifdaten aus.
+
+${rules}
 
 Antworte nur mit JSON in dieser Form:
 {"kategorie":"haftpflicht","anbieter":"…","tarif":"…","beitrag":6.5,"zahlweise":12,"sb_eur":0,"leistungen":["f1"],"hinweis":null}`;
     }
+
+    if (kind === "tk") {
+      const art = state.tk.art, name = TK_ART[art].name;
+      if (mode === "liste") return `Die Bilder zeigen Screenshots einer Ergebnisliste eines deutschen Vergleichsportals für ${name}-Tarife. Lies jedes Angebot aus.
+
+Regeln:
+${TK_RULES(art)}
+${LIST_RULES("vom Portal angezeigter Durchschnittspreis pro Monat in Euro (meist über 24 Monate)")}
+${PRIVACY}
+
+Antworte nur mit JSON in dieser Form:
+{"quelle":"…","angebote":[{"anbieter":"…","tarif":"…","preis_monat":39.99,"aktion_preis_monat":19.99,"aktion_monate":6,"einmalig_eur":0,"router_eur_monat":0,"bonus_eur":0,"leistung":100,"upload_mbit":40,"laufzeit_monate":24,"technik":"DSL","portal_preis":33.5,"anzeige":false}],"hinweis":null}`;
+      return `Die Bilder zeigen Seiten eines deutschen ${name}-Dokuments (Rechnung, Auftragsbestätigung oder Angebot). Lies die Tarifdaten aus.
+
+Regeln:
+${TK_RULES(art)}
+- "dokument": "angebot" bei einem Angebot für einen neuen Vertrag, sonst "rechnung". Bei einer Rechnung ist "preis_monat" der aktuelle Monatsbetrag inklusive Optionen.
+${PRIVACY}
+
+Antworte nur mit JSON in dieser Form:
+{"dokument":"rechnung","anbieter":"…","tarif":"…","preis_monat":39.99,"aktion_preis_monat":null,"aktion_monate":null,"einmalig_eur":null,"router_eur_monat":0,"bonus_eur":null,"leistung":100,"upload_mbit":40,"laufzeit_monate":24,"technik":"DSL","hinweis":null}`;
+    }
+
     const art = kind === "strom" ? "Strom" : "Gas";
+    if (mode === "liste") return `Die Bilder zeigen Screenshots einer Ergebnisliste eines deutschen Vergleichsportals für ${art}tarife. Lies jedes Angebot aus.
+
+Regeln:
+${ENERGY_RULES(kind)}
+${LIST_RULES("vom Portal angezeigter Gesamtpreis im ersten Jahr in Euro")}
+- Fehlen Grund- oder Arbeitspreis in der Liste, setze sie auf null.
+${PRIVACY}
+
+Antworte nur mit JSON in dieser Form:
+{"quelle":"…","angebote":[{"anbieter":"…","tarif":"…","grundpreis_eur_monat":12.5,"arbeitspreis_ct_kwh":29.9,"bonus_eur":100,"laufzeit_monate":12,"preisgarantie_monate":12,"oeko":true,"portal_preis":780,"anzeige":false}],"hinweis":null}`;
     return `Die Bilder zeigen Seiten eines deutschen ${art}-Dokuments (Jahresabrechnung, Preisblatt, Vertragsbestätigung, Preisanpassung oder Angebot). Lies die Tarifdaten aus.
 
 Regeln:
-- Alle Preise brutto inkl. MwSt.
-- "grundpreis_eur_monat": Grundpreis in Euro pro MONAT. Steht er pro Jahr, durch 12 teilen; pro Tag, mal 365 und durch 12.
-- "arbeitspreis_ct_kwh": Arbeitspreis in Cent pro kWh (bei €/kWh mal 100).
-- Gibt es mehrere Preisstände (z. B. vor/nach Preisänderung), nimm den neuesten.
-- "verbrauch_kwh": Jahresverbrauch in kWh${kind === "gas" ? " (bei Gas die kWh-Angabe, nicht m³)" : ""}, sonst null.
+${ENERGY_RULES(kind)}
+- Gibt es mehrere Preisstände (z. B. vor und nach einer Preisänderung), nimm den neuesten.
+- "verbrauch_kwh": Jahresverbrauch in kWh${kind === "gas" ? " (die kWh-Angabe, nicht m³)" : ""}, sonst null.
 - "dokument": "angebot" bei einem Angebot für einen neuen Vertrag, sonst "rechnung".
-- "oeko": true bei Ökostrom / Biogas / klimaneutral, sonst false; unklar null.
-- Unbekanntes = null. Gib keine Namen, Adressen, Zähler- oder Kundennummern aus.
-- "hinweis": ein kurzer deutscher Satz zu Unsicherheiten, sonst null.
+${PRIVACY}
 
 Antworte nur mit JSON in dieser Form:
 {"dokument":"rechnung","anbieter":"…","tarif":"…","grundpreis_eur_monat":12.5,"arbeitspreis_ct_kwh":32.1,"bonus_eur":null,"laufzeit_monate":null,"preisgarantie_monate":null,"oeko":false,"verbrauch_kwh":2500,"hinweis":null}`;
   }
 
-  const n0 = (x) => (typeof x === "number" && Number.isFinite(x) ? Math.round(x * 100) / 100 : null);
+  const NUM_KEYS = ["grundpreis_eur_monat", "arbeitspreis_ct_kwh", "bonus_eur", "laufzeit_monate", "preisgarantie_monate", "verbrauch_kwh", "beitrag", "sb_eur", "preis_monat", "aktion_preis_monat", "aktion_monate", "einmalig_eur", "router_eur_monat", "leistung", "upload_mbit", "portal_preis", "mindestlaufzeit_monate", "verlaengerung_monate", "kuendigungsfrist", "kosten_monat", "zahlweise"];
+  const cleanNums = (o) => { if (o && typeof o === "object") NUM_KEYS.forEach((k) => { if (k in o) o[k] = n0(o[k]); }); return o; };
 
-  async function runScan(kind, files) {
+  async function runScan(kind, mode, files) {
     if (!files || !files.length) return;
-    const list = Array.from(files).slice(0, imgLimits.maxCount);
-    scan.ctl && scan.ctl.abort();
+    const fl = Array.from(files).slice(0, imgLimits.maxCount);
+    if (scan.ctl) scan.ctl.abort();
     const ctl = new AbortController();
-    Object.assign(scan, { kind, busy: true, status: `${list.length} Foto${list.length > 1 ? "s" : ""} wird gelesen. Das dauert meist 10–40 Sekunden …`, error: "", result: null, ctl });
+    Object.assign(scan, { kind, mode, busy: true, status: `${fl.length} Bild${fl.length > 1 ? "er werden" : " wird"} gelesen. Das dauert meist 10–60 Sekunden …`, error: "", result: null, ctl });
     rerenderTab();
     try {
-      const r = await sampler.json(promptFor(kind), { images: list, signal: ctl.signal });
+      const r = await sampler.json(promptFor(kind, mode), { images: fl, signal: ctl.signal });
       if (!r || typeof r !== "object") throw { code: "invalid_json" };
-      ["grundpreis_eur_monat", "arbeitspreis_ct_kwh", "bonus_eur", "laufzeit_monate", "preisgarantie_monate", "verbrauch_kwh", "beitrag", "sb_eur"].forEach((k) => { if (k in r) r[k] = n0(r[k]); });
-      if (kind === "vers" && ![1, 2, 4, 12].includes(r.zahlweise)) r.zahlweise = 1;
-      Object.assign(scan, { busy: false, status: "Bitte prüfe die erkannten Werte:", result: r });
+      cleanNums(r);
+      if (Array.isArray(r.angebote)) r.angebote.forEach(cleanNums);
+      if (mode === "liste" && (!Array.isArray(r.angebote) || !r.angebote.length)) throw { code: "keine" };
+      Object.assign(scan, { busy: false, status: mode === "liste" ? "" : "Bitte prüfe die erkannten Werte:", result: r });
     } catch (e) {
-      Object.assign(scan, { busy: false, status: "", error: e && e.code === "cancelled" ? "" : (ERR[e && e.code] || "Das Lesen hat nicht geklappt. Bitte versuch es noch einmal.") });
+      const msg = e && e.code === "keine" ? "Auf dem Bild wurden keine Angebote gefunden. Fotografiere die Ergebnisliste möglichst vollständig." : ERR[e && e.code] || "Das Lesen hat nicht geklappt. Bitte versuch es noch einmal.";
+      Object.assign(scan, { busy: false, status: "", error: e && e.code === "cancelled" ? "" : msg });
     }
     rerenderTab();
   }
 
   function bindScan(kind) {
-    if (!sampler) return;
+    if (!canScan()) return;
     const file = document.getElementById("scan-file");
-    if (file) file.addEventListener("change", () => runScan(kind, file.files));
+    if (file) file.addEventListener("change", () => runScan(kind, "dokument", file.files));
+    const lf = document.getElementById("scan-list-file");
+    if (lf) lf.addEventListener("change", () => runScan(kind, "liste", lf.files));
     const stop = document.getElementById("scan-stop");
     if (stop) stop.addEventListener("click", () => scan.ctl && scan.ctl.abort());
     const clear = document.getElementById("scan-clear");
@@ -865,47 +1543,74 @@ Antworte nur mit JSON in dieser Form:
     const r = scan.kind === kind ? scan.result : null;
     if (!r) return;
     const done = () => Object.assign(scan, { result: null, status: "", error: "" });
+    const target = () => kind === "vers" ? currentKat().angebote : kind === "tk" ? state.tk[state.tk.art].angebote : state[kind].angebote;
+
+    const pick = document.getElementById("scan-pick");
+    if (pick) pick.addEventListener("click", () => {
+      const quelle = document.getElementById("scan-quelle").value.trim();
+      if (kind === "vers" && r.kategorie && state.vers.kategorien[r.kategorie]) state.vers.kategorie = r.kategorie;
+      const sel = Array.from(document.querySelectorAll("[data-pick]")).filter((c) => c.checked).map((c) => +c.dataset.pick);
+      const offers = sel.map((n) => offerFromRaw(kind, r.angebote[n], quelle));
+      target().push(...offers);
+      done(); save(); rerenderTab(); toast(`${offers.length} Angebot${offers.length === 1 ? "" : "e"} übernommen`);
+    });
     const akt = document.getElementById("scan-aktuell");
     if (akt) akt.addEventListener("click", () => {
-      const d = state[kind];
-      if (r.grundpreis_eur_monat !== null) d.aktuell.gp = r.grundpreis_eur_monat;
-      if (r.arbeitspreis_ct_kwh !== null) d.aktuell.ap = r.arbeitspreis_ct_kwh;
-      if (r.verbrauch_kwh) d.verbrauch = Math.round(r.verbrauch_kwh);
+      if (kind === "tk") {
+        const d = state.tk[state.tk.art];
+        if (r.preis_monat !== null) d.aktuell.preis = r.preis_monat;
+        if (r.leistung) d.aktuell.leistung = r.leistung;
+      } else {
+        const d = state[kind];
+        if (r.grundpreis_eur_monat !== null) d.aktuell.gp = r.grundpreis_eur_monat;
+        if (r.arbeitspreis_ct_kwh !== null) d.aktuell.ap = r.arbeitspreis_ct_kwh;
+        if (r.verbrauch_kwh) d.verbrauch = Math.round(r.verbrauch_kwh);
+      }
       done(); save(); rerenderTab(); toast("Aktueller Tarif übernommen");
     });
     const ang = document.getElementById("scan-angebot");
     if (ang) ang.addEventListener("click", () => {
       ui.edit = null;
-      if (kind === "vers") {
-        if (r.kategorie && state.vers.kategorien[r.kategorie]) state.vers.kategorie = r.kategorie;
-        const feats = {};
-        (r.leistungen || []).forEach((id) => { feats[id] = true; });
-        ui.draft = { kind, data: { anbieter: r.anbieter || "", tarif: r.tarif || "", beitrag: r.beitrag ?? "", zahlweise: r.zahlweise || 1, sb: r.sb_eur ?? 0, features: feats } };
+      if (kind === "vertrag") {
+        const verl = num(r.verlaengerung_monate);
+        ui.draft = { kind, data: { name: r.bezeichnung || "", kategorie: KAT_V[r.kategorie] ? r.kategorie : "sonstiges", anbieter: r.anbieter || "", beginn: parseD(r.beginn) ? r.beginn : "", mindest: r.mindestlaufzeit_monate ?? 12, verl: [0, 1, 12, 24].includes(verl) ? verl : 12, frist: r.kuendigungsfrist ?? 1, einheit: EINHEIT[r.frist_einheit] ? r.frist_einheit : "monate", kosten: r.kosten_monat ?? "" } };
       } else {
-        ui.draft = { kind, data: { anbieter: r.anbieter || "", tarif: r.tarif || "", gp: r.grundpreis_eur_monat ?? "", ap: r.arbeitspreis_ct_kwh ?? "", bonus: r.bonus_eur ?? "", laufzeit: r.laufzeit_monate ?? 12, garantie: r.preisgarantie_monate ?? 12, oeko: !!r.oeko } };
-        if (r.verbrauch_kwh && r.dokument !== "angebot") state[kind].verbrauch = Math.round(r.verbrauch_kwh);
+        if (kind === "vers" && r.kategorie && state.vers.kategorien[r.kategorie]) state.vers.kategorie = r.kategorie;
+        const o = offerFromRaw(kind, r, "");
+        Object.keys(o).forEach((k) => { if (o[k] === null || o[k] === undefined) o[k] = ""; });
+        ui.draft = { kind, data: o };
+        if ((kind === "strom" || kind === "gas") && r.verbrauch_kwh && r.dokument !== "angebot") state[kind].verbrauch = Math.round(r.verbrauch_kwh);
       }
       done(); save(); rerenderTab();
-      const form = document.getElementById(kind === "vers" ? "vers-form" : kind + "-form");
+      const form = document.getElementById(kind + "-form");
       if (form) form.scrollIntoView({ behavior: "smooth", block: "center" });
       toast("Werte ins Formular übernommen. Bitte prüfen und speichern.");
     });
   }
 
   // ---------- Reiter ----------
+  const TABS = ["strom", "gas", "internet", "versicherung", "fristen"];
   function show(tab) {
-    if (!["strom", "gas", "versicherung"].includes(tab)) tab = "strom";
+    if (!TABS.includes(tab)) tab = "strom";
     if (ui.tab !== tab) { ui.edit = null; ui.draft = null; }
     ui.tab = tab;
     document.querySelectorAll(".tab").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === tab)));
-    document.getElementById("panel-energy").hidden = tab === "versicherung";
+    document.getElementById("panel-energy").hidden = !(tab === "strom" || tab === "gas");
+    document.getElementById("panel-tk").hidden = tab !== "internet";
     document.getElementById("panel-versicherung").hidden = tab !== "versicherung";
-    if (tab === "versicherung") renderVers(); else renderEnergy(tab);
+    document.getElementById("panel-fristen").hidden = tab !== "fristen";
+    if (tab === "versicherung") renderVers();
+    else if (tab === "internet") renderTk();
+    else if (tab === "fristen") renderFristen();
+    else renderEnergy(tab);
+    updateDue();
   }
-  document.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => {
-    try { history.replaceState(null, "", "#" + b.dataset.tab); } catch (e) {}
-    show(b.dataset.tab);
-  }));
+  function go(tab) {
+    try { history.replaceState(null, "", "#" + tab); } catch (e) {}
+    show(tab);
+    window.scrollTo({ top: 0 });
+  }
+  document.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => go(b.dataset.tab)));
   window.addEventListener("hashchange", () => show(location.hash.slice(1)));
 
   // ---------- Sichern / Laden / Zurücksetzen ----------
@@ -919,13 +1624,13 @@ Antworte nur mit JSON in dieser Form:
     try {
       const data = JSON.parse(document.getElementById("io-text").value);
       if (!data.strom || !data.gas || !data.vers) throw new Error();
-      state = data; save(); show(ui.tab); toast("Daten übernommen");
+      state = migrate(data); save(); show(ui.tab); toast("Daten übernommen");
     } catch (e) { toast("Das sind keine gültigen Tarif-Kompass-Daten"); }
   });
   const reset = document.getElementById("btn-reset");
   reset.addEventListener("click", () => {
     if (reset.classList.contains("armed")) {
-      state = defaults(); save(); ui.edit = null; show(ui.tab);
+      state = defaults(); save(); ui.edit = null; ui.draft = null; show(ui.tab);
       reset.classList.remove("armed"); reset.textContent = "Auf Beispieldaten zurücksetzen"; toast("Beispieldaten geladen"); return;
     }
     reset.classList.add("armed"); reset.textContent = "Alle eigenen Daten löschen?";
