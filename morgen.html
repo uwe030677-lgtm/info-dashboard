@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-TxoH74J39vmrdOQozX+1FbFCyg941lM2tcbRlvADxkc='; style-src 'unsafe-inline'; img-src data:; connect-src https://api.open-meteo.com https://geocoding-api.open-meteo.com https://www.tagesschau.de; manifest-src 'self'; worker-src 'self'; font-src 'none'; object-src 'none'; frame-src 'none'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-tnVuJvbscDvYqjU4uU26z8J7/cRlLJS/heiIxUSfF48='; style-src 'unsafe-inline'; img-src data:; connect-src https://api.open-meteo.com https://geocoding-api.open-meteo.com https://www.tagesschau.de; manifest-src 'self'; worker-src 'self'; font-src 'none'; object-src 'none'; frame-src 'none'; form-action 'none'; base-uri 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f7f1e8" media="(prefers-color-scheme: light)">
@@ -278,7 +278,7 @@ dialog::backdrop { background: rgba(20, 14, 6, .45); }
   function readStore(key) { try { const s = localStorage.getItem(key); return s ? JSON.parse(s) : null; } catch { return null; } }
   const SECTIONS = { wetter: "Wetter", heute: "Termine & Aufgaben", news: "Nachrichten", geburtstage: "Geburtstage & Feiertage", fristen: "Kündigungsfristen (Tarif-Kompass)" };
   function defaults() {
-    return { v: 1, name: "", ort: null, land: "", ressort: "", newsCount: 6, sections: { wetter: true, heute: true, news: true, geburtstage: true, fristen: true }, termine: [], ics: [], icsName: "", aufgaben: [], geburtstage: [], erinnerung: "07:00", setup: false };
+    return { v: 1, name: "", ort: { name: "Mengerskirchen", lat: 50.564, lon: 8.156 }, land: "HE", ressort: "", newsCount: 6, sections: { wetter: true, heute: true, news: true, geburtstage: true, fristen: true }, termine: [], ics: [], icsName: "", aufgaben: [], geburtstage: [], erinnerung: "07:00", setup: false };
   }
   function migrate(s) {
     const d = defaults();
