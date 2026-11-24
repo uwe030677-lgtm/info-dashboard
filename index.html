@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-lXapaNNahgiBmo4vJveLG8JnJcmE6AOArAeMgdYL0rI='; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; font-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-sRWmTgw2Ax0j+mtaHi4l3tSEs4DX6Md6LzNsOmgNLPM='; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; font-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; form-action 'none'; base-uri 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tarif-Kompass</title>
@@ -271,6 +271,13 @@ footer a { color: var(--accent); }
 .prow { display: flex; justify-content: space-between; align-items: center; gap: 6px 10px; flex-wrap: wrap; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; }
 .prow.pbest { border-color: var(--good); background: var(--good-soft); }
 .pname { display: flex; flex-direction: column; min-width: 0; }
+.zgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+.zcell { border: 1px solid var(--line); border-top: 4px solid var(--c); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.zres { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+.zform { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; align-items: end; }
+.zform .btn { grid-column: 1 / -1; }
+.zhist { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; font-size: 0.85rem; }
+.zhist li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; align-items: center; }
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 999px; font-size: 0.86rem; z-index: 20; max-width: calc(100% - 32px); text-align: center; }
 </style>
 </head>
@@ -344,7 +351,7 @@ footer a { color: var(--accent); }
   </div>
 
   <footer id="app-footer">
-    <p><strong>Version vom 24.11.2026 · mit Portal-Suche</strong></p>
+    <p><strong>Version vom 24.11.2026 · mit Portal-Suche und Zählerständen</strong></p>
     <p>Rechenweg Energie: Grundpreis × 12 + Arbeitspreis × Verbrauch − Bonus; der Bonus gilt meist nur im ersten Jahr. Internet und Handy: alle Monatspreise, Routermiete und Einmalkosten abzüglich Gutschriften, geteilt durch die Monate des Vergleichszeitraums.</p>
     <p>Unabhängige Beratung: <a href="https://www.verbraucherzentrale.de" target="_blank" rel="noopener noreferrer">Verbraucherzentrale</a> · Tests: <a href="https://www.test.de" target="_blank" rel="noopener noreferrer">Stiftung Warentest</a></p>
   </footer>
@@ -532,6 +539,9 @@ footer a { color: var(--accent); }
     if (!s.portalLog || typeof s.portalLog !== "object") s.portalLog = {};
     if (typeof s.plz !== "string") s.plz = "";
     if (!Array.isArray(s.fix)) s.fix = [];
+    if (!s.zaehler || typeof s.zaehler !== "object") s.zaehler = {};
+    ["strom", "gas", "wasser"].forEach((k) => { if (!Array.isArray(s.zaehler[k])) s.zaehler[k] = []; });
+    if (!(num(s.gasFaktor) > 0)) s.gasFaktor = 10.45;
     return s;
   }
   // ---------- Tresor: optionale Verschlüsselung (PBKDF2-SHA256 + AES-256-GCM, nur im Browser) ----------
@@ -1472,6 +1482,13 @@ Antworte nur mit JSON in dieser Form:
       if (num(e.verbrauch) > 0) state[k].verbrauch = Math.round(num(e.verbrauch));
       done.push(label);
     });
+    if (d.zaehler && typeof d.zaehler === "object") {
+      ["strom", "gas", "wasser"].forEach((k) => {
+        const z = d.zaehler[k];
+        if (!z) return;
+        (Array.isArray(z) ? z : [z]).forEach((e) => { if (addReading(k, e && e.datum, e && e.stand)) done.push("Zählerstand " + ZAEHLER[k].name); });
+      });
+    }
     if (Array.isArray(d.fix)) {
       state.fix = state.fix || [];
       d.fix.forEach((f, n) => {
@@ -1508,6 +1525,90 @@ Antworte nur mit JSON in dieser Form:
       toast("Übernommen: " + list(r));
     });
     el.querySelectorAll(".jk-row.link").forEach((r) => r.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); r.click(); } }));
+  }
+
+  // ---------- Zählerstände ----------
+  const ZAEHLER = {
+    strom: { name: "Strom", einheit: "kWh", c: "--strom" },
+    gas: { name: "Gas", einheit: "m³", c: "--gas" },
+    wasser: { name: "Wasser", einheit: "m³", c: "--info" },
+  };
+  function zList(k) {
+    state.zaehler = state.zaehler || {};
+    if (!Array.isArray(state.zaehler[k])) state.zaehler[k] = [];
+    return state.zaehler[k];
+  }
+  function addReading(k, datum, stand) {
+    const d = parseD(String(datum || "")), st = num(stand, NaN);
+    if (!ZAEHLER[k] || !d || !(st >= 0)) return false;
+    const L = zList(k);
+    const iso = isoD(d);
+    const i = L.findIndex((r) => r.datum === iso);
+    if (i >= 0) L[i].stand = st; else L.push({ datum: iso, stand: st });
+    L.sort((a, b) => a.datum.localeCompare(b.datum));
+    return true;
+  }
+  // Jahresverbrauch aus dem ersten und letzten Stand, sofern mindestens 30 Tage dazwischen liegen
+  function zVerbrauch(k) {
+    const L = zList(k);
+    if (L.length < 2) return null;
+    const a = L[0], b = L[L.length - 1];
+    const tage = (parseD(b.datum) - parseD(a.datum)) / 864e5;
+    const diff = num(b.stand) - num(a.stand);
+    if (tage < 30 || diff < 0) return { fehler: diff < 0 ? "Der neuere Stand ist kleiner als der ältere. Wurde der Zähler getauscht? Dann lösche die alten Stände." : "Zwischen den Ständen liegen weniger als 30 Tage. Für eine Hochrechnung brauchst du einen größeren Abstand." };
+    const jahr = (diff / tage) * 365;
+    return { jahr, tage: Math.round(tage), kwh: k === "gas" ? jahr * num(state.gasFaktor, 10.45) : k === "strom" ? jahr : null };
+  }
+  function zaehlerCard() {
+    const heute = isoD(today());
+    return `<div class="card" id="zaehler">
+      <div class="card-head"><h2>Zählerstände</h2><span class="hint">Ab zwei Ständen rechnet der Kompass deinen Jahresverbrauch aus</span></div>
+      <div class="zgrid">${Object.entries(ZAEHLER).map(([k, z]) => {
+        const L = zList(k), last = L[L.length - 1], v = zVerbrauch(k);
+        const ziel = k === "strom" ? state.strom : k === "gas" ? state.gas : null;
+        return `<section class="zcell" style="--c:var(${z.c})">
+          <h3>${z.name}</h3>
+          ${last ? `<div><span class="o-big">${NUM.format(num(last.stand))} ${z.einheit}</span><div class="hint">am ${DATE.format(parseD(last.datum))}</div></div>` : '<p class="hint">Noch kein Zählerstand.</p>'}
+          ${v && !v.fehler ? `<div class="zres"><strong>${NUM.format(Math.round(v.jahr))} ${z.einheit} pro Jahr</strong>${k === "gas" ? `<span class="hint">≈ ${NUM.format(Math.round(v.kwh))} kWh (Faktor ${NUM.format(num(state.gasFaktor))})</span>` : ""}<span class="hint">hochgerechnet aus ${v.tage} Tagen</span>
+              ${ziel ? (Math.abs(num(ziel.verbrauch) - Math.round(v.kwh)) > 1 ? `<button class="btn small" data-zuse="${k}">Als Jahresverbrauch im ${z.name}-Vergleich nutzen</button>` : '<span class="pill good">im Vergleich genutzt</span>') : ""}</div>`
+            : v && v.fehler ? `<p class="err">${esc(v.fehler)}</p>`
+            : last ? `<p class="hint">Trag zusätzlich einen älteren Stand ein, z. B. von deiner letzten Jahresabrechnung. Dann siehst du deinen Verbrauch.</p>` : ""}
+          <form class="zform" data-zform="${k}" autocomplete="off">
+            <label class="f">Datum<input type="date" name="datum" value="${heute}" required></label>
+            <label class="f">Stand in ${z.einheit}<input type="number" name="stand" step="0.001" min="0" required inputmode="decimal"></label>
+            <button class="btn small primary" type="submit">Stand speichern</button>
+          </form>
+          ${L.length ? `<details class="more"><summary>Alle Stände (${L.length})</summary><ul class="zhist">${L.slice().reverse().map((r) => `<li><span>${DATE.format(parseD(r.datum))}</span><span class="mono">${NUM.format(num(r.stand))} ${z.einheit}</span><button class="btn small danger" data-zdel="${k}|${esc(r.datum)}">Löschen</button></li>`).join("")}</ul></details>` : ""}
+        </section>`;
+      }).join("")}</div>
+      <details class="more"><summary>Gas: Umrechnung m³ in kWh</summary>
+        <label class="f" style="margin-top:8px;max-width:260px">Brennwert × Zustandszahl<input type="number" id="z-gasfaktor" step="0.01" min="5" max="15" value="${esc(state.gasFaktor || 10.45)}"></label>
+        <p class="hint">Beide Werte stehen auf deiner Gasrechnung. Üblich sind 10 bis 11.</p>
+      </details>
+    </div>`;
+  }
+  function bindZaehler(root) {
+    root.querySelectorAll("[data-zform]").forEach((f) => f.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const k = f.dataset.zform, fd = new FormData(f);
+      const L = zList(k), prev = L[L.length - 1], st = num(fd.get("stand"), NaN);
+      if (!addReading(k, fd.get("datum"), fd.get("stand"))) { toast("Bitte Datum und Zählerstand eingeben"); return; }
+      save(); rerenderTab();
+      toast(prev && st < num(prev.stand) && String(fd.get("datum")) > prev.datum ? "Gespeichert. Achtung: kleiner als der vorige Stand." : `Zählerstand ${ZAEHLER[k].name} gespeichert`);
+    }));
+    root.querySelectorAll("[data-zdel]").forEach((b) => b.addEventListener("click", () => {
+      if (!b.classList.contains("armed")) { b.classList.add("armed"); b.textContent = "Sicher?"; setTimeout(() => { if (b.isConnected) { b.classList.remove("armed"); b.textContent = "Löschen"; } }, 3000); return; }
+      const [k, datum] = b.dataset.zdel.split("|");
+      state.zaehler[k] = zList(k).filter((r) => r.datum !== datum); save(); rerenderTab();
+    }));
+    root.querySelectorAll("[data-zuse]").forEach((b) => b.addEventListener("click", () => {
+      const k = b.dataset.zuse, v = zVerbrauch(k);
+      if (!v || v.fehler) return;
+      state[k].verbrauch = Math.round(v.kwh); save(); rerenderTab();
+      toast(`Jahresverbrauch ${ZAEHLER[k].name}: ${NUM.format(Math.round(v.kwh))} kWh übernommen`);
+    }));
+    const gf = root.querySelector("#z-gasfaktor");
+    if (gf) gf.addEventListener("change", () => { state.gasFaktor = num(gf.value, 10.45); save(); rerenderTab(); });
   }
 
   function portalOverviewCard() {
@@ -1561,6 +1662,7 @@ Antworte nur mit JSON in dieser Form:
     el.style.setProperty("--kind", "var(--accent)");
     el.innerHTML = `
       ${jahresKostenCard()}
+      ${zaehlerCard()}
       ${recoCard(reco, [
         ["Sparpotenzial pro Jahr", total > 0 ? EUR0.format(total) : "–", total > 0 ? "pos" : ""],
         ["Nächste Kündigungsfrist", fr[0] ? DATE.format(fr[0].fi.kuendBis) : "–", fr[0] && fr[0].fi.faellig ? "neg" : ""],
@@ -1603,6 +1705,7 @@ Antworte nur mit JSON in dieser Form:
         </ol>
       </div>`;
     bindJahresKosten(el);
+    bindZaehler(el);
   }
 
   // ---------- Energie ----------
@@ -1702,6 +1805,7 @@ Antworte nur mit JSON in dieser Form:
               <label class="f">Grundpreis €/Monat<input type="number" id="${kind}-akt-gp" step="0.01" min="0" value="${esc(d.aktuell.gp)}"></label>
               <label class="f">Arbeitspreis ct/kWh<input type="number" id="${kind}-akt-ap" step="0.01" min="0" value="${esc(d.aktuell.ap)}"></label>
             </div>
+            ${(() => { const L = zList(kind), last = L[L.length - 1], zv = zVerbrauch(kind); if (!last) return ""; return `<div class="vlink" style="border-left-color:var(--info)"><div><strong>Zählerstand ${NUM.format(num(last.stand))} ${ZAEHLER[kind].einheit}</strong><div class="hint">am ${DATE.format(parseD(last.datum))}${zv && !zv.fehler ? ` · hochgerechnet ${NUM.format(Math.round(zv.kwh))} kWh/Jahr` : " · für den Jahresverbrauch fehlt noch ein zweiter Stand"}</div></div><button class="btn small" data-go="uebersicht" data-jumpto="zaehler">Zählerstände</button></div>`; })()}
             <p class="hint">Steht auf deiner letzten Jahresabrechnung (Brutto-Preise).${canScan() ? " Du kannst die Rechnung auch in Schritt 2 fotografieren." : ""}</p>
             ${vertragBox(kind, kind, isStrom ? "Strom" : "Gas")}
           </div>
