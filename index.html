@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-7PWDtPadLNh4RoI9LkYxfuZJQQ56gmF4KQAfm7XLX+Q='; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; font-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-PWzHd+91LdmAQcwyGGy5kOl3haAw40MUgGqeUVLXrkg='; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; font-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; form-action 'none'; base-uri 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tarif-Kompass</title>
@@ -221,6 +221,34 @@ div.bigbtn { cursor: default; }
 .howto { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 0.9rem; }
 .facts { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 0.84rem; color: var(--muted); }
 .cal { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+
+/* Jahreskosten */
+.jk-hero { display: flex; flex-wrap: wrap; gap: 10px 32px; align-items: flex-end; }
+.jk-hero > div { display: flex; flex-direction: column; min-width: 0; }
+.jk-hero .lbl { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); font-weight: 600; }
+.jk-big { font-family: var(--font-data); font-size: clamp(1.8rem, 5vw, 2.4rem); font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.jk-hero .val { font-family: var(--font-data); font-size: 1.2rem; font-weight: 600; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.jk-bars { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.jk-row { display: grid; grid-template-columns: minmax(0, 190px) minmax(0, 1fr) auto; gap: 4px 14px; align-items: center; padding: 7px 8px; border-radius: 8px; }
+.jk-row.link { cursor: pointer; }
+.jk-row:hover, .jk-row:focus-visible { background: var(--bg); }
+.jk-name { display: flex; flex-direction: column; font-weight: 600; font-size: 0.9rem; min-width: 0; overflow-wrap: anywhere; }
+.jk-name .hint { font-weight: 400; font-size: 0.74rem; }
+.jk-track { height: 14px; position: relative; }
+.jk-fill { position: absolute; inset: 0 auto 0 0; background: var(--accent); border-radius: 0 4px 4px 0; }
+.jk-val { display: flex; flex-direction: column; align-items: flex-end; text-align: right; min-width: 96px; }
+.jk-val .hint { font-size: 0.74rem; white-space: nowrap; }
+.jk-row.missing .jk-name { color: var(--muted); }
+.jk-row.missing .jk-track { border: 1.5px dashed var(--line); border-radius: 4px; }
+.jk-row.missing .jk-val strong { color: var(--accent); font-family: var(--font-body); font-size: 0.85rem; }
+@media (max-width: 560px) {
+  .jk-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .jk-track { grid-column: 1 / -1; grid-row: 2; }
+}
+.fix-list { display: flex; flex-direction: column; gap: 6px; margin: 10px 0; }
+.fix-item { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px 12px; align-items: center; padding: 8px 10px; background: var(--bg); border-radius: 8px; font-size: 0.88rem; }
+.fix-item > span { display: flex; flex-direction: column; min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 520px) { .fix-item { grid-template-columns: minmax(0, 1fr) auto; } .fix-item .btn { grid-column: 1 / -1; justify-self: start; } }
 .lockcard { max-width: 420px; margin: 24px auto; }
 footer { margin-top: 28px; font-size: 0.8rem; color: var(--muted); max-width: 75ch; }
 footer a { color: var(--accent); }
@@ -250,7 +278,7 @@ footer a { color: var(--accent); }
 
 <div class="wrap">
   <header class="top">
-    <h1>Tarif-Kompass<small>Strom, Gas, Internet und Versicherungen vergleichen, Fristen im Blick behalten</small></h1>
+    <h1>Tarif-Kompass<small>Alle Jahreskosten auf einen Blick, Tarife vergleichen, Fristen im Blick behalten</small></h1>
     <nav class="tabs" id="tabs-nav" role="tablist" aria-label="Bereich">
       <button class="tab" role="tab" id="tab-uebersicht" data-tab="uebersicht">Übersicht</button>
       <button class="tab" role="tab" id="tab-strom" data-tab="strom"><span class="dot" style="background:var(--strom)"></span>Strom</button>
@@ -480,6 +508,9 @@ footer a { color: var(--accent); }
         },
       },
       vorlauf: 1,
+      fix: [
+        { id: "x1", name: "Beispiel: Rundfunkbeitrag", thema: "abos", betrag: 55.08, zahlweise: 4 },
+      ],
       vertraege: [
         { id: "v1", name: "Beispiel: Strom Wohnung", kategorie: "strom", anbieter: "Beispiel-Werk", beginn: "2025-01-01", mindest: 12, verl: 0, frist: 1, einheit: "monate", kosten: 96 },
         { id: "v2", name: "Beispiel: Internet", kategorie: "internet", anbieter: "Beispiel-Net", beginn: "2024-12-15", mindest: 24, verl: 0, frist: 1, einheit: "monate", kosten: 44.99 },
@@ -499,6 +530,7 @@ footer a { color: var(--accent); }
     if (!s.vorlauf) s.vorlauf = 1;
     if (!s.portalLog || typeof s.portalLog !== "object") s.portalLog = {};
     if (typeof s.plz !== "string") s.plz = "";
+    if (!Array.isArray(s.fix)) s.fix = [];
     return s;
   }
   // ---------- Tresor: optionale Verschlüsselung (PBKDF2-SHA256 + AES-256-GCM, nur im Browser) ----------
@@ -530,7 +562,7 @@ footer a { color: var(--accent); }
     if (isBlob(parsed)) { vault.enabled = true; vault.blob = parsed; vault.locked = true; state = defaults(); }
     else state = migrate(parsed);
   }
-  const ui = { tab: "uebersicht", form: {}, sort: { strom: "y1", gas: "y1" }, nurOeko: { strom: false, gas: false }, maxLaufzeit: { strom: 0, gas: 0 }, tkMin: false, edit: null, draft: null };
+  const ui = { tab: "uebersicht", form: {}, sort: { strom: "y1", gas: "y1" }, nurOeko: { strom: false, gas: false }, maxLaufzeit: { strom: 0, gas: 0 }, tkMin: false, edit: null, draft: null, fixOpen: false };
   let saveChain = Promise.resolve();
   function save() {
     if (vault.locked) return;
@@ -1345,6 +1377,138 @@ Antworte nur mit JSON in dieser Form:
     return { hasAkt, aktJahr: num(d.aktuell.preis) * 12, best: best && { name: nameOf(best.t), jahr: best.k.monat * 12 }, spar: hasAkt && best ? (num(d.aktuell.preis) - best.k.monat) * 12 : null, n: d.angebote.length };
   }
 
+  // ---------- Jahreskosten ----------
+  const THEMEN = { wasser: "Wasser & Abwasser", grundsteuer: "Grundsteuer & Abgaben", wohnen: "Wohnen & Haus", auto: "Auto", abos: "Abos & Beiträge", sonstiges: "Sonstiges" };
+  // Pro Bereich zählt der eingetragene Tarif; nur wenn keiner da ist, die Kosten aus den Verträgen (keine Doppelzählung).
+  function jahresKosten() {
+    const T = [];
+    const vsum = (kat) => state.vertraege.filter((v) => v.kategorie === kat).reduce((s, v) => s + num(v.kosten) * 12, 0);
+    const ausVertrag = (j) => (j ? "aus deinen Verträgen" : "");
+    [["strom", "Strom"], ["gas", "Gas"]].forEach(([k, name]) => {
+      const b = bereichEnergie(k);
+      if (b.hasAkt) T.push({ name, jahr: b.aktJahr, quelle: num(state[k].verbrauch) > 0 ? `Tarif · ${NUM.format(num(state[k].verbrauch))} kWh` : "nur Grundpreis, Verbrauch fehlt", go: k });
+      else { const j = vsum(k); T.push({ name, jahr: j, quelle: ausVertrag(j), go: k }); }
+    });
+    [["internet", "Internet & Festnetz"], ["mobil", "Handy"]].forEach(([k, name]) => {
+      const p = num(state.tk[k].aktuell.preis);
+      if (p > 0) T.push({ name, jahr: p * 12, quelle: "aus deinem Tarif", go: "internet", art: k });
+      else { const j = vsum(k); T.push({ name, jahr: j, quelle: ausVertrag(j), go: "internet", art: k }); }
+    });
+    const vj = vsum("versicherung");
+    T.push({ name: "Versicherungen", jahr: vj, quelle: ausVertrag(vj), go: "fristen" });
+    const sj = vsum("sonstiges");
+    if (sj) T.push({ name: "Weitere Verträge", jahr: sj, quelle: ausVertrag(sj), go: "fristen" });
+    const fx = {};
+    (state.fix || []).forEach((f) => { const t = THEMEN[f.thema] ? f.thema : "sonstiges"; fx[t] = (fx[t] || 0) + num(f.betrag) * num(f.zahlweise, 1); });
+    Object.entries(fx).forEach(([t, j]) => { if (j > 0) T.push({ name: THEMEN[t], jahr: j, quelle: "weitere feste Kosten" }); });
+    const mit = T.filter((t) => t.jahr > 0).sort((a, b) => b.jahr - a.jahr);
+    const ohne = T.filter((t) => !(t.jahr > 0));
+    return { mit, ohne, total: mit.reduce((s, t) => s + t.jahr, 0) };
+  }
+  function jahresKostenCard() {
+    const J = jahresKosten();
+    const max = J.mit.length ? J.mit[0].jahr : 1;
+    const fix = state.fix || [];
+    return `<div class="card" id="jahreskosten">
+      <div class="card-head"><h2>Deine Jahreskosten</h2><span class="hint">alle Bereiche zusammen, Stand heute</span></div>
+      <div class="jk-hero">
+        <div><span class="lbl">Gesamt pro Jahr</span><span class="jk-big">${J.total ? EUR0.format(J.total) : "–"}</span></div>
+        <div><span class="lbl">Pro Monat</span><span class="val">${J.total ? EUR0.format(J.total / 12) : "–"}</span></div>
+        <div><span class="lbl">Größter Posten</span><span class="val">${J.mit.length ? esc(J.mit[0].name) : "–"}</span></div>
+      </div>
+      ${J.mit.length ? `<h3>Nach Bereichen</h3><ul class="jk-bars" aria-label="Jahreskosten nach Bereich">${J.mit.map((t) => {
+        const pct = J.total ? (t.jahr / J.total) * 100 : 0;
+        const tip = `${t.name}: ${EUR0.format(t.jahr)} im Jahr, ${EUR2.format(t.jahr / 12)} im Monat, ${Math.round(pct)} % der Gesamtkosten`;
+        const link = t.go ? ` data-go="${t.go}"${t.art ? ` data-art="${t.art}"` : ""} tabindex="0" role="button"` : "";
+        return `<li class="jk-row${t.go ? " link" : ""}" title="${esc(tip)}"${link}>
+          <span class="jk-name">${esc(t.name)}${t.quelle ? `<span class="hint">${esc(t.quelle)}</span>` : ""}</span>
+          <span class="jk-track" aria-hidden="true"><span class="jk-fill" style="width:${Math.max(1, (t.jahr / max) * 100)}%"></span></span>
+          <span class="jk-val"><strong class="mono">${EUR0.format(t.jahr)}</strong><span class="hint mono">${EUR0.format(t.jahr / 12)}/Monat · ${Math.round(pct)} %</span></span>
+        </li>`;
+      }).join("")}</ul>` : '<div class="empty">Noch keine Kosten eingetragen. Trag in den Bereichen deinen aktuellen Tarif ein oder füge unten feste Kosten hinzu.</div>'}
+      ${J.ohne.length ? `<h3>Noch nicht eingetragen</h3><ul class="jk-bars" aria-label="Bereiche ohne Kosten">${J.ohne.map((t) => `<li class="jk-row link missing" title="${esc(t.name)}: noch kein Tarif und kein Vertrag mit Kosten" data-go="${t.go}"${t.art ? ` data-art="${t.art}"` : ""} tabindex="0" role="button">
+          <span class="jk-name">${esc(t.name)}<span class="hint">kein Tarif, kein Vertrag mit Kosten</span></span>
+          <span class="jk-track" aria-hidden="true"></span>
+          <span class="jk-val"><strong>eintragen →</strong><span class="hint">fehlt in der Summe</span></span>
+        </li>`).join("")}</ul>` : ""}
+      <details class="more" id="fix-details" ${ui.fixOpen ? "open" : ""}><summary>Weitere feste Kosten, z. B. Wasser oder Grundsteuer (${fix.length})</summary>
+        ${fix.length ? `<div class="fix-list">${fix.map((f, i) => `<div class="fix-item">
+            <span>${esc(f.name)}<span class="hint">${esc(THEMEN[f.thema] || "Sonstiges")} · ${EUR2.format(num(f.betrag))} ${esc(ZAHLWEISE[f.zahlweise] || "")}</span></span>
+            <strong class="mono">${EUR0.format(num(f.betrag) * num(f.zahlweise, 1))}/Jahr</strong>
+            <button class="btn small danger" data-del="${i}">Löschen</button></div>`).join("")}</div>` : '<p class="hint" style="margin:8px 0">Hier kommen Kosten hin, die kein Tarif und kein Vertrag abdeckt, etwa Wasserabschlag, Grundsteuer, Müllabfuhr oder Kfz-Steuer.</p>'}
+        <form class="fields" id="fix-form" autocomplete="off">
+          ${inp("Bezeichnung", "fix-f-name", "name", "", { type: "text", req: true, full: true, ph: "z. B. Wasser inkl. Grundsteuer" })}
+          <label class="f">Bereich<select name="thema" id="fix-f-thema">${Object.entries(THEMEN).map(([k, l]) => `<option value="${k}">${esc(l)}</option>`).join("")}</select></label>
+          <label class="f">Zahlweise<select name="zahlweise" id="fix-f-zahlweise">${Object.entries(ZAHLWEISE).map(([k, l]) => `<option value="${k}" ${k === "12" ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+          ${inp("Betrag € je Zahlung", "fix-f-betrag", "betrag", "", { req: true })}
+          <div class="row" style="align-self:end"><button class="btn small primary" type="submit">Hinzufügen</button></div>
+        </form>
+      </details>
+      <details class="more" id="imp-details"><summary>Daten von Claude übernehmen</summary>
+        <div class="col" style="gap:8px;margin-top:8px">
+          <p class="hint">Füge hier den Code ein, den Claude dir im Chat gibt. Strom und Gas werden als dein aktueller Tarif gesetzt, feste Kosten ergänzt oder aktualisiert. Alle anderen Einträge bleiben erhalten.</p>
+          <textarea id="imp-text" placeholder="Code hier einfügen" autocomplete="off" spellcheck="false"></textarea>
+          <div class="row"><button class="btn small primary" id="imp-btn">Übernehmen</button></div>
+        </div>
+      </details>
+    </div>`;
+  }
+  // Code aus dem Chat zusammenführen (JSON oder Base64-JSON); ersetzt nichts außer den genannten Werten
+  function mergeImport(raw) {
+    const s = String(raw || "").trim().replace(/^TK1:/, "");
+    let d = null;
+    try { d = JSON.parse(s); } catch (e) {
+      try { d = JSON.parse(td.decode(unb64(s.replace(/\s+/g, "")))); } catch (x) { d = null; }
+    }
+    if (!d || typeof d !== "object") return null;
+    const done = [];
+    const str = (x) => String(x ?? "").trim().slice(0, 120);
+    [["strom", "Strom"], ["gas", "Gas"]].forEach(([k, label]) => {
+      const e = d[k];
+      if (!e || typeof e !== "object") return;
+      if (num(e.gp) > 0) state[k].aktuell.gp = num(e.gp);
+      if (num(e.ap) > 0) state[k].aktuell.ap = num(e.ap);
+      if (num(e.verbrauch) > 0) state[k].verbrauch = Math.round(num(e.verbrauch));
+      done.push(label);
+    });
+    if (Array.isArray(d.fix)) {
+      state.fix = state.fix || [];
+      d.fix.forEach((f, n) => {
+        const name = str(f && f.name), betrag = num(f && f.betrag);
+        if (!name || !(betrag > 0)) return;
+        const z = [1, 2, 4, 12].includes(num(f.zahlweise)) ? num(f.zahlweise) : 12;
+        const item = { id: "x" + Date.now().toString(36) + n, name, thema: THEMEN[f.thema] ? f.thema : "sonstiges", betrag, zahlweise: z };
+        const i = state.fix.findIndex((x) => String(x.name).toLowerCase() === name.toLowerCase());
+        if (i >= 0) { item.id = state.fix[i].id; state.fix[i] = item; } else state.fix.push(item);
+        done.push(name);
+      });
+    }
+    return done;
+  }
+  function bindJahresKosten(el) {
+    const d = document.getElementById("fix-details");
+    if (d) d.addEventListener("toggle", () => { ui.fixOpen = d.open; });
+    const form = document.getElementById("fix-form");
+    if (form) form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const betrag = num(fd.get("betrag"));
+      if (!(betrag > 0)) { toast("Bitte einen Betrag eingeben"); return; }
+      state.fix = state.fix || [];
+      state.fix.push({ id: "x" + Date.now().toString(36), name: String(fd.get("name")).trim(), thema: String(fd.get("thema")), betrag, zahlweise: num(fd.get("zahlweise"), 12) });
+      ui.fixOpen = true; save(); renderUebersicht(); updateNotice(); toast("Kosten hinzugefügt");
+    });
+    bindDelete(el.querySelector(".fix-list"), (i) => { state.fix.splice(i, 1); save(); renderUebersicht(); updateNotice(); });
+    const ib = document.getElementById("imp-btn");
+    if (ib) ib.addEventListener("click", () => {
+      const r = mergeImport(document.getElementById("imp-text").value);
+      if (!r || !r.length) { toast("Der Code wurde nicht erkannt. Bitte vollständig einfügen."); return; }
+      save(); renderUebersicht(); updateDue(); updateNotice();
+      toast("Übernommen: " + list(r));
+    });
+    el.querySelectorAll(".jk-row.link").forEach((r) => r.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); r.click(); } }));
+  }
+
   function renderUebersicht() {
     const B = [
       { key: "strom", tab: "strom", name: "Strom", c: "--strom", ...bereichEnergie("strom") },
@@ -1371,6 +1535,7 @@ Antworte nur mit JSON in dieser Form:
     const el = document.getElementById("panel-uebersicht");
     el.style.setProperty("--kind", "var(--accent)");
     el.innerHTML = `
+      ${jahresKostenCard()}
       ${recoCard(reco, [
         ["Sparpotenzial pro Jahr", total > 0 ? EUR0.format(total) : "–", total > 0 ? "pos" : ""],
         ["Nächste Kündigungsfrist", fr[0] ? DATE.format(fr[0].fi.kuendBis) : "–", fr[0] && fr[0].fi.faellig ? "neg" : ""],
@@ -1411,6 +1576,7 @@ Antworte nur mit JSON in dieser Form:
           <li><strong>Frist eintragen:</strong> Im Bereich „Fristen“ bekommst du eine Kalender-Erinnerung einen Monat vor dem Kündigungstermin.</li>
         </ol>
       </div>`;
+    bindJahresKosten(el);
   }
 
   // ---------- Energie ----------
@@ -2024,6 +2190,7 @@ Antworte nur mit JSON in dieser Form:
     if (["strom", "gas"].some((k) => state[k].angebote.some((t) => isEx(t.anbieter)))) return true;
     if (["internet", "mobil"].some((k) => state.tk[k].angebote.some((t) => isEx(t.anbieter)))) return true;
     if (Object.values(state.vers.kategorien).some((k) => k.angebote.some((a) => isEx(a.anbieter)))) return true;
+    if ((state.fix || []).some((f) => isEx(f.name))) return true;
     return state.vertraege.some((v) => isEx(v.name));
   }
   function removeExamples() {
@@ -2038,6 +2205,7 @@ Antworte nur mit JSON in dieser Form:
     });
     Object.values(state.vers.kategorien).forEach((k) => { k.angebote = k.angebote.filter((a) => !isEx(a.anbieter)); });
     state.vertraege = state.vertraege.filter((v) => !isEx(v.name));
+    state.fix = (state.fix || []).filter((f) => !isEx(f.name));
     closeForm("strom"); save(); rerenderTab(); toast("Beispiele entfernt. Jetzt kannst du deine eigenen Daten eintragen.");
   }
   function updateNotice() { document.getElementById("notice").hidden = vault.locked || !hasExamples(); }
