@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-32PyeEIvEzfr+ssVG/qUIQX6wbuxb8rJAD9RpdMLKZY='; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; font-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-7PWDtPadLNh4RoI9LkYxfuZJQQ56gmF4KQAfm7XLX+Q='; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; font-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; form-action 'none'; base-uri 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tarif-Kompass</title>
@@ -239,6 +239,10 @@ footer a { color: var(--accent); }
 .kv dd { margin: 0; text-align: right; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
 .photo-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
 .photo-row .btn { position: relative; }
+.plist { display: flex; flex-direction: column; gap: 6px; }
+.prow { display: flex; justify-content: space-between; align-items: center; gap: 6px 10px; flex-wrap: wrap; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; }
+.prow.pbest { border-color: var(--good); background: var(--good-soft); }
+.pname { display: flex; flex-direction: column; min-width: 0; }
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 9px 16px; border-radius: 999px; font-size: 0.86rem; z-index: 20; max-width: calc(100% - 32px); text-align: center; }
 </style>
 </head>
@@ -333,10 +337,15 @@ footer a { color: var(--accent); }
   const keyOf = (t) => (String(t.anbieter || "") + "|" + String(t.tarif || "")).toLowerCase().replace(/[^a-z0-9äöüß|]/g, "");
 
   const PORTALE = {
-    energie: [["Check24", "https://www.check24.de"], ["Verivox", "https://www.verivox.de"], ["Tarifcheck", "https://www.tarifcheck.de"], ["Toptarif", "https://www.toptarif.de"]],
-    internet: [["Check24", "https://www.check24.de"], ["Verivox", "https://www.verivox.de"], ["Tarifcheck", "https://www.tarifcheck.de"], ["Verfügbarkeit: Gigabit-Grundbuch", "https://gigabitgrundbuch.bund.de"]],
+    strom: [["Check24", "https://www.check24.de/strom/"], ["Verivox", "https://www.verivox.de/stromvergleich/"], ["Tarifcheck", "https://www.tarifcheck.de"], ["Toptarif", "https://www.toptarif.de"]],
+    gas: [["Check24", "https://www.check24.de"], ["Verivox", "https://www.verivox.de/strom-gas/"], ["Tarifcheck", "https://www.tarifcheck.de"], ["Toptarif", "https://www.toptarif.de"]],
+    internet: [["Check24", "https://www.check24.de"], ["Verivox", "https://www.verivox.de"], ["Tarifcheck", "https://www.tarifcheck.de"]],
     mobil: [["Check24", "https://www.check24.de"], ["Verivox", "https://www.verivox.de"], ["Tarifcheck", "https://www.tarifcheck.de"]],
-    vers: [["Check24", "https://www.check24.de"], ["Verivox", "https://www.verivox.de"], ["Tarifcheck", "https://www.tarifcheck.de"], ["Finanztest", "https://www.test.de"]],
+    vers: [["Check24", "https://www.check24.de"], ["Verivox", "https://www.verivox.de"], ["Tarifcheck", "https://www.tarifcheck.de"]],
+  };
+  const INFO_LINKS = {
+    internet: [["Verfügbarkeit an deiner Adresse: Gigabit-Grundbuch", "https://gigabitgrundbuch.bund.de"]],
+    vers: [["Testergebnisse: Stiftung Warentest / Finanztest", "https://www.test.de"]],
   };
   const PORTAL_TIPP = {
     strom: "Stell im Portal ein: Preisgarantie mindestens 12 Monate, keine Vorauskasse, keine Pakettarife. Kein Portal listet alle Anbieter. Frag zusätzlich beim örtlichen Stadtwerk.",
@@ -488,6 +497,8 @@ footer a { color: var(--accent); }
     if (!s.tk) s.tk = d.tk;
     if (!Array.isArray(s.vertraege)) s.vertraege = d.vertraege;
     if (!s.vorlauf) s.vorlauf = 1;
+    if (!s.portalLog || typeof s.portalLog !== "object") s.portalLog = {};
+    if (typeof s.plz !== "string") s.plz = "";
     return s;
   }
   // ---------- Tresor: optionale Verschlüsselung (PBKDF2-SHA256 + AES-256-GCM, nur im Browser) ----------
@@ -1196,13 +1207,6 @@ Antworte nur mit JSON in dieser Form:
       </div>
       ${scanReview(kind)}
       <div id="form-wrap" ${o.open ? "" : "hidden"}>${o.formHtml}</div>
-      ${o.portalKey ? `<details class="more"><summary>Vergleichsportale und Tipps</summary>
-        <div class="col" style="gap:8px;margin-top:8px">
-          <div class="chips">${PORTALE[o.portalKey].map(([n, u]) => `<a class="chip" href="${u}" target="_blank" rel="noopener noreferrer">${esc(n)}</a>`).join("")}</div>
-          <p class="hint">Rechne im Portal mit deinen Daten, mach einen Screenshot der Ergebnisliste und lies ihn hier ein. Wiederhole das für jedes Portal.</p>
-          <p class="hint">${esc(PORTAL_TIPP[o.tipKey])}</p>
-          ${Object.keys(qs).length ? `<div class="chips">${Object.entries(qs).map(([q, n]) => `<span class="pill info">${esc(q)}: ${n}</span>`).join("")}</div>` : ""}
-        </div></details>` : ""}
       ${scanAvail !== "local" ? '<p class="hint small">Fotos gehen zur Auswertung über dein Claude-Konto an Anthropic und werden nicht gespeichert. Decke Name, Adresse, IBAN und Kundennummer vorher ab. Startet die Kamera nicht, öffne den Link in Safari oder Chrome statt in der Claude-App. Am Computer kannst du ein Bild auch mit Strg+V einfügen.</p>' : ""}
     </div>`;
   }
@@ -1275,6 +1279,56 @@ Antworte nur mit JSON in dieser Form:
     return null;
   }
   const kostenVon = (v) => num(v.kosten) || ((vertragVergleich(v) || {}).monat || 0);
+
+  // ---------- Portal-Suche über mehrere Vergleichsportale ----------
+  function portalSearchCard(o) {
+    const log = (state.portalLog || {})[o.logKey] || {};
+    const portale = PORTALE[o.portalKey] || [];
+    const match = (q, name) => normTxt(q).includes(normTxt(name));
+    const rows = portale.map(([name, url]) => {
+      const ang = o.angebote.filter((a) => match(a.quelle, name));
+      return { name, url, n: ang.length, min: ang.length ? Math.min(...ang.map(o.priceOf)) : null, checked: log[name] };
+    });
+    const rest = o.angebote.filter((a) => !portale.some(([n]) => match(a.quelle, n)));
+    const restMin = rest.length ? Math.min(...rest.map(o.priceOf)) : null;
+    const done = rows.filter((r) => r.n || r.checked).length;
+    const mins = rows.filter((r) => r.min !== null).map((r) => r.min).concat(restMin !== null ? [restMin] : []);
+    const best = mins.length > 1 ? Math.min(...mins) : null;
+    const status = (r) => r.n ? `${r.n} Angebot${r.n === 1 ? "" : "e"} eingelesen · ab ${o.fmt(r.min)}` : r.checked ? `durchsucht am ${DATE.format(new Date(r.checked))}, nichts Besseres gefunden` : "noch nicht durchsucht";
+    const bestPill = (m) => best !== null && m === best ? '<span class="pill good">günstigste Quelle</span>' : "";
+    const copies = [["PLZ", state.plz || ""], ...(o.copy || [])].filter(([, v]) => v);
+    return `<div class="card" id="portal-${esc(o.logKey)}">
+      <div class="card-head"><h2>Portal-Suche</h2><span class="pill ${done >= 2 ? "good" : "warn"}">${done} von ${rows.length} Portalen durchsucht</span></div>
+      <div class="track"><div class="fill" style="width:${rows.length ? (done / rows.length) * 100 : 0}%"></div></div>
+      <p class="hint">Kein Portal listet alle Anbieter, und nicht immer zeigt es den günstigsten. Such deshalb in mehreren: Suchdaten kopieren, Portal öffnen, dort einfügen und die Ergebnisliste in Schritt 2 als Screenshot einlesen.</p>
+      <div class="row">
+        <label class="f inline">Deine PLZ <input type="text" id="plz-input" inputmode="numeric" maxlength="5" pattern="[0-9]{5}" value="${esc(state.plz || "")}" style="width:90px"></label>
+        ${copies.map(([l, v]) => `<button type="button" class="btn small" data-copy="${esc(v)}">${esc(l)} ${esc(v)} kopieren</button>`).join("")}
+      </div>
+      <div class="plist">
+        ${rows.map((r) => `<div class="prow ${best !== null && r.min === best ? "pbest" : ""}">
+          <div class="pname"><strong>${esc(r.name)}</strong><span class="hint">${status(r)}</span></div>
+          <div class="row">${bestPill(r.min)}<a class="btn small" href="${r.url}" target="_blank" rel="noopener noreferrer">Öffnen ↗</a>
+            <label class="check" title="Hier gesucht, kein besseres Angebot"><input type="checkbox" data-pcheck="${esc(r.name)}" ${r.n || r.checked ? "checked" : ""} ${r.n ? "disabled" : ""}>durchsucht</label></div>
+        </div>`).join("")}
+        ${rest.length ? `<div class="prow ${best !== null && restMin === best ? "pbest" : ""}"><div class="pname"><strong>Andere Quellen</strong><span class="hint">${rest.length} Angebot${rest.length === 1 ? "" : "e"} · ab ${o.fmt(restMin)}, z. B. direkt beim Anbieter</span></div><div class="row">${bestPill(restMin)}</div></div>` : ""}
+      </div>
+      ${(INFO_LINKS[o.portalKey] || []).length ? `<div class="chips">${INFO_LINKS[o.portalKey].map(([n, u]) => `<a class="chip" href="${u}" target="_blank" rel="noopener noreferrer">${esc(n)}</a>`).join("")}</div>` : ""}
+      <p class="hint">${esc(PORTAL_TIPP[o.tipKey])}</p>
+    </div>`;
+  }
+  function bindPortalSearch(logKey) {
+    const el = document.getElementById("portal-" + logKey);
+    if (!el) return;
+    el.querySelectorAll("[data-pcheck]").forEach((c) => c.addEventListener("change", () => {
+      state.portalLog = state.portalLog || {};
+      const log = (state.portalLog[logKey] = state.portalLog[logKey] || {});
+      if (c.checked) log[c.dataset.pcheck] = new Date().toISOString(); else delete log[c.dataset.pcheck];
+      save(); rerenderTab();
+    }));
+    const plz = document.getElementById("plz-input");
+    if (plz) plz.addEventListener("change", () => { state.plz = plz.value.replace(/\D/g, "").slice(0, 5); save(); rerenderTab(); });
+  }
 
   // ---------- Übersicht ----------
   function bereichEnergie(kind) {
@@ -1459,7 +1513,8 @@ Antworte nur mit JSON in dieser Form:
             <p class="hint">Steht auf deiner letzten Jahresabrechnung (Brutto-Preise).${canScan() ? " Du kannst die Rechnung auch in Schritt 2 fotografieren." : ""}</p>
             ${vertragBox(kind, kind, isStrom ? "Strom" : "Gas")}
           </div>
-          ${collectCard(kind, { formHtml, open, portalKey: "energie", tipKey: kind, angebote: d.angebote, docLabel: "Rechnung oder Angebot fotografieren", docSub: "Claude liest Grund- und Arbeitspreis aus" })}
+          ${collectCard(kind, { formHtml, open, portalKey: kind, tipKey: kind, angebote: d.angebote, docLabel: "Rechnung oder Angebot fotografieren", docSub: "Claude liest Grund- und Arbeitspreis aus" })}
+          ${portalSearchCard({ logKey: kind, portalKey: kind, tipKey: kind, angebote: d.angebote, priceOf: (t) => kostenEnergie(t, kwh).y1, fmt: (x) => EUR0.format(x) + "/Jahr", copy: kwh ? [["Verbrauch", String(kwh)]] : [] })}
         </div>
 
         <div class="col">
@@ -1527,6 +1582,7 @@ Antworte nur mit JSON in dieser Form:
     bindEditButtons(el, kind);
     bindDelete(el.querySelector(".offers"), (i) => { d.angebote.splice(i, 1); ui.edit = null; rerender(); });
     bindScan(kind);
+    bindPortalSearch(kind);
     bindVergleich(kind, isStrom ? "Strom" : "Gas", { verbrauch_kwh: kwh, aktueller_tarif: d.aktuell, angebote: all.map((r) => ({ ...r.t, kosten_1_jahr: Math.round(r.k.y1), kosten_ab_2_jahr: Math.round(r.k.folge) })) }, findings);
   }
 
@@ -1602,6 +1658,7 @@ Antworte nur mit JSON in dieser Form:
             ${vertragBox(art, art, art === "mobil" ? "Handy" : "Internet")}
           </div>
           ${collectCard("tk", { formHtml, open, portalKey: art, tipKey: art, angebote: d.angebote, docLabel: "Rechnung oder Angebot fotografieren", docSub: "Claude liest Preise, Aktionen und Laufzeit aus" })}
+          ${portalSearchCard({ logKey: "tk-" + art, portalKey: art, tipKey: art, angebote: d.angebote, priceOf: (t) => kostenTk(t, H).monat, fmt: (x) => "Ø " + EUR2.format(x) + "/Monat", copy: [] })}
         </div>
         <div class="col">
           <div class="card">
@@ -1649,6 +1706,7 @@ Antworte nur mit JSON in dieser Form:
     bindEditButtons(el, "tk");
     bindDelete(el.querySelector(".offers"), (i) => { d.angebote.splice(i, 1); ui.edit = null; rerender(); });
     bindScan("tk");
+    bindPortalSearch("tk-" + art);
     bindVergleich("tk", A.name, { art: A.name, vergleichszeitraum_monate: H, aktueller_tarif: d.aktuell, angebote: all.map((r) => ({ ...r.t, durchschnitt_monat: Math.round(r.k.monat * 100) / 100 })) }, findings);
   }
 
@@ -1748,6 +1806,7 @@ Antworte nur mit JSON in dieser Form:
             </details>
           </div>
           ${collectCard("vers", { formHtml, open, portalKey: "vers", tipKey: "vers", angebote: kat.angebote, docLabel: "Police oder Angebot fotografieren", docSub: "Claude liest Beitrag, Selbstbeteiligung und Leistungen aus" })}
+          ${portalSearchCard({ logKey: "vers-" + v.kategorie, portalKey: "vers", tipKey: "vers", angebote: kat.angebote, priceOf: (a) => num(a.beitrag) * num(a.zahlweise, 1), fmt: (x) => EUR0.format(x) + "/Jahr", copy: [] })}
         </div>
         <div class="col">
           <div class="card">
@@ -1809,6 +1868,7 @@ Antworte nur mit JSON in dieser Form:
     bindDelete(el.querySelector(".offers"), (i) => { kat.angebote.splice(i, 1); ui.edit = null; rerender(); });
     bindDelete(document.getElementById("kat-del-row"), () => { delete v.kategorien[v.kategorie]; v.kategorie = Object.keys(v.kategorien)[0]; rerender(); });
     bindScan("vers");
+    bindPortalSearch("vers-" + v.kategorie);
     bindVergleich("vers", kat.name, { versicherungsart: kat.name, leistungen: kat.features.map((ft) => ({ id: ft.id, name: ft.name, gewicht: GEWICHT[ft.w] })), angebote: rows.map((r) => ({ ...r.a, jahresbeitrag: r.jahr, gesamtwert: r.score })) }, findings);
   }
 
@@ -2029,6 +2089,13 @@ Antworte nur mit JSON in dieser Form:
       rerenderTab();
       const f = document.getElementById("vertrag-form");
       if (f) { f.scrollIntoView({ behavior: "smooth", block: "center" }); const n = document.getElementById("vertrag-f-anbieter"); if (n) n.focus({ preventScroll: true }); }
+      return;
+    }
+    const cp = e.target.closest("[data-copy]");
+    if (cp) {
+      const val = cp.dataset.copy;
+      const ok = () => toast(`„${val}“ kopiert. Jetzt im Portal einfügen.`);
+      try { navigator.clipboard.writeText(val).then(ok, () => toast(`Kopieren nicht möglich. Bitte abtippen: ${val}`)); } catch (x) { toast(`Kopieren nicht möglich. Bitte abtippen: ${val}`); }
       return;
     }
     const n = e.target.closest("[data-noscan]");
