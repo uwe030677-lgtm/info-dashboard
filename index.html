@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-PWzHd+91LdmAQcwyGGy5kOl3haAw40MUgGqeUVLXrkg='; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; font-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-lXapaNNahgiBmo4vJveLG8JnJcmE6AOArAeMgdYL0rI='; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; font-src 'none'; object-src 'none'; frame-src 'none'; worker-src 'none'; form-action 'none'; base-uri 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tarif-Kompass</title>
@@ -344,6 +344,7 @@ footer a { color: var(--accent); }
   </div>
 
   <footer id="app-footer">
+    <p><strong>Version vom 24.11.2026 · mit Portal-Suche</strong></p>
     <p>Rechenweg Energie: Grundpreis × 12 + Arbeitspreis × Verbrauch − Bonus; der Bonus gilt meist nur im ersten Jahr. Internet und Handy: alle Monatspreise, Routermiete und Einmalkosten abzüglich Gutschriften, geteilt durch die Monate des Vergleichszeitraums.</p>
     <p>Unabhängige Beratung: <a href="https://www.verbraucherzentrale.de" target="_blank" rel="noopener noreferrer">Verbraucherzentrale</a> · Tests: <a href="https://www.test.de" target="_blank" rel="noopener noreferrer">Stiftung Warentest</a></p>
   </footer>
@@ -1509,6 +1510,30 @@ Antworte nur mit JSON in dieser Form:
     el.querySelectorAll(".jk-row.link").forEach((r) => r.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); r.click(); } }));
   }
 
+  function portalOverviewCard() {
+    const B = [
+      { name: "Strom", tab: "strom", key: "strom", pk: "strom", ang: state.strom.angebote },
+      { name: "Gas", tab: "gas", key: "gas", pk: "gas", ang: state.gas.angebote },
+      { name: "Internet & Festnetz", tab: "internet", art: "internet", key: "tk-internet", pk: "internet", ang: state.tk.internet.angebote },
+      { name: "Handy", tab: "internet", art: "mobil", key: "tk-mobil", pk: "mobil", ang: state.tk.mobil.angebote },
+      { name: "Versicherung: " + currentKat().name, tab: "versicherung", key: "vers-" + state.vers.kategorie, pk: "vers", ang: currentKat().angebote },
+    ];
+    const rows = B.map((b) => {
+      const ps = PORTALE[b.pk] || [];
+      const log = (state.portalLog || {})[b.key] || {};
+      const done = ps.filter(([n]) => log[n] || b.ang.some((a) => normTxt(a.quelle).includes(normTxt(n)))).length;
+      return { ...b, done, total: ps.length };
+    });
+    return `<div class="card" id="portal-overview">
+      <div class="card-head"><h2>Portal-Suche</h2><span class="hint">Check24, Verivox, Tarifcheck und mehr</span></div>
+      <p class="hint">Kein Portal zeigt alle Anbieter. Durchsuche je Bereich mehrere Portale. Der Kompass merkt sich, wo du schon gesucht hast, und zeigt die günstigste Quelle.</p>
+      <div class="plist">${rows.map((r) => `<div class="prow ${r.done >= 2 ? "pbest" : ""}">
+          <div class="pname"><strong>${esc(r.name)}</strong><span class="hint">${r.done} von ${r.total} Portalen durchsucht</span></div>
+          <button class="btn small ${r.done ? "" : "primary"}" data-go="${r.tab}"${r.art ? ` data-art="${r.art}"` : ""} data-jumpto="portal-${esc(r.key)}">Portal-Suche öffnen</button>
+        </div>`).join("")}</div>
+    </div>`;
+  }
+
   function renderUebersicht() {
     const B = [
       { key: "strom", tab: "strom", name: "Strom", c: "--strom", ...bereichEnergie("strom") },
@@ -1567,6 +1592,7 @@ Antworte nur mit JSON in dieser Form:
           <div class="row"><button class="btn small" data-go="fristen">Alle Fristen</button></div>
         </div>
       </div>
+      ${portalOverviewCard()}
       <div class="card">
         <h2>So funktioniert es</h2>
         <ol class="howto">
@@ -1614,7 +1640,7 @@ Antworte nur mit JSON in dieser Form:
       else if (s1 > 0.5) reco = `<strong>Wechsel lohnt sich nur im ersten Jahr.</strong> ${esc(nameOf(best.t))} spart dir dank Bonus ${EUR0.format(s1)}, ist danach aber ${EUR0.format(-s2)} pro Jahr teurer als dein Tarif. Nach einem Jahr also wieder wechseln.`;
       else reco = `<strong>Dein Tarif ist günstig.</strong> Keines der ${all.length} Angebote ist billiger als dein aktueller Tarif.`;
     }
-    reco += jumpLink(kind, warns);
+    reco += jumpLink(kind, warns) + ` <button type="button" class="jump" style="color:var(--accent)" data-jump="portal-${kind}">Zur Portal-Suche</button>`;
 
     const pillsFor = (t, k) => {
       const p = [];
@@ -1781,7 +1807,7 @@ Antworte nur mit JSON in dieser Form:
         ? `<strong>Wechsel lohnt sich.</strong> Mit ${esc(nameOf(best.t))} sparst du ${EUR0.format(s)} in ${H} Monaten, also im Schnitt ${EUR2.format(s / H)} im Monat.${weniger ? ` Achtung: Er bietet weniger als dein Tarif (${fmtLeistung(art, best.t.leistung)} statt ${fmtLeistung(art, d.aktuell.leistung)}).` : ""}`
         : `<strong>Dein Tarif ist günstig.</strong> Keines der ${all.length} Angebote ist über ${H} Monate billiger.`;
     }
-    reco += jumpLink("tk", warns);
+    reco += jumpLink("tk", warns) + ` <button type="button" class="jump" style="color:var(--accent)" data-jump="portal-tk-${art}">Zur Portal-Suche</button>`;
 
     const formHtml = `<form class="col" id="tk-form" autocomplete="off" style="gap:10px">
         ${formHead(edit, draft)}
@@ -1909,7 +1935,7 @@ Antworte nur mit JSON in dieser Form:
       reco = `<strong>Beste Wahl: ${esc(nameOf(best.a))}</strong> für ${EUR0.format(best.jahr)} im Jahr. Gesamtwert ${best.score} von 100 bei deiner Gewichtung.`;
       if (cheapest && cheapest !== best) reco += ` Am günstigsten ist ${esc(nameOf(cheapest.a))} mit ${EUR0.format(cheapest.jahr)}, deckt aber nur ${Math.round(cheapest.fs * 100)} % der Leistungen ab, die dir wichtig sind.`;
     }
-    reco += jumpLink("vers", warns);
+    reco += jumpLink("vers", warns) + ` <button type="button" class="jump" style="color:var(--accent)" data-jump="portal-vers-${esc(v.kategorie)}">Zur Portal-Suche</button>`;
 
     const formHtml = `<form class="col" id="vers-form" autocomplete="off" style="gap:10px">
         ${formHead(edit, draft)}
@@ -2240,7 +2266,9 @@ Antworte nur mit JSON in dieser Form:
     if (g) {
       if (g.dataset.art && state.tk[g.dataset.art]) state.tk.art = g.dataset.art;
       if (g.dataset.vkat && state.vers.kategorien[g.dataset.vkat]) state.vers.kategorie = g.dataset.vkat;
-      save(); go(g.dataset.go); return;
+      save(); go(g.dataset.go);
+      if (g.dataset.jumpto) { const t = document.getElementById(g.dataset.jumpto); if (t) { t.scrollIntoView({ behavior: "smooth", block: "start" }); t.style.outline = "3px solid var(--accent)"; setTimeout(() => { t.style.outline = ""; }, 2000); } }
+      return;
     }
     const sv = e.target.closest("[data-showvertrag]");
     if (sv) {
